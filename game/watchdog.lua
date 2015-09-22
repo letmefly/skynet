@@ -40,43 +40,19 @@ end
 function SOCKET.data(fd, msg)
 end
 
-local function testProtobuf()
-	protobuf = require "protobuf"
-	parser = require "protoparser"
-
-	t = parser.register("addressbook.proto","./game/proto")
-
-	addressbook = {
-		name = "Alice",
-		id = 12345,
-		phone = {
-			{ number = "1301234567" },
-			{ number = "87654321", type = "WORK" },
-		}
-	}
-
-	code = protobuf.encode("tutorial.Person", addressbook)
-
-	decode = protobuf.decode("tutorial.Person" , code)
-
-	print(decode.name)
-	print(decode.id)
-	for _,v in ipairs(decode.phone) do
-		print("\t"..v.number, v.type)
-	end
-
-	buffer = protobuf.pack("tutorial.Person name id", "Alice", 123)
-	print(protobuf.unpack("tutorial.Person name id", buffer))
-end
-
 function CMD.start(conf)
 	skynet.call(gate, "lua", "open" , conf)
-
-	testProtobuf()
 end
 
 function CMD.close(fd)
 	close_agent(fd)
+end
+
+local function testapi()
+	-- test pbc api
+	local testapi = skynet.newservice("testapi")
+	local ret = skynet.call(testapi, "lua", "testpbc", {a="hello", b=123})
+	print(ret.result)
 end
 
 skynet.start(function()
@@ -92,4 +68,7 @@ skynet.start(function()
 	end)
 
 	gate = skynet.newservice("gate")
+
+	--just for test api
+	testapi()
 end)
