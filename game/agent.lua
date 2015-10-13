@@ -1,8 +1,9 @@
 local skynet = require "skynet"
 local netpack = require "netpack"
 local socket = require "socket"
-local sproto = require "sproto"
-local sprotoloader = require "sprotoloader"
+-- local sproto = require "sproto"
+-- local sprotoloader = require "sprotoloader"
+
 
 local WATCHDOG
 local host
@@ -48,7 +49,9 @@ skynet.register_protocol {
 	name = "client",
 	id = skynet.PTYPE_CLIENT,
 	unpack = function (msg, sz)
-		return host:dispatch(msg, sz)
+		-- return host:dispatch(msg, sz)
+		local prototype, buff, size = netpack.unpackpbc(msg, sz)
+		return 
 	end,
 	dispatch = function (_, _, type, ...)
 		if type == "REQUEST" then

@@ -7,7 +7,8 @@ local function testProtobuf()
 	protobuf = require "protobuf"
 	parser = require "protoparser"
 
-	t = parser.register("addressbook.proto","./game/proto")
+	--t = parser.register("addressbook.proto","./game/proto")
+	local util = require "util"
 
 	addressbook = {
 		name = "Alice",

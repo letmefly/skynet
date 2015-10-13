@@ -394,4 +394,39 @@ function parser.register(fileset , path)
 	return files
 end
 
+function parser.load(fileset , path)
+	local all = {}
+	local files = {}
+	if type(fileset) == "string" then
+		fileset = { fileset }
+	end
+	for _, filename in ipairs(fileset) do
+		local fullname
+		if path then
+			fullname = path .. "." .. filename
+		else
+			fullname = filename
+		end
+		-- local f = assert(io.open(fullname , "r"))
+		-- local buffer = f:read "*a"
+		-- f:close()
+		local buffer = require (fullname)
+		local t = parser_one(buffer,filename)
+		_gen_fullname(t,all)
+		t.name = filename
+		tinsert(files , t)
+	end
+	for _,file in ipairs(files) do
+		_fix_typename(file,all)
+	end
+
+	local pbencode = pb.encode("google.protobuf.FileDescriptorSet" , { file = files })
+
+	if pbencode == nil then
+		error(pb.lasterror())
+	end
+	pb.register(pbencode)
+	return files
+end
+
 return parser
