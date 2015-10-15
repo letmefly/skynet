@@ -3,6 +3,7 @@ local netpack = require "netpack"
 local socket = require "socket"
 -- local sproto = require "sproto"
 -- local sprotoloader = require "sprotoloader"
+local netutil = require "netutil"
 
 
 local WATCHDOG
@@ -45,28 +46,33 @@ local function send_package(pack)
 	socket.write(client_fd, package)
 end
 
+local function msg_handler(msgname, msg)
+	print (msgname .. ": sn = " .. msg.sn)
+end
+
 skynet.register_protocol {
 	name = "client",
 	id = skynet.PTYPE_CLIENT,
 	unpack = function (msg, sz)
-		-- return host:dispatch(msg, sz)
-		local prototype, buff, size = netpack.unpackpbc(msg, sz)
-		return 
+		local msgname, msg = netutil.pbdecode(msg, sz)
+		return msgname, msg
 	end,
-	dispatch = function (_, _, type, ...)
-		if type == "REQUEST" then
-			local ok, result  = pcall(request, ...)
-			if ok then
-				if result then
-					send_package(result)
-				end
-			else
-				skynet.error(result)
-			end
-		else
-			assert(type == "RESPONSE")
-			error "This example doesn't support request client"
-		end
+	dispatch = function (_, _, msgname, ...)
+		print ("msgname: " .. msgname)
+		msg_handler(msgname, ...)
+		-- if type == "REQUEST" then
+		-- 	local ok, result  = pcall(request, ...)
+		-- 	if ok then
+		-- 		if result then
+		-- 			send_package(result)
+		-- 		end
+		-- 	else
+		-- 		skynet.error(result)
+		-- 	end
+		-- else
+		-- 	assert(type == "RESPONSE")
+		-- 	error "This example doesn't support request client"
+		-- end
 	end
 }
 
@@ -74,15 +80,13 @@ function CMD.start(conf)
 	local fd = conf.client
 	local gate = conf.gate
 	WATCHDOG = conf.watchdog
-	-- slot 1,2 set at main.lua
-	host = sprotoloader.load(1):host "package"
-	send_request = host:attach(sprotoloader.load(2))
-	skynet.fork(function()
-		while true do
-			send_package(send_request "heartbeat")
-			skynet.sleep(500)
-		end
-	end)
+
+	-- skynet.fork(function()
+	-- 	while true do
+	-- 		send_package(send_request "heartbeat")
+	-- 		skynet.sleep(500)
+	-- 	end
+	-- end)
 
 	client_fd = fd
 	skynet.call(gate, "lua", "forward", fd)

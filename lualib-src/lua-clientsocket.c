@@ -66,10 +66,37 @@ block_send(lua_State *L, int fd, const char * buffer, int sz) {
 	}
 }
 
+static void *
+get_buffer(lua_State *L, int index, int *sz) {
+	void *buffer;
+	if (lua_isuserdata(L,index)) {
+		buffer = lua_touserdata(L,index);
+		*sz = luaL_checkinteger(L,index+1);
+	} else {
+		size_t len = 0;
+		const char * str =  luaL_checklstring(L, index, &len);
+		buffer = malloc(len);
+		memcpy(buffer, str, len);
+		*sz = (int)len;
+	}
+	return buffer;
+}
+
+static int
+lsend2(lua_State *L) {
+	int sz = 0;
+	int fd = luaL_checkinteger(L,1);
+	void *buffer = get_buffer(L, 2, &sz);
+	block_send(L, fd, buffer, (int)sz);
+	free(buffer);
+	return 0;
+}
+
 /*
 	integer fd
 	string message
  */
+/*
 static int
 lsend(lua_State *L) {
 	size_t sz = 0;
@@ -80,6 +107,7 @@ lsend(lua_State *L) {
 
 	return 0;
 }
+*/
 
 /*
 	intger fd
@@ -189,7 +217,7 @@ luaopen_clientsocket(lua_State *L) {
 	luaL_Reg l[] = {
 		{ "connect", lconnect },
 		{ "recv", lrecv },
-		{ "send", lsend },
+		{ "send", lsend2 },
 		{ "close", lclose },
 		{ "usleep", lusleep },
 		{ NULL, NULL },

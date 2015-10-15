@@ -1,10 +1,10 @@
 local protoparser = require "protoparser"
 -- preload, execute one time
-protoparser.load("proto.addressbook")
+protoparser.load("proto.prototext")
 
 local proto = {}
 
-local type2name = {[1] = "register", [2] = "login"}
+local type2name = {[1] = "register", [2] = "login", [3] = "handshake"}
 local name2type = {}
 for k, v in pairs(type2name) do
 	name2type[v] = k
