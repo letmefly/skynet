@@ -58,8 +58,9 @@ skynet.register_protocol {
 		return msgname, msg
 	end,
 	dispatch = function (_, _, msgname, ...)
-		print ("msgname: " .. msgname)
 		msg_handler(msgname, ...)
+		local buff, size = netutil.pbencode("handshake", {sn = 101})
+		socket.write(client_fd, buff, size)
 		-- if type == "REQUEST" then
 		-- 	local ok, result  = pcall(request, ...)
 		-- 	if ok then

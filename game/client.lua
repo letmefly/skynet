@@ -16,10 +16,11 @@ end
 
 local function recvmsg()
 	while true do
-		local msgdata = socket.recv()
-		if msgdata then
-			local msgname, msg = netutil.pbdecode(msgdata)
-			print(msgname .. ":\r\n")
+		local buff, size = socket.recv(fd)
+		if size and size > 0 then
+			print ("msg size:" .. size)
+			local msgname, msg = netutil.pbdecode(buff, size)
+			print(msgname .. ":" .. msg.sn)
 		else
 			socket.usleep(100)
 		end

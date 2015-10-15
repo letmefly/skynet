@@ -92,6 +92,30 @@ lsend2(lua_State *L) {
 	return 0;
 }
 
+static int
+lrecv2(lua_State *L) {
+	int fd = luaL_checkinteger(L,1);
+
+	char buffer[CACHE_SIZE];
+	int r = recv(fd, buffer, CACHE_SIZE, 0);
+	if (r == 0) {
+		lua_pushliteral(L, "");
+		lua_pushinteger(L, r);
+		// close
+		return 2;
+	}
+	if (r < 0) {
+		if (errno == EAGAIN || errno == EINTR) {
+			return 0;
+		}
+		luaL_error(L, "socket error: %s", strerror(errno));
+	}
+
+	lua_pushlightuserdata(L, (void*)(buffer+2));
+	lua_pushinteger(L, r-2);
+	return 2;
+}
+
 /*
 	integer fd
 	string message
@@ -124,6 +148,7 @@ struct socket_buffer {
 	int sz;
 };
 
+/*
 static int
 lrecv(lua_State *L) {
 	int fd = luaL_checkinteger(L,1);
@@ -144,6 +169,7 @@ lrecv(lua_State *L) {
 	lua_pushlstring(L, buffer, r);
 	return 1;
 }
+*/
 
 static int
 lusleep(lua_State *L) {
@@ -216,7 +242,7 @@ luaopen_clientsocket(lua_State *L) {
 	luaL_checkversion(L);
 	luaL_Reg l[] = {
 		{ "connect", lconnect },
-		{ "recv", lrecv },
+		{ "recv", lrecv2 },
 		{ "send", lsend2 },
 		{ "close", lclose },
 		{ "usleep", lusleep },

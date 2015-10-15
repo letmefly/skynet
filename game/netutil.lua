@@ -11,8 +11,8 @@ function netutil.pbencode(msgname, msg)
 	return buff, size
 end
 
-function netutil.pbdecode(msgdata, msgsize)
-	local msgtype, buff, size = netpack.unpackpbc(msgdata, msgsize)
+function netutil.pbdecode(msgbuff, buffsize)
+	local msgtype, buff, size = netpack.unpackpbc(msgbuff, buffsize)
 	local msgname = proto.getname(msgtype)
 	local msg = protobuf.decode(msgname, buff, size)
 	return msgname, msg
