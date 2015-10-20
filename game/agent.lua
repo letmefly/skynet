@@ -53,8 +53,8 @@ end
 skynet.register_protocol {
 	name = "client",
 	id = skynet.PTYPE_CLIENT,
-	unpack = function (msg, sz)
-		local msgname, msg = netutil.pbdecode(msg, sz)
+	unpack = function (data, sz)
+		local msgname, msg = netutil.pbdecode(data, sz)
 		return msgname, msg
 	end,
 	dispatch = function (_, _, msgname, ...)
