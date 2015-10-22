@@ -48,6 +48,7 @@ end
 
 local function msg_handler(msgname, msg)
 	print (msgname .. ": sn = " .. msg.sn)
+	return msg.sn
 end
 
 skynet.register_protocol {
@@ -58,9 +59,13 @@ skynet.register_protocol {
 		return msgname, msg
 	end,
 	dispatch = function (_, _, msgname, ...)
-		msg_handler(msgname, ...)
-		local buff, size = netutil.pbencode("handshake", {sn = 101})
-		socket.write(client_fd, buff, size)
+		local sn = msg_handler(msgname, ...)
+		local buff, size = netutil.pbencode("handshake", {sn = sn})
+		for i = 1, 100 do
+			local buff, size = netutil.pbencode("handshake", {sn = sn})
+			socket.write(client_fd, buff, size)
+		end
+		
 		-- if type == "REQUEST" then
 		-- 	local ok, result  = pcall(request, ...)
 		-- 	if ok then

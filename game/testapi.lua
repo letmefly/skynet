@@ -8,16 +8,16 @@ local function testProtobuf()
 	parser = require "protoparser"
 
 	--t = parser.register("addressbook.proto","./game/proto")
-	local util = require "util"
+	-- local util = require "util"
 
-	addressbook = {
-		name = "Alice",
-		id = 12345,
-		phone = {
-			{ number = "1301234567" },
-			{ number = "87654321", type = "WORK" },
-		}
-	}
+	-- addressbook = {
+	-- 	name = "Alice",
+	-- 	id = 12345,
+	-- 	phone = {
+	-- 		{ number = "1301234567" },
+	-- 		{ number = "87654321", type = "WORK" },
+	-- 	}
+	-- }
 	--[[
 	code = protobuf.encode("tutorial.Person", addressbook)
 
