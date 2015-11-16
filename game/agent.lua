@@ -1,56 +1,167 @@
 local skynet = require "skynet"
 local netpack = require "netpack"
 local socket = require "socket"
--- local sproto = require "sproto"
--- local sprotoloader = require "sprotoloader"
 local netutil = require "netutil"
-
 
 local WATCHDOG
 local host
 local send_request
 
-local CMD = {}
-local REQUEST = {}
+local SERVICE_API = {}
+local CLIENT_API = {}
 local client_fd
 
-function REQUEST:get()
+-- user model --
+local user_data = {}
+
+------------------------ common client request ------------------
+function CLIENT_API:get()
 	print("get", self.what)
 	--local r = skynet.call("SIMPLEDB", "lua", "get", self.what)
 	return { result = r }
 end
 
-function REQUEST:set()
+function CLIENT_API:set()
 	print("set", self.what, self.value)
 	--local r = skynet.call("SIMPLEDB", "lua", "set", self.what, self.value)
 end
 
-function REQUEST:handshake()
+function CLIENT_API:handshake()
 	return { msg = "Welcome to skynet, I will send heartbeat every 5 sec." }
 end
 
-function REQUEST:quit()
+function CLIENT_API:quit()
 	skynet.call(WATCHDOG, "lua", "close", client_fd)
 end
 
-local function request(name, args, response)
-	local f = assert(REQUEST[name])
-	local r = f(args)
-	if response then
-		return response(r)
+
+------------------------ user controller ------------------------
+function CLIENT_API.user_register(msg)
+end
+
+function CLIENT_API.user_login(msg)
+end
+
+function CLIENT_API.user_change_nickname(msg)
+end
+
+
+------------------------ game controller ------------------------
+function CLIENT_API:game_enterlobby(msg)
+end
+
+function CLIENT_API.game_start(msg)
+end
+
+function CLIENT_API.game_result(msg)
+end
+
+function CLIENT_API.game_get_ranking(msg)
+end
+
+function CLIENT_API.game_get_mission(msg)
+end
+
+function CLIENT_API.game_get_achievements(msg)
+end
+
+function CLIENT_API.game_set_achievement(msg)
+end
+
+function CLIENT_API.game_get_achievement_info(msg)
+end
+
+function CLIENT_API.game_get_userdetail(msg)
+end
+
+function CLIENT_API.game_unlock_achievement(msg)
+end
+
+function CLIENT_API.game_tutorial(msg)
+end
+
+
+------------------------ shop controller ------------------------
+function CLIENT_API.shop_pay_item(msg)
+end
+
+function CLIENT_API.shop_buy_item(msg)
+end
+
+function CLIENT_API.shop_buy_character(msg)
+end
+
+function CLIENT_API.shop_buy_skill(msg)
+end
+
+function CLIENT_API.shop_buy_treasure(msg)
+end
+
+function CLIENT_API.shop_sell_treasure(msg)
+end
+
+function CLIENT_API.shop_buy_skillslot(msg)
+end
+
+function CLIENT_API.shop_buy_treasureslot(msg)
+end
+
+function CLIENT_API.shop_buy_treasure_inventory(msg)
+end
+
+function CLIENT_API.shop_buy_instant_item(msg)
+end
+
+function CLIENT_API.shop_get_lottery(msg)
+end
+
+
+------------------------ shop controller ------------------------
+function CLIENT_API.friend_get_friends(msg)
+end
+
+function CLIENT_API.friend_get_suggest_friends(msg)
+end
+
+function CLIENT_API.friend_find(msg)
+end
+
+function CLIENT_API.friend_add(msg)
+end
+
+function CLIENT_API.friend_accept(msg)
+end
+
+function CLIENT_API.friend_remove(msg)
+end
+
+function CLIENT_API.friend_send_gift(msg)
+end
+
+function CLIENT_API.friend_get_invitations(msg)
+end
+
+function CLIENT_API.friend_invite(msg)
+end
+
+
+------------------------ helper function ------------------------
+local function send_client_msg(msgname, msg)
+	local buff, size = netutil.pbencode(msgname, msg)
+	socket.write(client_fd, buff, size)
+end
+
+local function client_msg_handler(msgname, msg)
+	local handler = CLIENT_API[msgname]
+	if handler then
+		handler(msg)
+	else
+		print("[agent]no msg handler for " .. msgname)
 	end
 end
 
-local function send_package(pack)
-	local package = string.pack(">s2", pack)
-	socket.write(client_fd, package)
-end
 
-local function msg_handler(msgname, msg)
-	print (msgname .. ": sn = " .. msg.sn)
-	return msg.sn
-end
-
+------------------------ register client dispatch -----------------
 skynet.register_protocol {
 	name = "client",
 	id = skynet.PTYPE_CLIENT,
@@ -59,33 +170,18 @@ skynet.register_protocol {
 		return msgname, msg
 	end,
 	dispatch = function (_, _, msgname, ...)
-		local sn = msg_handler(msgname, ...)
-		local buff, size = netutil.pbencode("handshake", {sn = sn})
-		for i = 1, 100 do
-			local buff, size = netutil.pbencode("handshake", {sn = sn})
-			socket.write(client_fd, buff, size)
-		end
-		
-		-- if type == "REQUEST" then
-		-- 	local ok, result  = pcall(request, ...)
-		-- 	if ok then
-		-- 		if result then
-		-- 			send_package(result)
-		-- 		end
-		-- 	else
-		-- 		skynet.error(result)
-		-- 	end
-		-- else
-		-- 	assert(type == "RESPONSE")
-		-- 	error "This example doesn't support request client"
-		-- end
+		client_msg_handler(msgname, ...)
 	end
 }
 
-function CMD.start(conf)
+
+------------------------ service API -------------------------------
+function SERVICE_API.start(conf)
 	local fd = conf.client
 	local gate = conf.gate
 	WATCHDOG = conf.watchdog
+	client_fd = fd
+	skynet.call(gate, "lua", "forward", fd)
 
 	-- skynet.fork(function()
 	-- 	while true do
@@ -93,19 +189,21 @@ function CMD.start(conf)
 	-- 		skynet.sleep(500)
 	-- 	end
 	-- end)
-
-	client_fd = fd
-	skynet.call(gate, "lua", "forward", fd)
 end
 
-function CMD.disconnect()
+function SERVICE_API.disconnect()
 	-- todo: do something before exit
 	skynet.exit()
 end
 
+function SERVICE_API.send_client(msgname, msg)
+	send_client_msg(msgname, msg)
+end
+
+------------------------ service start! -----------------------------
 skynet.start(function()
 	skynet.dispatch("lua", function(_,_, command, ...)
-		local f = CMD[command]
+		local f = SERVICE_API[command]
 		skynet.ret(skynet.pack(f(...)))
 	end)
 end)
