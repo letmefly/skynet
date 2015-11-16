@@ -11,8 +11,22 @@ local SERVICE_API = {}
 local CLIENT_API = {}
 local client_fd
 
--- user model --
-local user_data = {}
+------------------------ user model -----------------------------
+local USER_DATA = {}
+
+function USER_DATA:init(userdata)
+	for k, v in pairs(userdata) do
+		self[k] = v
+	end
+end
+
+function USER_DATA:set(key, value)
+	self[key] = value
+end
+
+function USER_DATA:get(key)
+	return self[key]
+end
 
 ------------------------ common client request ------------------
 function CLIENT_API:get()
