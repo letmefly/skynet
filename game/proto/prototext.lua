@@ -6,4 +6,10 @@ message handshake {
 
 ]]
 
+PROTO_TYPE2NAME = {
+	[1] = "register", 
+	[2] = "login", 
+	[3] = "handshake"
+}
+
 return prototext

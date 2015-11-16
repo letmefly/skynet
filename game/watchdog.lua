@@ -70,5 +70,5 @@ skynet.start(function()
 	gate = skynet.newservice("gate")
 
 	--just for test api
-	testapi()
+	--testapi()
 end)
