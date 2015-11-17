@@ -1,13 +1,15 @@
 local skynet = require "skynet"
+require "skynet.manager"
 local mysql = require "mysql"
+local config = require "config"
 
 local conf = {
-	host = "127.0.0.1" ,
-	port = 3306 ,
-	database = "onefigure_skynet",
-	user = "root",
-	password = "root123!",
-	max_packet_size = 1024 * 1024
+	host = config["mysql_host"],
+	port = config["mysql_port"],
+	database = config["mysql_database"],
+	user = config["mysql_user"],
+	password = config["mysql_password"],
+	max_packet_size = config["mysql_max_packet_size"]
 }
 
 local SERVICE_API = {}
@@ -44,6 +46,7 @@ skynet.start(function()
 		skynet.ret(skynet.pack(f(...)))
 	end)
 
-	skynet.register("db")
+	skynet.register("db_s")
+	print("[db]start service db..")
 end)
 

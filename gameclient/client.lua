@@ -1,5 +1,5 @@
 package.cpath = "luaclib/?.so"
-package.path = "lualib/?.lua;game/?.lua;game/?/?.lua"
+package.path = "lualib/?.lua;gameclient/?.lua;gameclient/?/?.lua"
 
 if _VERSION ~= "Lua 5.3" then
 	error "Use lua 5.3"
@@ -20,7 +20,7 @@ local function recvmsg()
 		if size and size > 0 then
 			print ("msg size:" .. size)
 			local msgname, msg = netutil.pbdecode(buff, size)
-			print(msgname .. ":" .. msg.sn)
+			print(msgname .. ":" .. msg.err)
 		else
 			socket.usleep(100)
 		end
@@ -28,7 +28,7 @@ local function recvmsg()
 end
 
 -- test hand shake
-sendmsg("handshake", {sn = 100})
+sendmsg("user_register", {email = "chris.li@sky-mobi.com", password = "123456"})
 recvmsg()
 
 --[[

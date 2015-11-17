@@ -1,10 +1,12 @@
 local skynet = require "skynet"
+require "skynet.manager"
 local redis = require "redis"
+local config = require "config"
 
 local conf = {
-	host = "127.0.0.1",
-	port = 6379,
-	db = 0
+	host = config["redis_host"],
+	port = config["redis_port"],
+	db = config["redis_db"]
 }
 
 local SERVICE_API = {}
@@ -24,6 +26,8 @@ skynet.start(function()
 		skynet.ret(skynet.pack(f(...)))
 	end)
 
-	skynet.register("ram")
+	skynet.register("ram_s")
+
+	print("[ram]start service ram...")
 end)
 

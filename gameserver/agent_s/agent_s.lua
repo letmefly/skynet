@@ -1,7 +1,7 @@
 local skynet = require "skynet"
 local netpack = require "netpack"
 local socket = require "socket"
-local netutil = require "netutil"
+local netutil = require "agent_s.netutil"
 
 local WATCHDOG
 local host
@@ -11,22 +11,26 @@ local SERVICE_API = {}
 local CLIENT_API = {}
 local client_fd
 
------------------------- user model -----------------------------
-local USER_DATA = {}
 
-function USER_DATA:init(userdata)
-	for k, v in pairs(userdata) do
-		self[k] = v
+------------------------ controllers ----------------------------
+local user = require "agent_s.user"
+
+
+------------------------ helper function ------------------------
+local function send_client_msg(msgname, msg)
+	local buff, size = netutil.pbencode(msgname, msg)
+	socket.write(client_fd, buff, size)
+end
+
+local function client_msg_handler(msgname, msg)
+	local handler = CLIENT_API[msgname]
+	if handler then
+		handler(msg)
+	else
+		print("[agent]no msg handler for " .. msgname)
 	end
 end
 
-function USER_DATA:set(key, value)
-	self[key] = value
-end
-
-function USER_DATA:get(key)
-	return self[key]
-end
 
 ------------------------ common client request ------------------
 function CLIENT_API:get()
@@ -51,12 +55,18 @@ end
 
 ------------------------ user controller ------------------------
 function CLIENT_API.user_register(msg)
+	local retmsgname, retmsg = user:register(msg)
+	send_client_msg(retmsgname, retmsg)
 end
 
 function CLIENT_API.user_login(msg)
+	local retmsgname, retmsg = user:login(msg)
+	send_client_msg(retmsgname, retmsg)
 end
 
 function CLIENT_API.user_change_nickname(msg)
+	local retmsgname, retmsg = user:change_nickname(msg)
+	send_client_msg(retmsgname, retmsg)
 end
 
 
@@ -159,22 +169,6 @@ function CLIENT_API.friend_invite(msg)
 end
 
 
------------------------- helper function ------------------------
-local function send_client_msg(msgname, msg)
-	local buff, size = netutil.pbencode(msgname, msg)
-	socket.write(client_fd, buff, size)
-end
-
-local function client_msg_handler(msgname, msg)
-	local handler = CLIENT_API[msgname]
-	if handler then
-		handler(msg)
-	else
-		print("[agent]no msg handler for " .. msgname)
-	end
-end
-
-
 ------------------------ register client dispatch -----------------
 skynet.register_protocol {
 	name = "client",
@@ -213,6 +207,7 @@ end
 function SERVICE_API.send_client(msgname, msg)
 	send_client_msg(msgname, msg)
 end
+
 
 ------------------------ service start! -----------------------------
 skynet.start(function()

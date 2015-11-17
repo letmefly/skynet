@@ -80,7 +80,7 @@ _init(struct snlua *l, struct skynet_context *ctx, const char * args, size_t sz)
 	luaL_requiref(L, "skynet.codecache", codecache , 0);
 	lua_pop(L,1);
 
-	const char *path = optstring(ctx, "lua_path","./lualib/?.lua;./lualib/?/init.lua;./game/?.lua;./game/?/?.lua");
+	const char *path = optstring(ctx, "lua_path","./lualib/?.lua;./lualib/?/init.lua;./gameserver/?.lua;./gameserver/?/?.lua");
 	lua_pushstring(L, path);
 	lua_setglobal(L, "LUA_PATH");
 	const char *cpath = optstring(ctx, "lua_cpath","./luaclib/?.so");
