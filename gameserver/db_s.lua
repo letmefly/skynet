@@ -1,5 +1,5 @@
 local skynet = require "skynet"
-require "skynet.manager"
+local nothing = require "skynet.manager"
 local mysql = require "mysql"
 local config = require "config"
 
