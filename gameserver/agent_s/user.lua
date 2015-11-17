@@ -5,7 +5,10 @@ local user = {}
 function user:register(msg)
 	print("email:" .. msg.email)
 	print("password:" .. msg.password)
-	return "user_register_ack", {err = 0}
+	local msg_ack = {
+		err = 0
+	}
+	return msg_ack
 end
 
 function user:login(msg)

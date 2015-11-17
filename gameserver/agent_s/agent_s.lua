@@ -55,18 +55,18 @@ end
 
 ------------------------ user controller ------------------------
 function CLIENT_API.user_register(msg)
-	local retmsgname, retmsg = user:register(msg)
-	send_client_msg(retmsgname, retmsg)
+	local msg_ack = user:register(msg)
+	send_client_msg("user_register_ack", msg_ack)
 end
 
 function CLIENT_API.user_login(msg)
-	local retmsgname, retmsg = user:login(msg)
-	send_client_msg(retmsgname, retmsg)
+	local msg_ack = user:register(msg)
+	send_client_msg("user_login_ack", msg_ack)
 end
 
 function CLIENT_API.user_change_nickname(msg)
-	local retmsgname, retmsg = user:change_nickname(msg)
-	send_client_msg(retmsgname, retmsg)
+	local msg_ack = user:register(msg)
+	send_client_msg("user_change_nickname_ack", msg_ack)
 end
 
 
