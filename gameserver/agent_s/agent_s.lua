@@ -60,12 +60,12 @@ function CLIENT_API.user_register(msg)
 end
 
 function CLIENT_API.user_login(msg)
-	local msg_ack = user:register(msg)
+	local msg_ack = user:login(msg)
 	send_client_msg("user_login_ack", msg_ack)
 end
 
 function CLIENT_API.user_change_nickname(msg)
-	local msg_ack = user:register(msg)
+	local msg_ack = user:change_nickname(msg)
 	send_client_msg("user_change_nickname_ack", msg_ack)
 end
 

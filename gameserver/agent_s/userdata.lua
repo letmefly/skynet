@@ -2,11 +2,12 @@
 
 local userdata = {}
 
-function userdata:newdata(params)
+function userdata:newdata(email, password)
 	local insert_data = {
-		email = params.email,
-		password = params.password,
-		nickname = userdata_config.default_nickname
+		email = email,
+		password = password,
+		nickname = "",
+		
 
 	}
 end

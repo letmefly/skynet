@@ -1,7 +1,7 @@
 local skynet = require "skynet"
 local nothing = require "skynet.manager"
 local mysql = require "mysql"
-local config = require "config"
+local config = require "dbconf"
 
 local conf = {
 	host = config["mysql_host"],

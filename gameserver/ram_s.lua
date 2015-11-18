@@ -1,7 +1,7 @@
 local skynet = require "skynet"
 local nothing = require "skynet.manager"
 local redis = require "redis"
-local config = require "config"
+local config = require "dbconf"
 
 local conf = {
 	host = config["redis_host"],
