@@ -1,6 +1,7 @@
 local skynet = require "skynet"
 local nothing = require "skynet.manager"
 local mysql = require "mysql"
+local cjson = require "cjson"
 local config = require "dbconf"
 
 local conf = {
@@ -15,13 +16,79 @@ local conf = {
 local SERVICE_API = {}
 local db
 
-function SERVICE_API.insert_user(params)
+local function get_insert_sql(tablename, insertdata)
+	local keys, values = "", ""
+	for k, v in pairs(insertdata) do
+		keys = keys .. k .. ","
+		if type(v) == "string" then
+			values = values.."'"..v.."'"..","
+		else
+			values = values .. v .. ","
+		end
+	end
+	keys = string.sub(keys, 1, -2)
+	values = string.sub(values, 1, -2)
+	local sql = "INSERT INTO " .. tablename .. " (" .. keys .. ")" .. " VALUES " .. "(" .. values .. ")"
+	return sql
 end
 
-function SERVICE_API.select_user(params)
+local function get_update_sql(tablename, searchkey, updatedata)
+	local str = ""
+	for k, v in pairs(updatedata) do
+		if k ~= searchkey then
+			if type(v) == "string" then
+				str = str..k.."=".."'"..v.."'"..","
+			else
+				str = str..k.."="..v..","
+			end
+		end
+	end
+	str = string.sub(str, 1, -2)
+	local searchvalue = updatedata[searchkey]
+	if type(searchvalue) == "string" then
+		searchvalue = "'"..searchvalue.."'"
+	end
+	local sql = "UPDATE "..tablename.." SET "..str.." WHERE "..searchkey.."="..searchvalue
+	return sql
 end
 
-function SERVICE_API.update_user(params)
+local function get_select_sql(tablename, conditions)
+	local str = ""
+	for k, v in pairs(conditions) do
+		if type(v) == "string" then
+			str = str..k.."=".."'"..v.."'"..","
+		else
+			str = str..k.."="..v..","
+		end
+	end
+	str = string.sub(str, 1, -2)
+	local sql = "SELECT * FROM "..tablename.." WHERE "..str
+	return sql
+end
+
+function SERVICE_API.insert_user(data)
+	local sql = get_insert_sql("op_users", data)
+	local result = db:query(sql)
+	if result.badresult then
+		print("[db_s]err: db query fail..")
+		print(cjson.encode(result))
+		return {errno = result.errno, data = {}}
+	end
+	return {errno = 0, data = result}
+end
+
+function SERVICE_API.select_user(conditions)
+	local sql = get_select_sql("op_users", conditions)
+	local result = db:query(sql)
+	if result.badresult then
+		print("[db_s]err: db query fail..")
+		print(cjson.encode(result))
+		return {errno = result.errno, data = {}}
+	end
+	return {errno = 0, data = result}
+end
+
+function SERVICE_API.update_user(data)
 end
 
 skynet.start(function()

@@ -1,15 +1,54 @@
--- local default_config = require "luaconfig.userdata_default_config"
+-- local cjson = require "cjson"
+local skynet = require "skynet"
+local constants = require "config.constants"
 
 local userdata = {}
 
 function userdata:newdata(email, password)
-	local insert_data = {
+	local data = {
 		email = email,
 		password = password,
-		nickname = "",
-		
-
+		nickname = constants["user_default_nickname"],
+		level = constants["user_default_level"],
+		exp_point = constants["user_default_exp"],
+		money = constants["user_default_money"],
+		cash = constants["user_default_cash"],
+		heart = constants["user_default_heart"],
+		lottery_point = constants["user_default_lottery"],
+		lottery_high_coupon = constants["user_lottery_high_coupon"],
+		lottery_coupon = constants["user_lottery_coupon"],
+		character_id = constants["user_default_character_id"],
+		treasure_inventory = constants["user_default_treasure"],
+		best_score = 0,
+		os_type = 1,
+		os_version = "",
+		market_type = 1,
+		attendance_count = 0,
+		attendance_date = "",
+		push_id = "",
+		create_date = os.time(),
+		update_date = "",
+		delete_date = "",
+		login_date = "",
+		create_ip = "",
+		update_ip = "",
+		delete_ip = "",
+		login_ip = "",
+		version = 1,
+		status = 1
 	}
+
+	local select_result = skynet.call("db_s", "lua", "select_user", {email = email})
+	-- user exist already
+	if select_result.errno == 0 and next(select_result.data) ~= nil then
+		return {errno = 10000, data = {}}
+	end
+	local insert_result = skynet.call("db_s", "lua", "insert_user", data)
+	if insert_result.errno ~= 0 then
+		return {errno = 10001, data = {}}
+	end
+
+	return {errno = 0, data = {}}
 end
 
 function userdata:load(userid)

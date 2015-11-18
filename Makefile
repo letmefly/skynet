@@ -47,7 +47,7 @@ update3rd :
 CSERVICE = snlua logger gate harbor
 LUA_CLIB = skynet socketdriver bson mongo md5 netpack \
   clientsocket memory profile multicast \
-  cluster crypt sharedata stm sproto protobuf lpeg \
+  cluster crypt sharedata stm sproto protobuf cjson lpeg \
   mysqlaux debugchannel
 
 SKYNET_SRC = skynet_main.c skynet_handle.c skynet_module.c skynet_mq.c \
@@ -123,6 +123,9 @@ $(LUA_CLIB_PATH)/sproto.so : lualib-src/sproto/sproto.c lualib-src/sproto/lsprot
 
 $(LUA_CLIB_PATH)/protobuf.so : lualib-src/pbc/lua-pbc.c lualib-src/pbc/alloc.c lualib-src/pbc/array.c lualib-src/pbc/bootstrap.c lualib-src/pbc/context.c lualib-src/pbc/decode.c lualib-src/pbc/map.c lualib-src/pbc/pattern.c lualib-src/pbc/proto.c lualib-src/pbc/register.c lualib-src/pbc/rmessage.c lualib-src/pbc/stringpool.c lualib-src/pbc/varint.c lualib-src/pbc/wmessage.c | $(LUA_CLIB_PATH)
 	$(CC) $(CFLAGS) $(SHARED) -Ilualib-src/pbc $^ -o $@ 
+
+$(LUA_CLIB_PATH)/cjson.so : lualib-src/cjson/fpconv.c lualib-src/cjson/strbuf.c lualib-src/cjson/lua_cjson.c | $(LUA_CLIB_PATH)
+	$(CC) $(CFLAGS) $(SHARED) -Ilualib-src/cjson $^ -o $@ 
 
 $(LUA_CLIB_PATH)/lpeg.so : 3rd/lpeg/lpcap.c 3rd/lpeg/lpcode.c 3rd/lpeg/lpprint.c 3rd/lpeg/lptree.c 3rd/lpeg/lpvm.c | $(LUA_CLIB_PATH)
 	$(CC) $(CFLAGS) $(SHARED) -I3rd/lpeg $^ -o $@ 

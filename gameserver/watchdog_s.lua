@@ -51,8 +51,8 @@ end
 local function testapi()
 	-- test pbc api
 	local testapi = skynet.newservice("testapi")
-	local ret = skynet.call(testapi, "lua", "testpbc", {a="hello", b=123})
-	print(ret.result)
+	-- local ret = skynet.call(testapi, "lua", "testpbc", {a="hello", b=123})
+	-- print(ret.result)
 end
 
 skynet.start(function()
@@ -70,5 +70,5 @@ skynet.start(function()
 	gate = skynet.newservice("gate")
 
 	--just for test api
-	--testapi()
+	-- testapi()
 end)

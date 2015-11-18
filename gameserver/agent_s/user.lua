@@ -3,12 +3,9 @@ local userdata = require "agent_s.userdata"
 local user = {}
 
 function user:register(msg)
-	print("email:" .. msg.email)
-	print("password:" .. msg.password)
 	local ret = userdata:newdata(msg.email, msg.password)
-
 	local msg_ack = {
-		err = 0
+		err = ret.errno 
 	}
 	return msg_ack
 end
