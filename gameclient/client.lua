@@ -28,7 +28,8 @@ local function recvmsg()
 end
 
 -- test hand shake
-sendmsg("user_register", {email = "chris.li@sky-mobi.com", password = "123456"})
+-- sendmsg("user_register", {email = "chris.li@sky-mobi.com", password = "123456"})
+sendmsg("user_login", {email = "chris.li@sky-mobi.com", password = "123456"})
 recvmsg()
 
 --[[

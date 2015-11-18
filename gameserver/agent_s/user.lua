@@ -11,8 +11,15 @@ function user:register(msg)
 end
 
 function user:login(msg)
-	local userid = msg.userid
-	userdata:load(userid)
+	local ret = userdata:load(msg.email)
+	local errno = ret.errno
+	if ret.errno == 0 and userdata:get("password") ~= msg.password then
+		errno = 1002
+	end
+	local msg_ack = {
+		err = errno
+	}
+	return msg_ack
 end
 
 function user:logout()

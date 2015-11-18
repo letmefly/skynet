@@ -1,8 +1,8 @@
--- local cjson = require "cjson"
+local cjson = require "cjson"
 local skynet = require "skynet"
 local constants = require "config.constants"
 
-local userdata = {}
+local userdata = {data = {}}
 
 function userdata:newdata(email, password)
 	local data = {
@@ -47,25 +47,33 @@ function userdata:newdata(email, password)
 	if insert_result.errno ~= 0 then
 		return {errno = 10001, data = {}}
 	end
-
 	return {errno = 0, data = {}}
 end
 
-function userdata:load(userid)
-	-- for k, v in pairs(data) do
-	-- 	self[k] = v
-	-- end
+function userdata:load(email)
+	local result = skynet.call("db_s", "lua", "select_user", {email = email})
+	if result.errno == 0 and next(result.data) ~= nil then
+		for k, v in pairs(result.data[1]) do
+			self.data[k] = v
+		end
+	end
+	-- print(cjson.encode(self.data))
+	return result
+end
+
+function userdata:clear()
+	self.data = nil
 end
 
 function userdata:save()
 end
 
 function userdata:set(key, value)
-	self[key] = value
+	self.data[key] = value
 end
 
 function userdata:get(key)
-	return self[key]
+	return self.data[key]
 end
 
 return userdata
