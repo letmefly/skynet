@@ -76,5 +76,9 @@ function userdata:get(key)
 	return self.data[key]
 end
 
+function userdata:cost_heart(heart_num)
+	self.data["heart"] = self.data["heart"] - heart_num
+end
+
 return userdata
 
