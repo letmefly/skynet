@@ -83,17 +83,25 @@ function game:result(msg)
 	end
 
 	local stage_id = tostring(playcode["stage_id"])
-	local stage_info = configdata:get("define_stage")[stage_id]
+	local stageinfo = configdata:get("define_stage")[stage_id]
 	
 	-- update exp_point
-	local reward_exp_point = stage_info["rewardValue2"]
+	local reward_exp_point = stageinfo["rewardValue2"]
 	userdata:plus_exp_point(reward_exp_point)
 
 	-- update money
-	local reward_money = stage_info["rewardValue1"]
+	local reward_money = stageinfo["rewardValue1"]
 	shopdata:plus_money(reward_money)
 
-	-- update stage
+	-- update stage accomplish state
+	gamedata:update_stageinfo({
+		stage_id = stage_id, 
+		clear_type = msg["is_clear"], 
+		score = msg["score"],
+		clear_count = 1,
+		create_date = os.time(),
+		perfect = msg["isPerfect"]
+	})
 
 end
 
