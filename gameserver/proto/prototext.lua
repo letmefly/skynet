@@ -141,7 +141,7 @@ message game_result {
 	optional int32 maxCombo = 6;
 	optional int32 isClear = 7;
 	optional int32 isPerfect = 8;
-	optional int32 dealCode = 9;
+	optional int32 killCount = 9;
 }
 
 message game_result_ack {

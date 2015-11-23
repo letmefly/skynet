@@ -80,5 +80,9 @@ function userdata:cost_heart(heart_num)
 	self.data["heart"] = self.data["heart"] - heart_num
 end
 
+function userdata:plus_exp_point(point_num)
+	self.data["exp_point"] = self.data["exp_point"] + point_num
+end
+
 return userdata
 

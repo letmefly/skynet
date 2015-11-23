@@ -10,6 +10,13 @@ local configdata = require "agent_s.configdata"
 
 local game = {}
 
+local function game:set_playcode(playcode)
+	self.playcode = playcode
+end
+local function game:get_playcode()
+	return self.playcode
+end
+
 function game:lobby(msg)
 end
 
@@ -49,10 +56,18 @@ function game:start(msg)
 	for k, v in pairs(msg["useItems"]) do
 		itemdata:cost_instantitem(v, 1)
 	end
+
+	-- store game start state data
+	self:set_playcode({
+		stage_id = msg["stageID"],
+		friend_user_id = msg["friendUserID"],
+		is_finish = 0,
+		create_date = os.time()
+	})
 	
 	-- msg_ack
 	msg_ack["playCode"] = 0
-	msg_ack["slotCharacter"] = slotcharacter
+	msg_ack["slotCharacter"] = slotcharacters
 	msg_ack["slotskills"] = slotskills
 	msg_ack["slotTreasures"] = slotTreasures
 
@@ -60,7 +75,26 @@ function game:start(msg)
 end
 
 function game:result(msg)
-	-- body
+	local msg_ack = {errno = 0}
+	local playcode = self:get_playcode()
+	if nil == playcode then
+		msg_ack["errno"] = 201
+		return msg_ack
+	end
+
+	local stage_id = tostring(playcode["stage_id"])
+	local stage_info = configdata:get("define_stage")[stage_id]
+	
+	-- update exp_point
+	local reward_exp_point = stage_info["rewardValue2"]
+	userdata:plus_exp_point(reward_exp_point)
+
+	-- update money
+	local reward_money = stage_info["rewardValue1"]
+	shopdata:plus_money(reward_money)
+
+	-- update stage
+
 end
 
 function function_name( ... )
