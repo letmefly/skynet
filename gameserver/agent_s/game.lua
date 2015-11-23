@@ -6,7 +6,7 @@ local characterdata = require "agent_s.characterdata"
 local skilldata = require "agent_s.skilldata"
 local treasuredata = require "agent_s.treasuredata"
 local itemdata = require "agent_s.itemdata"
-
+local configdata = require "agent_s.configdata"
 
 local game = {}
 

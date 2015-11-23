@@ -1,0 +1,122 @@
+index,name,itemType,classType,grade,GatchaGrade,effectType,gatchaRate,abiliity,sellPrice,enchantPriceType,icon,desc,miniDesc,MaxLevelArtifact,name ref,effect reference,advanced gatcha,find
+1,Mantis,Stance,Mantis,C,C,,30,"31, 131",500,MantisL,02_Store_Kungfu_Icon_05,~item_desc_1,~mantis_mini_desc,,,,,
+2,Drunken,Stance,Drunken,C,C,,30,"32,22,27,132",500,DrunkenL,02_Store_Kungfu_Icon_02,~item_desc_2,~drunken_mini_desc,,,,,
+3,Crane,Stance,Crane,B,B,,20,"33,35,23,28,133",1500,CraneL,02_Store_Kungfu_Icon_03,~item_desc_3,~crane_mini_desc,,,,,
+4,Eagle,Stance,Eagle,B,B,,20,"34,25,29,134",1500,EagleL,02_Store_Kungfu_Icon_04,~item_desc_4,~eagle_mini_desc,,,,,
+5,Tiger,Stance,Tiger,A,A,,10,"69,36,24,30,135",10000,TigerL,02_Store_Kungfu_Icon_01,~item_desc_5,~tiger_mini_desc,,,,,
+6,Capoeira,Stance,Capoeira,S,S,,5,"153,154,155,134,136",25000,CapoeiraL,02_Store_Kungfu_Icon_06,~item_desc_6,~capoeira_mini_desc,,,,,
+100,~item_name_desc_6,Mystique,Weapon,B,B,,20,1,1500,MystiqueB,Weapon Rain,~item_desc_100,,1022,웨폰 레인[무],#N/A,20,#N/A
+101,~item_name_desc_7,Mystique,Physical,A,A,,10,8,10000,MystiqueA,Light 'En Up,~item_desc_101,,,라이트 업[체],Voice1_Skill_08,10,#N/A
+102,~item_name_desc_8,Mystique,Physical,B,B,,20,9,1500,MystiqueB,Unarmed Master,~item_desc_102,,,언암드 마스터[체],Voice1_Skill_09,20,#N/A
+103,~item_name_desc_9,Mystique,Illusion,C,C,,30,10,500,MystiqueC,Slow Enemies,~item_desc_103,,,슬로우 에너미[환],Voice1_Skill_10,0,#N/A
+104,~item_name_desc_10,Mystique,Physical,S,A,,10,12,10000,MystiqueS,Freezing Point,~item_desc_104,,,프리징 포인트[체],Voice1_Skill_12,10,104
+105,~item_name_desc_11,Mystique,Physical,S,A,,10,13,10000,MystiqueS,Deep Impact,~item_desc_105,,,딥 임펙트[체],Voice1_Skill_13,10,105
+106,~item_name_desc_12,Mystique,Physical,A,A,,10,14,10000,MystiqueA,Heal,~item_desc_106,,,힐[체],Voice1_Skill_14,10,#N/A
+107,~item_name_desc_13,Mystique,Illusion,A,A,,10,15,10000,MystiqueA,Deflect Grey,~item_desc_107,,,디플렉트 그레이[환],Voice1_Skill_15,10,#N/A
+108,~item_name_desc_14,Mystique,Illusion,B,B,,20,16,1500,MystiqueB,Deflect Color,~item_desc_108,,,디플렉트 컬러[환],Voice1_Skill_16,20,#N/A
+109,~item_name_desc_15,Mystique,Physical,B,B,,20,17,1500,MystiqueB,Throw Weapon,~item_desc_109,,,쓰로우 웨폰[체],Voice1_Skill_17,20,#N/A
+110,~item_name_desc_16,Mystique,Illusion,C,C,,30,18,500,MystiqueC,Iron Fist,~item_desc_110,,,아이언 피스트[환],Voice1_Skill_18,0,#N/A
+111,~item_name_desc_17,Mystique,Physical,B,B,,20,19,1500,MystiqueB,Venom Fist,~item_desc_111,,,베놈 피스트[체],Voice1_Skill_19,20,#N/A
+112,~item_name_desc_18,Mystique,Illusion,S,S,,5,20,25000,MystiqueS,Grey Out,~item_desc_112,,,그레이 아웃[환],Voice1_Skill_20,5,112
+113,~item_name_desc_19,Mystique,Illusion,C,C,,30,21,500,MystiqueC,Slow Assault,~item_desc_113,,,슬로우 어썰트[환],Voice1_Skill_21,0,#N/A
+114,~item_name_desc_20,Mystique,Weapon,B,B,,20,45,1500,MystiqueB,Weapon Increase,~item_desc_114,,,웨폰 인크리스[무],,20,#N/A
+115,~item_name_desc_21,Mystique,Illusion,B,B,,20,48,1500,MystiqueB,Juggler,~item_desc_115,,,몬스터 러시[환],,20,#N/A
+116,~item_name_desc_22,Mystique,Magic,S,SS,,1,46,25000,MystiqueS,Skill recall,~item_desc_116,,,리콜 이펙트[마],,1,116
+117,~item_name_desc_23,Mystique,Magic,A,S,,5,47,25000,MystiqueA,10second Miracle,~item_desc_117,,,미라클 턴[마],,5,117
+118,~item_name_desc_24,Mystique,Physical,A,A,,10,49,10000,MystiqueA,Earth Quake,~item_desc_118,,,어스퀘이크[체],,10,#N/A
+119,~item_name_desc_25,Mystique,Magic,S,SS,,1,50,25000,MystiqueS,Paradise,~item_desc_119,,,파라다이스[마],,1,119
+120,~item_name_desc_26,Mystique,Physical,S,SS,,1,51,25000,MystiqueS,Sword of Hell,~item_desc_120,,,소드 오브 헬[체],,1,120
+1000,~item_name_desc_27,Artifact,,C,C,Weapon,30,2,500,ArtifactC,Club Master,~item_desc_1000,,,클럽 마스터,#N/A,0,#N/A
+1001,~item_name_desc_28,Artifact,,C,C,Weapon,30,3,500,ArtifactC,Sword Master,~item_desc_1001,,,소드 마스터,Voice1_Skill_03,0,#N/A
+1002,~item_name_desc_29,Artifact,,C,C,Weapon,30,4,500,ArtifactC,Staff Master,~item_desc_1002,,,스테프 마스터,Voice1_Skill_04,0,#N/A
+1003,~item_name_desc_30,Artifact,,B,A,Weapon,10,5,10000,ArtifactB,Three Arrows,~item_desc_1003,,,보우 마스터,Voice1_Skill_05,10,1003
+1004,~item_name_desc_31,Artifact,,B,A,Weapon,10,6,10000,ArtifactB,Three Daggers,~item_desc_1004,,,대거 마스터,Voice1_Skill_06,10,1004
+1005,~item_name_desc_32,Artifact,,B,A,Weapon,10,7,10000,ArtifactB,Three Bombs,~item_desc_1005,,,폭탄 마스터,Voice1_Skill_07,10,1005
+1006,~item_name_desc_33,Artifact,,C,C,Other,30,11,500,ArtifactC,Brawl Master,~item_desc_1006,,,고수 마스터,Voice1_Skill_11,0,#N/A
+1007,~item_name_desc_34,Artifact,,C,C,IncreaseGain,30,39,500,ArtifactC,Point Up C,~item_desc_1007,,,브레이크 대거,,0,#N/A
+1008,~item_name_desc_35,Artifact,,B,B,Viability,20,40,1500,ArtifactB,Bear gallbladder,~item_desc_1008,,,곰발바닥,,20,1008
+1009,~item_name_desc_36,Artifact,,C,C,IncreaseGain,30,41,500,ArtifactC,Exp UP,~item_desc_1009,,,부다 스톤,,0,#N/A
+1010,~item_name_desc_37,Artifact,,C,C,IncreaseGain,30,42,500,ArtifactC,Gold UP,~item_desc_1010,,,마리오네트 캣,,0,#N/A
+1011,~item_name_desc_38,Artifact,,C,C,Viability,30,43,500,ArtifactC,Kill heal,~item_desc_1011,,,도트 케이프,,0,#N/A
+1012,~item_name_desc_39,Artifact,,C,C,Viability,30,44,500,ArtifactC,Heal UP,~item_desc_1012,,,알약 조각,,0,#N/A
+1013,~item_name_desc_40,Artifact,,B,C,IncreaseGain,30,59,500,ArtifactB,10Combo Bonus,~item_desc_1013,,,페이탈 글러브,,30,1013
+1014,~item_name_desc_41,Artifact,,B,C,Other,30,52,500,ArtifactB,Speed Down,~item_desc_1014,,,스피드 글라스,,30,1014
+1015,~item_name_desc_42,Artifact,,A,S,Viability,5,54,25000,ArtifactA,Hp decrease Down,~item_desc_1015,,,타이거 케이나인,,5,1015
+1016,~item_name_desc_43,Artifact,,B,C,IncreaseGain,30,57,500,ArtifactB,Impact Gold,~item_desc_1016,,,주판,,30,1016
+1017,~item_name_desc_44,Artifact,,B,C,IncreaseGain,30,58,500,ArtifactB,Brawl Gold,~item_desc_1017,,,실크,,30,1017
+1018,~item_name_desc_45,Artifact,,B,A,Skill,10,56,10000,ArtifactB,Line Attack Increase,~item_desc_1018,,,실버 대거,,10,1018
+1019,~item_name_desc_46,Artifact,,C,C,IncreaseGain,30,55,500,ArtifactC,Ball Point Up,~item_desc_1019,,,카우 하트,,0,#N/A
+1020,~item_name_desc_47,Artifact,,B,C,IncreaseGain,30,53,500,ArtifactB,Freeheat overall,~item_desc_1020,,,너클,,30,1020
+1021,~item_name_desc_48,Artifact,,B,A,Weapon,10,60,10000,ArtifactB,Bouns Kill,~item_desc_1021,,,레전드 스톤,,10,1021
+1022,~item_name_desc_49,Artifact,Hat_02,B,A,Weapon,10,"61,62",10000,ArtifactB,Weapon Master,~item_desc_1022,,,시크릿 도큐먼트,,10,1022
+1023,~item_name_desc_50,Artifact,,S,S,Skill,5,63,25000,ArtifactS,Witchcraft Turn Down,~item_desc_1023,,,위치크래프트,,5,1023
+1024,~item_name_desc_51,Artifact,,S,S,Skill,5,64,25000,ArtifactS,Marshallart Turn Down,~item_desc_1024,,,스트렝스,,5,1024
+1025,~item_name_desc_52,Artifact,,A,A,Viability,10,65,10000,ArtifactA,Stun recover,~item_desc_1025,,,윈드밀,,10,1025
+1026,~item_name_desc_53,Artifact,,A,A,Skill,10,66,10000,ArtifactA,Earth quake Sub,~item_desc_1026,,,지오그래피,,10,1026
+1027,~item_name_desc_54,Artifact,,B,B,Viability,20,67,1500,ArtifactB,Don't move,~item_desc_1027,,,스크롤,,20,1027
+1028,~item_name_desc_55,Artifact,,B,B,Viability,20,68,1500,ArtifactB,BronzeFist,~item_desc_1028,,,골드 크라운,,20,1028
+1029,~item_name_desc_1029,Artifact,,C,C,IncreaseGain,30,70,500,ArtifactC,Smash,~item_desc_1029,,,강타,,0,#N/A
+1030,~item_name_desc_1030,Artifact,,C,C,IncreaseGain,30,71,500,ArtifactC,Fatality,~item_desc_1030,,,응징,,0,#N/A
+1031,~item_name_desc_1031,Artifact,,A,B,Viability,20,72,1500,ArtifactA,LastHit,~item_desc_1031,,,보검소환,,20,1031
+1032,~item_name_desc_1032,Artifact,,A,A,Viability,10,73,10000,ArtifactA,DeflectMaster,~item_desc_1032,,,반격마스터,,10,1032
+1033,~item_name_desc_1033,Artifact,,S,SS,Weapon,1,74,25000,ArtifactS,ThrowMaster,~item_desc_1033,,,투척마스터,,1,1033
+1034,~item_name_desc_1034,Artifact,,B,B,IncreaseGain,20,75,1500,ArtifactB,Glove,~item_desc_1034,,,가죽장갑,,20,1034
+1035,~item_name_desc_1035,Artifact,,B,C,Other,30,76,500,ArtifactB,TimeMaster,~item_desc_1035,,,시간마스터,,30,1035
+1036,~item_name_desc_1036,Artifact,,S,SS,Skill,1,77,25000,ArtifactS,Freezing Tiger,~item_desc_1036,,,프리징타이거,,1,1036
+1037,~item_name_desc_1037,Artifact,,C,C,IncreaseGain,30,"78,89",500,ArtifactC,GreyMaster,~item_desc_1037,,,그레이마스터,,0,#N/A
+1038,~item_name_desc_1038,Artifact,,S,S,Weapon,5,79,25000,ArtifactS,Pickpocket,~item_desc_1038,,,무기탈취,,5,1038
+1039,~item_name_desc_1039,Artifact,,B,C,IncreaseGain,30,"80,90",500,ArtifactB,MantisMaster,~item_desc_1039,,,당랑권마스터,,30,1039
+1040,~item_name_desc_1040,Artifact,,B,C,IncreaseGain,30,"81,91",500,ArtifactB,CraneMaster,~item_desc_1040,,,학권마스터,,30,1040
+1041,~item_name_desc_1041,Artifact,,B,C,IncreaseGain,30,"82,92",500,ArtifactB,DrunkenMaster,~item_desc_1041,,,취권마스터,,30,1041
+1042,~item_name_desc_1042,Artifact,,B,C,IncreaseGain,30,"83,93",500,ArtifactB,TigerMaster,~item_desc_1042,,,호권마스터,,30,1042
+1043,~item_name_desc_1043,Artifact,,B,C,IncreaseGain,30,"84,94",500,ArtifactB,EagleMaster,~item_desc_1043,,,응조권마스터,,30,1043
+121,~item_name_desc_121,Mystique,Weapon,S,SS,,1,85,25000,MystiqueS,Guillotine,~item_desc_121,,,단두대[무],,1,121
+122,~item_name_desc_122,Mystique,Physical,S,SS,,1,86,25000,MystiqueS,Berserk,~item_desc_122,,,광전사[체],,1,122
+123,~item_name_desc_123,Mystique,Illusion,S,SS,,1,87,25000,MystiqueS,Blizzard,~item_desc_123,,,눈보라[환],,1,123
+124,~item_name_desc_124,Mystique,Physical,S,SS,,1,88,25000,MystiqueS,Avatar,~item_desc_124,,,분신[체],,1,124
+1044,~item_name_desc_1055,Artifact,,A,B,Weapon,20,95,1500,ArtifactA,Club Master,~item_desc_1055,,,클럽 그랜드 마스터,,,
+1045,~item_name_desc_1056,Artifact,,A,B,Weapon,20,96,1500,ArtifactA,Sword Master,~item_desc_1056,,,소드 그랜드 마스터,,,
+1046,~item_name_desc_1057,Artifact,,A,B,Weapon,20,97,1500,ArtifactA,Staff Master,~item_desc_1057,,,스테프 그랜드 마스터,,,
+1047,~item_name_desc_1058,Artifact,,S,A,Weapon,10,98,10000,ArtifactS,Three Arrows,~item_desc_1058,,,보우 그랜드 마스터,,,
+1048,~item_name_desc_1059,Artifact,,S,A,Weapon,10,99,10000,ArtifactS,Three Daggers,~item_desc_1059,,,대거 그랜드 마스터,,,
+1049,~item_name_desc_1060,Artifact,,S,A,Weapon,10,100,10000,ArtifactS,Three Bombs,~item_desc_1060,,,폭탄 그랜드 마스터,,,
+1050,~item_name_desc_1061,Artifact,,C,C,Viability,30,101,500,ArtifactC,Bear gallbladder,~item_desc_1061,,,곰발톱,,,
+1051,~item_name_desc_1062,Artifact,,A,A,Viability,10,102,10000,ArtifactA,Bear gallbladder,~item_desc_1062,,,곰의심장,,,
+1052,~item_name_desc_1063,Artifact,,B,B,IncreaseGain,20,103,1500,ArtifactB,Exp UP,~item_desc_1063,,,부다 스톤 2,,,
+1053,~item_name_desc_1064,Artifact,,B,B,IncreaseGain,20,104,1500,ArtifactB,Gold UP,~item_desc_1064,,,마리오네트 캣 2,,,
+1054,~item_name_desc_1065,Artifact,,B,B,Viability,20,105,1500,ArtifactB,Kill heal,~item_desc_1065,,,도트 케이프 2,,,
+1055,~item_name_desc_1066,Artifact,,B,B,Viability,20,106,1500,ArtifactB,Heal UP,~item_desc_1066,,,타블렛 크럼브 2,,,
+1056,~item_name_desc_1067,Artifact,,A,A,IncreaseGain,10,107,10000,ArtifactA,10Combo Bonus,~item_desc_1067,,,페이탈 글러브 2,,,
+1057,~item_name_desc_1068,Artifact,,A,B,IncreaseGain,20,108,1500,ArtifactA,Freeheat overall,~item_desc_1068,,,너클 2,,,
+1058,~item_name_desc_1069,Artifact,,A,S,Weapon,5,109,25000,ArtifactA,Bouns Kill,~item_desc_1069,,,레전드 스톤 2,,,
+1059,~item_name_desc_1070,Artifact,,C,C,Viability,30,110,500,ArtifactC,Don't move,~item_desc_1070,,,두루마리,,,
+1060,~item_name_desc_1071,Artifact,,A,A,Viability,10,111,10000,ArtifactA,Don't move,~item_desc_1071,,,스크롤 2,,,
+1061,~item_name_desc_1072,Artifact,,C,C,Viability,30,112,500,ArtifactC,BronzeFist,~item_desc_1072,,,실버 크라운,,,
+1062,~item_name_desc_1073,Artifact,,A,B,Viability,20,113,1500,ArtifactA,BronzeFist,~item_desc_1073,,,골드 크라운 2,,,
+1063,~item_name_desc_1074,Artifact,,A,B,IncreaseGain,20,114,1500,ArtifactA,Glove,~item_desc_1074,,,강철장갑,,,
+1064,~item_name_desc_1075,Artifact,,A,B,IncreaseGain,20,"115,120",1500,ArtifactA,MantisMaster,~item_desc_1075,,,당랑권 그랜드 마스터,,,
+1065,~item_name_desc_1076,Artifact,,A,B,IncreaseGain,20,"116,121",1500,ArtifactA,CraneMaster,~item_desc_1076,,,학권 그랜드 마스터,,,
+1066,~item_name_desc_1077,Artifact,,A,B,IncreaseGain,20,"117,122",1500,ArtifactA,DrunkenMaster,~item_desc_1077,,,취권 그랜드 마스터,,,
+1067,~item_name_desc_1078,Artifact,,A,B,IncreaseGain,20,"118,123",1500,ArtifactA,TigerMaster,~item_desc_1078,,,호권 그랜드 마스터,,,
+1068,~item_name_desc_1079,Artifact,,A,B,IncreaseGain,20,"119,124",1500,ArtifactA,EagleMaster,~item_desc_1079,,,응조권 그랜드 마스터,,,
+1069,~item_name_desc_1080,Artifact,,C,B,Viability,20,125,1500,ArtifactC,Stun recover,~item_desc_1080,,,기회주의자,,,
+1070,~item_name_desc_1081,Artifact,,C,C,Skill,30,126,500,ArtifactC,Earth quake Sub,~item_desc_1081,,,땅의분노,,,
+1071,~item_name_desc_1082,Artifact,,C,C,Viability,30,127,500,ArtifactC,LastHit,~item_desc_1082,,,보검의 조력,,,
+1072,~item_name_desc_1083,Artifact,,C,B,Viability,20,128,500,ArtifactC,DeflectMaster,~item_desc_1083,,,반격입문,,,
+1073,~item_name_desc_1084,Artifact,,A,A,Weapon,10,129,10000,ArtifactA,ThrowMaster,~item_desc_1084,,,투척입문,,,
+1074,~item_name_desc_1086,Artifact,,A,A,Weapon,10,130,10000,ArtifactA,Pickpocket,~item_desc_1086,,,무기취득,,,
+1075,~item_name_desc_1090,Artifact,Hat_05,A,C,IncreaseGain,0,53,500,ArtifactA,Hat_05_Santa,~item_desc_1090,,,산타의 분노,,,
+1076,~item_name_desc_1087,Artifact,,S,A,Viability,10,137,10000,ArtifactS,Stun recover,~item_desc_1080,,,,,,
+1077,~item_name_desc_1088,Artifact,,S,A,Other,10,138,10000,ArtifactS,Brawl Master,~item_desc_1006,,,,,,
+1078,~item_name_desc_1089,Artifact,,S,A,Viability,10,139,10000,ArtifactS,Kill heal,~item_desc_1011,,,,,,
+1079,~item_name_desc_1101,Artifact,,S,A,IncreaseGain,10,140,10000,ArtifactS,Gold UP,~item_desc_1010,,,,,,
+1081,~item_name_desc_1091,Artifact,,S,A,Viability,10,141,10000,ArtifactS,Heal UP,~item_desc_1012,,,,,,
+1082,~item_name_desc_1092,Artifact,,S,A,Skill,10,142,10000,ArtifactS,Earth quake Sub,~item_desc_1081,,,,,,
+1083,~item_name_desc_1093,Artifact,,S,A,IncreaseGain,10,143,10000,ArtifactS,Ball Point Up,~item_desc_1019,,,,,,
+1084,~item_name_desc_1094,Artifact,,S,A,IncreaseGain,10,144,10000,ArtifactS,Point Up C,~item_desc_1007,,,,,,
+1085,~item_name_desc_1095,Artifact,,S,SS,Viability,1,145,25000,ArtifactS,Hp decrease Down,~item_desc_1015,,,,,,
+1086,~item_name_desc_1096,Artifact,,S,S,Viability,5,146,25000,ArtifactS,Bear gallbladder,~item_desc_1062,,,,,,
+1087,~item_name_desc_1097,Artifact,,S,A,IncreaseGain,10,147,10000,ArtifactS,Freeheat overall,~item_desc_1068,,,,,,
+1088,~item_name_desc_1098,Artifact,,S,A,IncreaseGain,10,148,10000,ArtifactS,Glove,~item_desc_1074,,,,,,
+1089,~item_name_desc_1099,Artifact,,B,C,IncreaseGain,30,"149,150",500,ArtifactB,CapoeiraMaster,~item_desc_1100,,,,,,
+1090,~item_name_desc_1100,Artifact,Hat_06,A,B,IncreaseGain,20,"151,152",1500,ArtifactA,CapoeiraMaster,~item_desc_1101,,,,,,

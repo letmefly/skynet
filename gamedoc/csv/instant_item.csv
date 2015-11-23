@@ -1,0 +1,8 @@
+index,name,rate,value,price,icon,desc
+0,Random,,1,1500,Random,InstantItemRandom
+1,StrengthUp,10,100,3000,StrengthUp,InstantItemStrengthUp
+2,ScoreUp,20,0.5,800,ScoreUp,InstantItemScoreUp
+3,Revival,30,0.5,3000,Revival,InstantItemRevival
+4,ExpUp,20,0.5,800,ExpUp,InstantItemExpUp
+5,ArmorUp,10,0.2,2000,ArmorUp,InstantItemArmorUp
+6,MoneyUp,10,1,1500,MoneyUp,InstantItemMoneyUp

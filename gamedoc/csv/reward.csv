@@ -1,0 +1,11 @@
+index,name,first,second,third,tenthOver,fiftiethOver,hundredthOver,up,down
+1,~RankA,Cash 60,Cash 55,Cash 50,Cash 45,Cash 40,Booster3 3,0,25
+2,~RankB,Cash 40,Cash 35,Cash 30,Cash 25,Cash 20,Booster1 3,20,30
+3,~RankC,Cash 20,Cash 18,Cash 16,Cash 15,Cash 12,Booster5 3,20,35
+4,~RankD,Cash 15,Cash 12,Cash 10,Cash 8,Cash 6,Booster4 5,25,40
+5,~RankE,Cash 10,Cash 8,Cash 6,Cash 5,Cash 3,Booster2 5,25,40
+6,~RankF,Money 10000,Money 7000,Money 6000,Money 5000,Booster3 1,Booster3 1,30,45
+7,~RankG,Money 8000,Money 6000,Money 5000,Money 4000,Booster1 1,Booster1 1,30,45
+8,~RankH,Money 7000,Money 5000,Money 4000,Money 3000,Booster5 1,Booster5 1,30,50
+9,~RankI,Money 5000,Money 4000,Money 3000,Money 1000,Booster4 1,Booster4 1,40,50
+10,~RankJ,Money 3000,Money 2000,Money 1000,Money 500,Booster2 1,Booster2 1,50,50

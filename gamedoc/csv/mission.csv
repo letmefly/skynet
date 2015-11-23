@@ -1,0 +1,72 @@
+index,takeType,missionType1,missionType2,target,targetValue,rewardType,rewardValue1,rewardValue2,desc,desc_localkey
+1,Repetition,Survivor,Score,EnemyAll,100000,Money,1000,0,[서바이벌]서바이벌 점수 100000점에 도달하세요!,~MissionDescScore
+2,Repetition,Survivor,Score,EnemyAll,300000,Money,3000,0,[서바이벌]서바이벌 점수 300000점에 도달하세요!,~MissionDescScore
+3,Repetition,Survivor,Score,EnemyAll,500000,Cash,1,0,[서바이벌]서바이벌 점수 500000점에 도달하세요!,~MissionDescScore
+4,Repetition,Survivor,Score,EnemyAll,700000,Cash,2,0,[서바이벌]서바이벌 점수 700000점에 도달하세요!,~MissionDescScore
+5,Repetition,Survivor,Score,EnemyAll,1000000,Cash,3,0,[서바이벌]서바이벌 점수 1000000점에 도달하세요!,~MissionDescScore
+6,Repetition,Survivor,Weapon_Kill,Staff,5,Money,1500,0,[서바이벌]봉을 사용해 몬스터 5마리를 처치하세요!,~MissionDescWeapon_KillStaff
+7,Repetition,Survivor,Weapon_Kill,Staff,50,Money,4000,0,[서바이벌]봉을 사용해 몬스터 50마리를 처치하세요!,~MissionDescWeapon_KillStaff
+8,Repetition,Survivor,Weapon_Kill,Staff,100,Cash,1,0,[서바이벌]봉을 사용해 몬스터 100마리를 처치하세요!,~MissionDescWeapon_KillStaff
+9,Repetition,Survivor,Weapon_Kill,Sword,5,Money,1500,0,[서바이벌]검을 사용해 몬스터 5마리를 처치하세요!,~MissionDescWeapon_KillSword
+10,Repetition,Survivor,Weapon_Kill,Sword,50,Money,4000,0,[서바이벌]검을 사용해 몬스터 50마리를 처치하세요!,~MissionDescWeapon_KillSword
+11,Repetition,Survivor,Weapon_Kill,Sword,100,Cash,1,0,[서바이벌]검을 사용해 몬스터 100마리를 처치하세요!,~MissionDescWeapon_KillSword
+12,Repetition,Survivor,Weapon_Kill,Club,5,Money,1500,0,[서바이벌]곤봉을 사용해 몬스터 5마리를 처치하세요!,~MissionDescWeapon_KillClub
+13,Repetition,Survivor,Weapon_Kill,Club,50,Money,4000,0,[서바이벌]곤봉을 사용해 몬스터 50마리를 처치하세요!,~MissionDescWeapon_KillClub
+14,Repetition,Survivor,Weapon_Kill,Club,100,Cash,1,0,[서바이벌]곤봉을 사용해 몬스터 100마리를 처치하세요!,~MissionDescWeapon_KillClub
+15,Repetition,Survivor,Weapon_Equip,Staff,1,Money,1000,0,[서바이벌]봉을 1회 획득하세요!,~MissionDescWeapon_EquipStaff
+16,Repetition,Survivor,Weapon_Equip,Staff,3,Money,3000,0,[서바이벌]봉을 3회 획득하세요!,~MissionDescWeapon_EquipStaff
+17,Repetition,Survivor,Weapon_Equip,Staff,10,Cash,1,0,[서바이벌]봉을 10회 획득하세요!,~MissionDescWeapon_EquipStaff
+18,Repetition,Survivor,Weapon_Equip,Sword,1,Money,1000,0,[서바이벌]검을 1회 획득하세요!,~MissionDescWeapon_EquipSword
+19,Repetition,Survivor,Weapon_Equip,Sword,3,Money,3000,0,[서바이벌]검을 3회 획득하세요!,~MissionDescWeapon_EquipSword
+20,Repetition,Survivor,Weapon_Equip,Sword,10,Cash,1,0,[서바이벌]검을 10회 획득하세요!,~MissionDescWeapon_EquipSword
+21,Repetition,Survivor,Weapon_Equip,Club,1,Money,1000,0,[서바이벌]곤봉을 1회 획득하세요!,~MissionDescWeapon_EquipClub
+22,Repetition,Survivor,Weapon_Equip,Club,3,Money,3000,0,[서바이벌]곤봉을 3회 획득하세요!,~MissionDescWeapon_EquipClub
+23,Repetition,Survivor,Weapon_Equip,Club,10,Cash,1,0,[서바이벌]곤봉을 10회 획득하세요!,~MissionDescWeapon_EquipClub
+24,Repetition,Stage,Weapon_Kill,Staff,5,Money,1500,0,[스테이지]봉을 사용해 몬스터 5마리를 처치하세요!,~MissionDescWeapon_KillStaff
+25,Repetition,Stage,Weapon_Kill,Staff,50,Money,4000,0,[스테이지]봉을 사용해 몬스터 50마리를 처치하세요!,~MissionDescWeapon_KillStaff
+26,Repetition,Stage,Weapon_Kill,Staff,100,Cash,1,0,[스테이지]봉을 사용해 몬스터 100마리를 처치하세요!,~MissionDescWeapon_KillStaff
+27,Repetition,Stage,Weapon_Kill,Sword,5,Money,1500,0,[스테이지]검을 사용해 몬스터 5마리를 처치하세요!,~MissionDescWeapon_KillSword
+28,Repetition,Stage,Weapon_Kill,Sword,50,Money,4000,0,[스테이지]검을 사용해 몬스터 50마리를 처치하세요!,~MissionDescWeapon_KillSword
+29,Repetition,Stage,Weapon_Kill,Sword,100,Cash,1,0,[스테이지]검을 사용해 몬스터 100마리를 처치하세요!,~MissionDescWeapon_KillSword
+30,Repetition,Stage,Weapon_Kill,Club,5,Money,1500,0,[스테이지]곤봉을 사용해 몬스터 5마리를 처치하세요!,~MissionDescWeapon_KillClub
+31,Repetition,Stage,Weapon_Kill,Club,50,Money,4000,0,[스테이지]곤봉을 사용해 몬스터 50마리를 처치하세요!,~MissionDescWeapon_KillClub
+32,Repetition,Stage,Weapon_Kill,Club,100,Cash,1,0,[스테이지]곤봉을 사용해 몬스터 100마리를 처치하세요!,~MissionDescWeapon_KillClub
+33,Repetition,Stage,Weapon_Equip,Staff,1,Money,1000,0,[스테이지]봉을 1회 획득하세요!,~MissionDescWeapon_EquipStaff
+34,Repetition,Stage,Weapon_Equip,Staff,3,Money,3000,0,[스테이지]봉을 3회 획득하세요!,~MissionDescWeapon_EquipStaff
+35,Repetition,Stage,Weapon_Equip,Staff,10,Cash,1,0,[스테이지]봉을 10회 획득하세요!,~MissionDescWeapon_EquipStaff
+36,Repetition,Stage,Weapon_Equip,Sword,1,Money,1000,0,[스테이지]검을 1회 획득하세요!,~MissionDescWeapon_EquipSword
+37,Repetition,Stage,Weapon_Equip,Sword,3,Money,3000,0,[스테이지]검을 3회 획득하세요!,~MissionDescWeapon_EquipSword
+38,Repetition,Stage,Weapon_Equip,Sword,10,Cash,1,0,[스테이지]검을 10회 획득하세요!,~MissionDescWeapon_EquipSword
+39,Repetition,Stage,Weapon_Equip,Club,1,Money,1000,0,[스테이지]곤봉을 1회 획득하세요!,~MissionDescWeapon_EquipClub
+40,Repetition,Stage,Weapon_Equip,Club,3,Money,3000,0,[스테이지]곤봉을 3회 획득하세요!,~MissionDescWeapon_EquipClub
+41,Repetition,Stage,Weapon_Equip,Club,10,Cash,1,0,[스테이지]곤봉을 10회 획득하세요!,~MissionDescWeapon_EquipClub
+42,Repetition,Stage,Weapon_Kill,WeaponAll,10,Money,1000,0,[스테이지]모든 무기를 사용해 몬스터 10마리를 처치하세요!,~MissionDescWeapon_Kill
+43,Repetition,Stage,Weapon_Kill,WeaponAll,100,Money,4000,0,[스테이지]모든 무기를 사용해 몬스터 100마리를 처치하세요!,~MissionDescWeapon_Kill
+44,Repetition,Stage,Weapon_Kill,WeaponAll,200,Cash,1,0,[스테이지]모든 무기를 사용해 몬스터 200마리를 처치하세요!,~MissionDescWeapon_Kill
+45,Repetition,Stage,Weapon_Equip,WeaponAll,5,Money,1000,0,[스테이지]아무 무기나 5회 획득하세요!,~MissionDescWeapon_Equip
+46,Repetition,Stage,Weapon_Equip,WeaponAll,10,Money,3000,0,[스테이지]아무 무기나 10회 획득하세요!,~MissionDescWeapon_Equip
+47,Repetition,Stage,Weapon_Equip,WeaponAll,20,Cash,1,0,[스테이지]아무 무기나 20회 획득하세요!,~MissionDescWeapon_Equip
+48,Repetition,Survivor,Weapon_Kill,WeaponAll,10,Money,1000,0,[서바이벌]모든 무기를 사용해 몬스터 10마리를 처치하세요!,~MissionDescWeapon_Kill
+49,Repetition,Survivor,Weapon_Kill,WeaponAll,100,Money,3000,0,[서바이벌]모든 무기를 사용해 몬스터 100마리를 처치하세요!,~MissionDescWeapon_Kill
+50,Repetition,Survivor,Weapon_Kill,WeaponAll,200,Cash,1,0,[서바이벌]모든 무기를 사용해 몬스터 200마리를 처치하세요!,~MissionDescWeapon_Kill
+51,Repetition,Survivor,Weapon_Equip,WeaponAll,5,Money,1000,0,[서바이벌]아무 무기나 5회 획득하세요!,~MissionDescWeapon_Equip
+52,Repetition,Survivor,Weapon_Equip,WeaponAll,10,Money,2000,0,[서바이벌]아무 무기나 10회 획득하세요!,~MissionDescWeapon_Equip
+53,Repetition,Survivor,Weapon_Equip,WeaponAll,20,Money,4000,0,[서바이벌]아무 무기나 20회 획득하세요!,~MissionDescWeapon_Equip
+54,Repetition,Stage,Enemy,EnemyAll,100,Money,3000,0,[스테이지]몬스터 100마리를 처치하세요!,~MissionDescEnemy
+55,Repetition,Stage,Enemy,EnemyAll,500,Cash,1,0,[스테이지]몬스터 300마리를 처치하세요!,~MissionDescEnemy
+56,Repetition,Stage,Enemy,EnemyAll,1000,Cash,3,0,[스테이지]몬스터 700마리를 처치하세요!,~MissionDescEnemy
+57,Repetition,Survivor,Enemy,EnemyAll,100,Money,3000,0,[서바이벌]몬스터 100마리를 처치하세요!,~MissionDescEnemy
+58,Repetition,Survivor,Enemy,EnemyAll,500,Cash,1,0,[서바이벌]몬스터 300마리를 처치하세요!,~MissionDescEnemy
+59,Repetition,Survivor,Enemy,EnemyAll,1000,Cash,3,0,[서바이벌]몬스터 700마리를 처치하세요!,~MissionDescEnemy
+60,Repetition,Survivor,Try,Stamina,3,Money,3000,0,[서바이벌]국수를 3회 소모하세요!,~MissionDescTry
+61,Repetition,Survivor,Try,Stamina,5,Money,5000,0,[서바이벌]국수를 5회 소모하세요!,~MissionDescTry
+62,Repetition,Survivor,Try,Stamina,10,Cash,1,0,[서바이벌]국수를 10회 소모하세요!,~MissionDescTry
+63,Repetition,Stage,Try,Stamina,3,Money,3000,0,[스테이지]국수를 3회 소모하세요!,~MissionDescTry
+64,Repetition,Stage,Try,Stamina,5,Money,5000,0,[스테이지]국수를 5회 소모하세요!,~MissionDescTry
+65,Repetition,Stage,Try,Stamina,10,Cash,1,0,[스테이지]국수를 10회 소모하세요!,~MissionDescTry
+66,Repetition,Shop,Buy,Artifact,1,Stamina,3,0,[상점]뽑기를 1회 하세요!,~MissionDescBuyArtifact
+67,Repetition,Shop,Buy,Artifact,3,Stamina,5,0,[상점]뽑기를 3회 하세요!,~MissionDescBuyArtifact
+68,Repetition,Shop,Enchant,Artifact,1,Stamina,3,0,[상점]장비을 1회 강화하세요!,~MissionDescEnchantArtifact
+69,Repetition,Shop,Enchant,Mystique,1,Stamina,3,0,[상점]스킬를 1회 강화하세요!,~MissionDescEnchantMystique
+70,Fixed,Stage,Clear,,35,Cash,5,0,[스테이지]스테이지를 35회 클리어 하세요!,~MissionDescStage100
+71,Fixed,Shop,EnchantFull,Artifact,1,Cash,5,0,[상점]장비를 최대로 강화하세요!,~MissionDescEnchantFullArtifact
