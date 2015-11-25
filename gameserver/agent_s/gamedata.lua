@@ -4,7 +4,10 @@ local constants = require "config.constants"
 
 local gamedata = {data = {}}
 
-function gamedata:update_stageinfo(stageinfo)
+function gamedata:update_user_stageinfo(stageinfo)
+end
+
+function gamedata:insert_user_stageinfo(stageinfo)
 end
 
 return gamedata
