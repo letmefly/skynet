@@ -142,7 +142,7 @@ function game:result(msg)
 			local rewardtype = stage_config["gradeRewardType"..v]
 			local rewardcount = stage_config["gradeRewardValue"..v]
 			if "Gold" == rewardtype then
-				shopdata:plus_money(rewardcount)
+				userdata:plus_money(rewardcount)
 				table.insert(grade_reward, {type=0, amount=rewardcount, itemID=nil})
 			end
 		end
@@ -158,13 +158,13 @@ function game:result(msg)
 
 	-- send reward message to friend, using message service
 	if playcode.friend_user_id then
-		-- messagedata:insert_message({
-		-- 	send_user_id = msg["userID"],
-		-- 	receive_user_id = playcode.friend_user_id,
-		-- 	gift_type = 6,
-		-- 	amount = 10,
-		-- 	text_id = 4,
-		-- })
+		skynet.send("mail_s", "lua", "send_mail", {
+			send_user_id = msg["userID"],
+			receive_user_id = playcode.friend_user_id,
+			gift_type = 6,
+			amount = 10,
+			text_id = 4
+		})
 	end
 
 	-- clear this time game play state

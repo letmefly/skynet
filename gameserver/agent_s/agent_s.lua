@@ -1,4 +1,5 @@
 local skynet = require "skynet"
+local nothing = require "skynet.manager"
 local netpack = require "netpack"
 local socket = require "socket"
 local netutil = require "agent_s.netutil"
@@ -62,6 +63,9 @@ end
 function CLIENT_API.user_login(msg)
 	local msg_ack = user:login(msg)
 	send_client_msg("user_login_ack", msg_ack)
+	if msg_ack["errno"] == 0 then
+		skynet.register(tostring(msg_ack["userID"]))
+	end
 end
 
 function CLIENT_API.user_change_nickname(msg)
@@ -197,6 +201,9 @@ function SERVICE_API.start(conf)
 	-- 		skynet.sleep(500)
 	-- 	end
 	-- end)
+end
+
+function SERVICE_API.has_new_mail(mail)
 end
 
 function SERVICE_API.disconnect()

@@ -91,6 +91,9 @@ end
 function SERVICE_API.update_user(data)
 end
 
+function SERVICE_API.insert_message(data)
+end
+
 skynet.start(function()
 	db = mysql.connect({
 		host = conf.host,
