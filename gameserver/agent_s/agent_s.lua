@@ -65,7 +65,8 @@ function CLIENT_API.user_login(msg)
 	local msg_ack = user:login(msg)
 	send_client_msg("user_login_ack", msg_ack)
 	if msg_ack["errno"] == 0 then
-		skynet.register(tostring(msg_ack["userID"]))
+		print("skyent register:".."agent_"..tostring(msg_ack["userID"]))
+		skynet.register("agent_"..tostring(msg_ack["userID"]))
 	end
 end
 

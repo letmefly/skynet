@@ -1,6 +1,6 @@
 local cjson = require "cjson"
 local skynet = require "skynet"
-local constants = require "config.constants"
+local constants = require "config.define_constants"
 
 local gamedata = {data = {}}
 

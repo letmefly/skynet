@@ -10,10 +10,10 @@ local configdata = require "agent_s.configdata"
 
 local game = {}
 
-local function game:set_playcode(playcode)
+function game:set_playcode(playcode)
 	self.playcode = playcode
 end
-local function game:get_playcode()
+function game:get_playcode()
 	return self.playcode
 end
 

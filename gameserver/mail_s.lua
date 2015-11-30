@@ -3,8 +3,9 @@ local nothing = require "skynet.manager"
 
 function SERVICE_API.send_mail(params)
 	local receive_user_id = params.receive_user_id
-	if skynet.queryservice(true, tostring(receive_user_id)) then
-		skynet.send(tostring(receive_user_id), "lua", "has_new_mail", params)
+	local agentservice = "agent_"..tostring(receive_user_id)
+	if skynet.queryservice(true, agentservice) then
+		skynet.send(agentservice, "lua", "has_new_mail", params)
 	end
 	skynet.send("db_s", "lua", "insert_message", params)
 end
