@@ -1,5 +1,6 @@
 local userdata = require "agent_s.userdata"
 local frienddata = require "agent_s.frienddata"
+local itemdata = require "agent_s.itemdata"
 
 local user = {}
 
@@ -13,6 +14,7 @@ end
 
 function user:login(msg)
 	local msg_ack = {errno = 0}
+	
 	-- 1. load user data
 	local ret = userdata:load(msg.email)
 	if ret.errno ~= 0 then
@@ -26,6 +28,13 @@ function user:login(msg)
 
 	-- 2. load friend data
 	local ret = frienddata:load()
+	if ret.errno ~= 0 then
+		msg_ack["errno"] = ret.errno
+		return msg_ack
+	end
+
+	-- 3. load item data
+	local ret = itemdata:load()
 	if ret.errno ~= 0 then
 		msg_ack["errno"] = ret.errno
 		return msg_ack
