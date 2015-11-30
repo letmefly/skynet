@@ -15,6 +15,7 @@ local client_fd
 
 ------------------------ controllers ----------------------------
 local user = require "agent_s.user"
+local game = require "agent_s.game"
 
 
 ------------------------ helper function ------------------------
@@ -79,6 +80,8 @@ function CLIENT_API:game_enterlobby(msg)
 end
 
 function CLIENT_API.game_start(msg)
+	local msg_ack = game:start(msg)
+	send_client_msg("game_start_ack", msg_ack)
 end
 
 function CLIENT_API.game_result(msg)

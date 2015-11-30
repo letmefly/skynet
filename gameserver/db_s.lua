@@ -89,6 +89,25 @@ function SERVICE_API.select_user(conditions)
 end
 
 function SERVICE_API.update_user(data)
+	local sql = get_update_sql("op_users", "user_id", data)
+	local result = db:query(sql)
+	if result.badresult then
+		print("[db_s]err: db query fail..")
+		print(cjson.encode(result))
+		return {errno = result.errno, data = {}}
+	end
+	return {errno = 0, data = result}
+end
+
+function SERVICE_API.select_friends(conditions)
+	local sql = get_select_sql("op_users_friends", conditions)
+	local result = db:query(sql)
+	if result.badresult then
+		print("[db_s]err: db query fail..")
+		print(cjson.encode(result))
+		return {errno = result.errno, data = {}}
+	end
+	return {errno = 0, data = result}
 end
 
 function SERVICE_API.insert_message(data)
