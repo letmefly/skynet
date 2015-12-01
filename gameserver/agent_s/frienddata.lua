@@ -14,10 +14,35 @@ function frienddata:load(userid)
 	return result
 end
 
+
 function frienddata:save()
 	local result = skynet.call("db_s", "lua", "update_friends", self.data)
 	return result
 end
+
+
+function frienddata:add_friend(friend_userid)
+	local is_exist = false
+	for k,v in pairs(self.data) do
+		if v.user_id == friend_userid then
+			is_exist = true
+			return 2000
+		end
+	end
+	if false == is_exist then
+		local newfriend = {
+			user_id = userdata:get("user_id"),
+			friend_user_id = friend_userid,
+			create_date = os.time(),
+			delete_date = "",
+			play_date = "",
+			status = 3
+		}
+		table.insert(self.data, newfriend)
+	end
+	return 0
+end
+
 
 function frienddata:get_friendinfo(friend_userid)
 	for k,v in pairs(self.data) do
