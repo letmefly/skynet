@@ -32,6 +32,26 @@ local function get_insert_sql(tablename, insertdata)
 	return sql
 end
 
+local function get_insert_update_sql(tablename, insertdata)
+	local keys, values = "", ""
+	local updatestr = ""
+	for k, v in pairs(insertdata) do
+		keys = keys .. k .. ","
+		if type(v) == "string" then
+			values = values.."'"..v.."'"..","
+			updatestr = updatestr..k.."=".."'"..v.."'"..","
+		else
+			values = values .. v .. ","
+			updatestr = updatestr..k.."=".."'"..v.."'"..","
+		end
+	end
+	keys = string.sub(keys, 1, -2)
+	values = string.sub(values, 1, -2)
+	updatestr = string.sub(updatestr, 1, -2)
+	local sql = "INSERT INTO " .. tablename .. " (" .. keys .. ")" .. " VALUES " .. "(" .. values .. ")".." ON DUPLICATE KEY UPDATE "..updatestr
+	return sql
+end
+
 local function get_update_sql(tablename, searchkey, updatedata)
 	local str = ""
 	for k, v in pairs(updatedata) do
@@ -108,6 +128,19 @@ function SERVICE_API.select_friends(conditions)
 		return {errno = result.errno, data = {}}
 	end
 	return {errno = 0, data = result}
+end
+
+function SERVICE_API.update_instant_items(data)
+	for k,v in pairs(data) do
+		local sql = get_insert_update_sql("op_users_instant_items", v)
+		local result = db:query(sql)
+		if result.badresult then
+			print("[db_s]err: db query fail..")
+			print(cjson.encode(result))
+			return {errno = result.errno, data = {}}
+		end
+	end
+	return {errno = 0, data = {}}
 end
 
 function SERVICE_API.select_instant_items(conditions)
