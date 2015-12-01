@@ -39,8 +39,8 @@ function user:login(msg)
 		msg_ack["errno"] = ret.errno
 		return msg_ack
 	end
-	itemdata:plus_instantitem(99, 8888)
-	itemdata:save()
+	-- itemdata:plus_instantitem(99, 8888)
+	-- itemdata:save()
 
 
 	msg_ack["attendanceCount"] = userdata:get("attendance_count")

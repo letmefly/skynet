@@ -4,7 +4,8 @@ local userdata = require "agent_s.userdata"
 
 local frienddata = {data = {}}
 
-function frienddata:load(userid)
+
+function frienddata:load()
 	local userid = userdata:get("user_id")
 	local result = skynet.call("db_s", "lua", "select_friends", {user_id = userid})
 	if result.errno == 0 and next(result.data) ~= nil then

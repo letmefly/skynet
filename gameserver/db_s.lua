@@ -86,6 +86,17 @@ local function get_select_sql(tablename, conditions)
 	return sql
 end
 
+local function do_select(tablename, conditions)
+	local sql = get_select_sql(tablename, conditions)
+	local result = db:query(sql)
+	if result.badresult then
+		print("[db_s]err: db query fail..")
+		print(cjson.encode(result))
+		return {errno = result.errno, data = {}}
+	end
+	return {errno = 0, data = result}
+end
+
 function SERVICE_API.insert_user(data)
 	local sql = get_insert_sql("op_users", data)
 	local result = db:query(sql)
@@ -98,14 +109,15 @@ function SERVICE_API.insert_user(data)
 end
 
 function SERVICE_API.select_user(conditions)
-	local sql = get_select_sql("op_users", conditions)
-	local result = db:query(sql)
-	if result.badresult then
-		print("[db_s]err: db query fail..")
-		print(cjson.encode(result))
-		return {errno = result.errno, data = {}}
-	end
-	return {errno = 0, data = result}
+	return do_select("op_users", conditions)
+	-- local sql = get_select_sql("op_users", conditions)
+	-- local result = db:query(sql)
+	-- if result.badresult then
+	-- 	print("[db_s]err: db query fail..")
+	-- 	print(cjson.encode(result))
+	-- 	return {errno = result.errno, data = {}}
+	-- end
+	-- return {errno = 0, data = result}
 end
 
 function SERVICE_API.update_user(data)
@@ -119,15 +131,9 @@ function SERVICE_API.update_user(data)
 	return {errno = 0, data = result}
 end
 
+
 function SERVICE_API.select_friends(conditions)
-	local sql = get_select_sql("op_users_friends", conditions)
-	local result = db:query(sql)
-	if result.badresult then
-		print("[db_s]err: db query fail..")
-		print(cjson.encode(result))
-		return {errno = result.errno, data = {}}
-	end
-	return {errno = 0, data = result}
+	return do_select("op_users_friends", conditions)
 end
 
 function SERVICE_API.update_friends(data)
@@ -143,6 +149,16 @@ function SERVICE_API.update_friends(data)
 	return {errno = 0, data = {}}
 end
 
+
+function SERVICE_API.select_characters(conditions)
+	return do_select("op_users_characters", conditions)
+end
+
+
+function SERVICE_API.select_instant_items(conditions)
+	return do_select("op_users_instant_items", conditions)
+end
+
 function SERVICE_API.update_instant_items(data)
 	for k,v in pairs(data) do
 		local sql = get_insert_update_sql("op_users_instant_items", v)
@@ -156,19 +172,12 @@ function SERVICE_API.update_instant_items(data)
 	return {errno = 0, data = {}}
 end
 
-function SERVICE_API.select_instant_items(conditions)
-	local sql = get_select_sql("op_users_instant_items", conditions)
-	local result = db:query(sql)
-	if result.badresult then
-		print("[db_s]err: db query fail..")
-		print(cjson.encode(result))
-		return {errno = result.errno, data = {}}
-	end
-	return {errno = 0, data = result}
-end
+
+
 
 function SERVICE_API.insert_message(data)
 end
+
 
 skynet.start(function()
 	db = mysql.connect({

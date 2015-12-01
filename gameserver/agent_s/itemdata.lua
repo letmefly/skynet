@@ -1,7 +1,6 @@
 local cjson = require "cjson"
 local skynet = require "skynet"
 local userdata = require "agent_s.userdata"
-local userdata = require "agent_s.userdata"
 
 local itemdata = {}
 
