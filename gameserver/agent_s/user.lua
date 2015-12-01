@@ -39,9 +39,14 @@ function user:login(msg)
 		msg_ack["errno"] = ret.errno
 		return msg_ack
 	end
+
+	-- test api
 	-- itemdata:plus_instantitem(99, 8888)
 	-- itemdata:save()
-
+	-- userdata:plus_money(9999)
+	-- userdata:save()
+	-- userdata:save()
+	-- userdata:save()
 
 	msg_ack["attendanceCount"] = userdata:get("attendance_count")
 	msg_ack["heart"] = userdata:get("heart")

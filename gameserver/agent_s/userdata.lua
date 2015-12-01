@@ -67,7 +67,8 @@ function userdata:clear()
 end
 
 function userdata:save()
-	local select_result = skynet.call("db_s", "lua", "update_user", {data = self.data})
+	local select_result = skynet.call("db_s", "lua", "update_user", self.data)
+	return select_result
 end
 
 function userdata:set(key, value)
