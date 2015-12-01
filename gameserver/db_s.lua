@@ -110,6 +110,7 @@ local function do_insert_update(tablename, data)
 	return {errno = 0, data = {}}
 end
 
+
 function SERVICE_API.insert_user(data)
 	local sql = get_insert_sql("op_users", data)
 	local result = db:query(sql)
@@ -143,6 +144,17 @@ function SERVICE_API.select_characters(conditions)
 	return do_select("op_users_characters", conditions)
 end
 
+function SERVICE_API.update_characters(data)
+	return do_insert_update("op_users_characters", data)
+end
+
+function SERVICE_API.select_skills(conditions)
+	return do_select("op_users_skills", conditions)
+end
+
+function SERVICE_API.update_skills(data)
+	return do_insert_update("op_users_skills", data)
+end
 
 function SERVICE_API.select_instant_items(conditions)
 	return do_select("op_users_instant_items", conditions)
@@ -151,8 +163,6 @@ end
 function SERVICE_API.update_instant_items(data)
 	return do_insert_update("op_users_instant_items", data)
 end
-
-
 
 function SERVICE_API.insert_message(data)
 end

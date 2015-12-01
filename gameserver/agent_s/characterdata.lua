@@ -15,10 +15,17 @@ function characterdata:load()
 end
 
 function characterdata:save()
+	local result = skynet.call("db_s", "lua", "update_characters", self.data)
+	return result
 end
 
-function characterdata:get_slotcharacters(userid, character_id)
-	return
+function characterdata:get_slotcharacter(character_id)
+	for k,v in pairs(self.data) do
+		if v.character_id == character_id then
+			return v
+		end
+	end
+	return nil
 end
 
 return characterdata

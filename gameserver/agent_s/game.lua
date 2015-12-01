@@ -47,7 +47,7 @@ function game:start(msg)
 		return msg_ack
 	end
 
-	local slotcharacters = characterdata:get_slotcharacters(userdata:get("character_id"))
+	local slotcharacter = characterdata:get_slotcharacter(userdata:get("character_id"))
 	local slotskills = skilldata:get_slotskills()
 	local slottreasures = treasuredata:get_slottreasures()
 
@@ -67,7 +67,7 @@ function game:start(msg)
 	
 	-- msg_ack
 	msg_ack["playCode"] = 0
-	msg_ack["slotCharacter"] = slotcharacters
+	msg_ack["slotCharacter"] = slotcharacter
 	msg_ack["slotskills"] = slotskills
 	msg_ack["slotTreasures"] = slotTreasures
 
