@@ -1,7 +1,21 @@
+local cjson = require "cjson"
+
 local prototext = [[
 
 message handshake {
   optional int32 sn = 1;
+}
+
+message server_push {
+	optional int32 sn = 1;
+	optional int32 money = 2;
+	optional int32 cash = 3;
+	optional int32 lotteryPoint = 4;
+	optional int32 lotteryHighCoupon =5;
+	optional int32 lotteryCoupon = 6;
+	optional int32 heart = 7;
+	optional string heartTime = 8;
+	optional int32 heartTimeSeconds = 9;
 }
 
 message user_register {
@@ -127,7 +141,7 @@ message game_result {
 	optional int32 maxCombo = 6;
 	optional int32 isClear = 7;
 	optional int32 isPerfect = 8;
-	optional int32 dealCode = 9;
+	optional int32 killCount = 9;
 }
 
 message game_result_ack {
@@ -290,12 +304,47 @@ message game_notice_ack {
 
 ]]
 
-PROTO_TYPE2NAME = {
-	[1] = "user_register",
-	[2] = "user_register_ack", 
-	[3] = "user_login", 
-	[4] = "user_login_ack",
-	[5] = "handshake"
+
+local type2name_json = [[
+
+{
+	"1": "user_register",
+	"2": "user_register_ack", 
+	"3": "user_login", 
+	"4": "user_login_ack",
+	"5": "handshake",
+	"6": "game_start",
+	"7": "game_start_ack",
+	"8": "game_result",
+	"9": "game_result_ack"
 }
+
+]]
+
+local errno2desp_json = [[
+
+{
+	"1000": "用户已存在",
+	"1001": "数据库错误",
+	"1002": "用户名或者密码错误",
+	"2000": "好友已存在"
+}
+
+]]
+
+PROTO_TYPE2NAME = {}
+
+local type2name = cjson.decode(type2name_json)
+for k, v in pairs(type2name) do
+	PROTO_TYPE2NAME[tonumber(k)] = v
+end
+
+-- PROTO_TYPE2NAME = {
+-- 	[1] = "user_register",
+-- 	[2] = "user_register_ack", 
+-- 	[3] = "user_login", 
+-- 	[4] = "user_login_ack",
+-- 	[5] = "handshake"
+-- }
 
 return prototext

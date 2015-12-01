@@ -156,6 +156,14 @@ function SERVICE_API.update_skills(data)
 	return do_insert_update("op_users_skills", data)
 end
 
+function SERVICE_API.select_treasures(conditions)
+	return do_select("op_users_treasures", conditions)
+end
+
+function SERVICE_API.update_treasures(data)
+	return do_insert_update("op_users_treasures", data)
+end
+
 function SERVICE_API.select_instant_items(conditions)
 	return do_select("op_users_instant_items", conditions)
 end

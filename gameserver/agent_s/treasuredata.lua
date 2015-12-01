@@ -2,7 +2,7 @@ local cjson = require "cjson"
 local skynet = require "skynet"
 local userdata = require "agent_s.userdata"
 
-local treasuredata = {}
+local treasuredata = {data = {}}
 
 function treasuredata:load()
 	local userid = userdata:get("user_id")

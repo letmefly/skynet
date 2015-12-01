@@ -312,7 +312,11 @@ local type2name_json = [[
 	"2": "user_register_ack", 
 	"3": "user_login", 
 	"4": "user_login_ack",
-	"5": "handshake"	
+	"5": "handshake",
+	"6": "game_start",
+	"7": "game_start_ack",
+	"8": "game_result",
+	"9": "game_result_ack"
 }
 
 ]]

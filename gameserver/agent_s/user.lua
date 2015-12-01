@@ -1,6 +1,11 @@
 local userdata = require "agent_s.userdata"
 local frienddata = require "agent_s.frienddata"
 local itemdata = require "agent_s.itemdata"
+local characterdata = require "agent_s.characterdata"
+local gamedata = require "agent_s.gamedata"
+local skilldata = require "agent_s.skilldata"
+local treasuredata = require "agent_s.treasuredata"
+
 
 local user = {}
 
@@ -35,6 +40,34 @@ function user:login(msg)
 
 	-- 3. load item data
 	local ret = itemdata:load()
+	if ret.errno ~= 0 then
+		msg_ack["errno"] = ret.errno
+		return msg_ack
+	end
+
+	-- 4. load character data
+	local ret = characterdata:load()
+	if ret.errno ~= 0 then
+		msg_ack["errno"] = ret.errno
+		return msg_ack
+	end
+
+	-- 5. load game data
+	local ret = gamedata:load()
+	if ret.errno ~= 0 then
+		msg_ack["errno"] = ret.errno
+		return msg_ack
+	end
+
+	-- 6. load skill data
+	local ret = skilldata:load()
+	if ret.errno ~= 0 then
+		msg_ack["errno"] = ret.errno
+		return msg_ack
+	end
+
+	-- 7. load treasure data
+	local ret = treasuredata:load()
 	if ret.errno ~= 0 then
 		msg_ack["errno"] = ret.errno
 		return msg_ack

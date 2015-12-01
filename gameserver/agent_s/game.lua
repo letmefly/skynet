@@ -1,3 +1,4 @@
+local cjson = require "cjson"
 local userdata = require "agent_s.userdata"
 local gamedata = require "agent_s.gamedata"
 local frienddata = require "agent_s.frienddata"
@@ -29,7 +30,7 @@ function game:start(msg)
 	end
 
 	local friendinfo = frienddata:get_friendinfo(msg["friendUserID"])
-	if friendinfo == nil then
+	if msg["friendUserID"] > 0 and friendinfo == nil then
 		msg_ack["errno"] = 101
 		return msg_ack
 	end
@@ -37,7 +38,7 @@ function game:start(msg)
 	local instantitem_ok = true
 	for k, v in pairs(msg["useItems"]) do
 		local amount = itemdata:get_instantitem_amount(v)
-		if amount <= 0 then
+		if amount and amount <= 0 then
 			instantitem_ok = false
 			break
 		end
@@ -66,9 +67,9 @@ function game:start(msg)
 	})
 	
 	-- msg_ack
-	msg_ack["playCode"] = 0
+	msg_ack["playCode"] = 10
 	msg_ack["slotCharacter"] = slotcharacter
-	msg_ack["slotskills"] = slotskills
+	msg_ack["slotSkills"] = slotskills
 	msg_ack["slotTreasures"] = slotTreasures
 
 	return msg_ack
@@ -137,7 +138,6 @@ function game:result(msg)
 			})
 		end
 
-		
 		for k, v in pairs(reward) do
 			local rewardtype = stage_config["gradeRewardType"..v]
 			local rewardcount = stage_config["gradeRewardValue"..v]

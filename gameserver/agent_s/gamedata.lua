@@ -53,7 +53,7 @@ function gamedata:insert_user_stageinfo(stageinfo)
 	end
 	if false == is_exist then
 		table.insert({
-			user_id = userdata:get("user_id")
+			user_id = userdata:get("user_id"),
 			stage_id = stageinfo.stage_id,
 			clear_type = stageinfo.clear_type,
 			score = stageinfo.score,
