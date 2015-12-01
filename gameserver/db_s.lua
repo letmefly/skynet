@@ -130,6 +130,19 @@ function SERVICE_API.select_friends(conditions)
 	return {errno = 0, data = result}
 end
 
+function SERVICE_API.update_friends(data)
+	for k,v in pairs(data) do
+		local sql = get_insert_update_sql("op_users_friends", v)
+		local result = db:query(sql)
+		if result.badresult then
+			print("[db_s]err: db query fail..")
+			print(cjson.encode(result))
+			return {errno = result.errno, data = {}}
+		end
+	end
+	return {errno = 0, data = {}}
+end
+
 function SERVICE_API.update_instant_items(data)
 	for k,v in pairs(data) do
 		local sql = get_insert_update_sql("op_users_instant_items", v)

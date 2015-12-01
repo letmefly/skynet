@@ -14,6 +14,11 @@ function frienddata:load(userid)
 	return result
 end
 
+function frienddata:save()
+	local result = skynet.call("db_s", "lua", "update_friends", self.data)
+	return result
+end
+
 function frienddata:get_friendinfo(friend_userid)
 	for k,v in pairs(self.data) do
 		if v.user_id == friend_userid then
