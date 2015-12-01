@@ -26,7 +26,7 @@ function skilldata:get_slotskills()
 			skill_id = v.skill_id,
 			skill_info_id = v.skill_info_id,
 			level = v.level,
-			slot_number = v.slotnumber
+			slot_number = v.slot_number
 		}
 		table.insert(slotskills, slotskill)
 	end

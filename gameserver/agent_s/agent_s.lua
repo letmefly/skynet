@@ -3,6 +3,7 @@ local nothing = require "skynet.manager"
 local netpack = require "netpack"
 local socket = require "socket"
 local netutil = require "agent_s.netutil"
+local cjson = require "cjson"
 
 local WATCHDOG
 local host
@@ -82,6 +83,7 @@ end
 
 function CLIENT_API.game_start(msg)
 	local msg_ack = game:start(msg)
+	print(cjson.encode(msg_ack))
 	send_client_msg("game_start_ack", msg_ack)
 end
 
