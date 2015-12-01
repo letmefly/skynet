@@ -97,6 +97,19 @@ local function do_select(tablename, conditions)
 	return {errno = 0, data = result}
 end
 
+local function do_insert_update(tablename, data)
+	for k,v in pairs(data) do
+		local sql = get_insert_update_sql(tablename, v)
+		local result = db:query(sql)
+		if result.badresult then
+			print("[db_s]err: db query fail..")
+			print(cjson.encode(result))
+			return {errno = result.errno, data = {}}
+		end
+	end
+	return {errno = 0, data = {}}
+end
+
 function SERVICE_API.insert_user(data)
 	local sql = get_insert_sql("op_users", data)
 	local result = db:query(sql)
@@ -110,25 +123,10 @@ end
 
 function SERVICE_API.select_user(conditions)
 	return do_select("op_users", conditions)
-	-- local sql = get_select_sql("op_users", conditions)
-	-- local result = db:query(sql)
-	-- if result.badresult then
-	-- 	print("[db_s]err: db query fail..")
-	-- 	print(cjson.encode(result))
-	-- 	return {errno = result.errno, data = {}}
-	-- end
-	-- return {errno = 0, data = result}
 end
 
 function SERVICE_API.update_user(data)
-	local sql = get_update_sql("op_users", "user_id", data)
-	local result = db:query(sql)
-	if result.badresult then
-		print("[db_s]err: db query fail..")
-		print(cjson.encode(result))
-		return {errno = result.errno, data = {}}
-	end
-	return {errno = 0, data = result}
+	return do_insert_update("op_users", data)
 end
 
 
@@ -137,16 +135,7 @@ function SERVICE_API.select_friends(conditions)
 end
 
 function SERVICE_API.update_friends(data)
-	for k,v in pairs(data) do
-		local sql = get_insert_update_sql("op_users_friends", v)
-		local result = db:query(sql)
-		if result.badresult then
-			print("[db_s]err: db query fail..")
-			print(cjson.encode(result))
-			return {errno = result.errno, data = {}}
-		end
-	end
-	return {errno = 0, data = {}}
+	return do_insert_update("op_users_friends", data)
 end
 
 
@@ -160,18 +149,8 @@ function SERVICE_API.select_instant_items(conditions)
 end
 
 function SERVICE_API.update_instant_items(data)
-	for k,v in pairs(data) do
-		local sql = get_insert_update_sql("op_users_instant_items", v)
-		local result = db:query(sql)
-		if result.badresult then
-			print("[db_s]err: db query fail..")
-			print(cjson.encode(result))
-			return {errno = result.errno, data = {}}
-		end
-	end
-	return {errno = 0, data = {}}
+	return do_insert_update("op_users_instant_items", data)
 end
-
 
 
 

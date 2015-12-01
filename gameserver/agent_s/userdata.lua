@@ -53,9 +53,10 @@ end
 function userdata:load(email)
 	local result = skynet.call("db_s", "lua", "select_user", {email = email})
 	if result.errno == 0 and next(result.data) ~= nil then
-		for k, v in pairs(result.data[1]) do
-			self.data[k] = v
-		end
+		self.data = result.data
+		-- for k, v in pairs(result.data[1]) do
+		-- 	self.data[k] = v
+		-- end
 	end
 	-- print(cjson.encode(self.data))
 	return result
@@ -70,24 +71,24 @@ function userdata:save()
 end
 
 function userdata:set(key, value)
-	self.data[key] = value
+	self.data[1][key] = value
 end
 
 function userdata:get(key)
-	return self.data[key]
+	return self.data[1][key]
 end
 
 function userdata:cost_heart(heart_num)
-	self.data["heart"] = self.data["heart"] - heart_num
+	self.data[1]["heart"] = self.data[1]["heart"] - heart_num
 end
 
 -- must check level up
 function userdata:plus_exp_point(point_num)
-	self.data["exp_point"] = self.data["exp_point"] + point_num
+	self.data[1]["exp_point"] = self.data[1]["exp_point"] + point_num
 end
 
 function userdata:plus_money(money_num)
-	self.data["money"] = self.data["money"] + money_num
+	self.data[1]["money"] = self.data[1]["money"] + money_num
 end
 
 return userdata
