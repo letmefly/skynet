@@ -164,6 +164,14 @@ function SERVICE_API.update_instant_items(data)
 	return do_insert_update("op_users_instant_items", data)
 end
 
+function SERVICE_API.select_stages(conditions)
+	return do_select("op_users_stages", conditions)
+end
+
+function SERVICE_API.update_stages(data)
+	return do_insert_update("op_users_stages", data)
+end
+
 function SERVICE_API.insert_message(data)
 end
 
