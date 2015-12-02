@@ -15,7 +15,7 @@ local util = {}
 local function dump(obj)
     local getIndent, quoteStr, wrapKey, wrapVal, dumpObj
     getIndent = function(level)
-        return string.rep("\t", level)
+        return string.rep("    ", level)
     end
     quoteStr = function(str)
         return '"' .. string.gsub(str, '"', '\\"') .. '"'
