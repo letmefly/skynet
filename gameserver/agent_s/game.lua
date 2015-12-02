@@ -1,3 +1,5 @@
+local skynet = require "skynet"
+local nothing = require "skynet.manager"
 local cjson = require "cjson"
 local userdata = require "agent_s.userdata"
 local gamedata = require "agent_s.gamedata"
@@ -67,13 +69,7 @@ function game:start(msg)
 	})
 	
 	-- msg_ack
-	slotcharacter = {
-		{character_id=1, level = 2,character_info_id = 3}
-	}
-	slotTreasures = {
-		{treasure_id = 1, treasure_info_id = 2, level = 3, slot_number = 4}
-	}
-	msg_ack["playCode"] = 10
+	msg_ack["playCode"] = 0
 	msg_ack["slotCharacter"] = slotcharacter
 	msg_ack["slotSkills"] = slotskills
 	msg_ack["slotTreasures"] = slotTreasures
@@ -92,7 +88,7 @@ function game:result(msg)
 	local grade_reward = {}
 	local stage_id = tostring(playcode.stage_id)
 
-	if msg["is_clear"] > 0 and stage_id then
+	if msg["isClear"] > 0 and stage_id then
 		local stage_config = configdata:get("define_stage")[stage_id]
 		local user_stageinfo = gamedata:get_user_stageinfo(playcode["stage_id"])
 		
@@ -107,36 +103,36 @@ function game:result(msg)
 		-- update stage accomplish state
 		local reward = {}
 		if user_stageinfo then
-			if msg["is_clear"] == 3 and user_stageinfo.clear_type < 3 then
+			if msg["isClear"] == 3 and user_stageinfo.clear_type < 3 then
 				table.insert(reward, 3)
 			end
-			if msg["is_clear"] >= 2 and user_stageinfo.clear_type < 2 then
+			if msg["isClear"] >= 2 and user_stageinfo.clear_type < 2 then
 				table.insert(reward, 2)
 			end
-			if msg["is_clear"] >= 1 and user_stageinfo.clear_type < 1 then
+			if msg["isClear"] >= 1 and user_stageinfo.clear_type < 1 then
 				table.insert(reward, 1)
 			end
 			gamedata:update_user_stageinfo({
 				stage_id = stage_id,
-				clear_type = msg["is_clear"],
+				clear_type = msg["isClear"],
 				score = msg["score"],
 				clear_count = 1,
 				create_date = os.time(),
 				perfect = msg["isPerfect"]
 			})
 		else
-			if msg["is_clear"] == 3 then
+			if msg["isClear"] == 3 then
 				table.insert(reward, 3)
 			end
-			if msg["is_clear"] >= 2 then
+			if msg["isClear"] >= 2 then
 				table.insert(reward, 2)
 			end
-			if msg["is_clear"] >= 1 then
+			if msg["isClear"] >= 1 then
 				table.insert(reward, 1)
 			end
 			gamedata:insert_user_stageinfo({
 				stage_id = stage_id,
-				clear_type = msg["is_clear"],
+				clear_type = msg["isClear"],
 				score = msg["score"],
 				clear_count = 1,
 				create_date = os.time(),
@@ -153,7 +149,7 @@ function game:result(msg)
 			end
 		end
 
-	elseif 1 == msg["is_clear"] and 0 == stage_id then
+	elseif 1 == msg["isClear"] and 0 == stage_id then
 		leaguedate:update_user_leagueranking(msg["score"])
 	else
 	end
