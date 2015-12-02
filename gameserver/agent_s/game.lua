@@ -67,6 +67,12 @@ function game:start(msg)
 	})
 	
 	-- msg_ack
+	slotcharacter = {
+		{character_id=1, level = 2,character_info_id = 3}
+	}
+	slotTreasures = {
+		{treasure_id = 1, treasure_info_id = 2, level = 3, slot_number = 4}
+	}
 	msg_ack["playCode"] = 10
 	msg_ack["slotCharacter"] = slotcharacter
 	msg_ack["slotSkills"] = slotskills

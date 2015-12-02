@@ -130,6 +130,8 @@ message game_start_ack {
 	repeated slot_character slotCharacter = 11;
 	repeated slot_skill slotSkills = 12;
 	repeated slot_treasure slotTreasures = 13;
+
+	extensions 10 to max;
 }
 
 message game_result {
