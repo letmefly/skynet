@@ -45,39 +45,39 @@ local config = require "dbconf"
 -- }
 
 local SERVICE_API = {}
-local ssdb_client
+local db
 
 function SERVICE_API.update_score(params)
 	local userid = params.userid
 	local score = params.score
 	local rankname = "rank_"..os.date("%Y%m%d")
-	local result = ssdb_client:zadd(rankname, score, userid)
+	local result = db:zadd(rankname, score, userid)
 	return result
 end
 
 function SERVICE_API.get_rank(params)
 	local userid = params.userid
 	local rankname = "rank_"..os.date("%Y%m%d")
-	local rank = ssdb_client:zrank(rankname, userid)
+	local rank = db:zrank(rankname, userid)
 	return rank
 end
 
 function SERVICE_API.get_score(params)
 	local userid = params.userid
 	local rankname = "rank_"..os.date("%Y%m%d")
-	local score = ssdb_client:zscore(rankname, userid)
+	local score = db:zscore(rankname, userid)
 	return score
 end
 
 function SERVICE_API.get_rank_count(params)
 	local rankname = "rank_"..os.date("%Y%m%d")
-	local count = ssdb_client:zcount(rankname, 0, 2147483647)
+	local count = db:zcount(rankname, 0, 2147483647)
 	return count
 end
 
 skynet.start(function()
-	ssdb_client = ssdb.connect({host="127.0.0.1", port=8880})
-	if not ssdb_client then
+	db = ssdb.connect({host="127.0.0.1", port=8880})
+	if not db then
 		print("[ram]failed to connect redis")
 	end
 
@@ -89,3 +89,4 @@ skynet.start(function()
 	skynet.register("ram_s")
 	print("[ram]start service ram...")
 end)
+
