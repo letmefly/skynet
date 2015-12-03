@@ -95,6 +95,23 @@ message game_start {
 	repeated int32 useItems = 4;
 }
 
+message slot_character {
+	optional int32 character_id = 1;
+	optional int32 level = 2;
+	optional int32 character_info_id = 3;
+}
+message slot_skill {
+	optional int32 skill_id = 1;
+	optional int32 skill_info_id = 2;
+	optional int32 level = 3;
+	optional int32 slot_number = 4;
+}
+message slot_treasure {
+	optional int32 treasure_id = 1;
+	optional int32 treasure_info_id = 2;
+	optional int32 level = 3;
+	optional int32 slot_number = 4;
+}
 message game_start_ack {
 	optional int32 errno = 1;
 	optional int32 money = 2;
@@ -106,27 +123,6 @@ message game_start_ack {
 	optional string heartTime = 8;
 	optional int32 heartTimeSeconds = 9;
 	optional int32 playCode = 10;
-
-	message slot_character {
-		optional int32 character_id = 1;
-		optional int32 level = 2;
-		optional int32 character_info_id = 3;
-	}
-
-	message slot_skill {
-		optional int32 skill_id = 1;
-		optional int32 skill_info_id = 2;
-		optional int32 level = 3;
-		optional int32 slot_number = 4;
-	}
-
-	message slot_treasure {
-		optional int32 treasure_id = 1;
-		optional int32 treasure_info_id = 2;
-		optional int32 level = 3;
-		optional int32 slot_number = 4;
-	}
-
 	repeated slot_character slotCharacter = 11;
 	repeated slot_skill slotSkills = 12;
 	repeated slot_treasure slotTreasures = 13;
@@ -176,16 +172,14 @@ message game_characters {
 	optional int32 userID = 1;
 }
 
+message character_item {
+	optional int32 character_id = 1;
+	optional int32 level = 2;
+	optional int32 character_info_id = 3;
+	optional int32 slot = 4;
+}
 message game_characters_ack {
 	optional int32 errno = 1;
-
-	message character_item {
-		optional int32 character_id = 1;
-		optional int32 level = 2;
-		optional int32 character_info_id = 3;
-		optional int32 slot = 4;
-	}
-
 	repeated character_item characters = 2;
 }
 
@@ -301,6 +295,25 @@ message game_notice_ack {
 		optional string IS_SHOW = 6;
 	}
 	repeated notice_item notice = 2;
+}
+
+message game_userdetail {
+	optional int32 userID = 1;
+	optional int32 detailUserID = 2;
+}
+
+message game_userdetail_ack {
+	optional int32 errno = 1;
+	optional string nickname = 2;
+	optional int32 level = 3;
+	optional int32 leagueGrade = 4;
+	optional int32 score = 5;
+	optional int32 bestCcore = 6;
+	optional string loginDate = 7;
+	optional string loginDateTime = 8;
+	optional slot_character character = 9;
+	repeated slot_skill skills = 10;
+	repeated slot_treasure treasures = 11;
 }
 
 

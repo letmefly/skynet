@@ -9,6 +9,7 @@ local characterdata = require "agent_s.characterdata"
 local skilldata = require "agent_s.skilldata"
 local treasuredata = require "agent_s.treasuredata"
 local itemdata = require "agent_s.itemdata"
+local leaguedata = require "agent_s.leaguedata"
 local configdata = require "agent_s.configdata"
 
 local game = {}
@@ -150,7 +151,7 @@ function game:result(msg)
 		end
 
 	elseif 1 == msg["isClear"] and 0 == stage_id then
-		leaguedate:update_user_leagueranking(msg["score"])
+		leaguedata:update_user_leagueranking(msg["score"])
 	else
 	end
 
