@@ -51,7 +51,8 @@ function SERVICE_API.update_score(params)
 	local userid = params.userid
 	local score = params.score
 	local rankname = "rank_"..os.date("%Y%m%d")
-	ssdb_client:zadd(rankname, score, userid)
+	local result = ssdb_client:zadd(rankname, score, userid)
+	return result
 end
 
 function SERVICE_API.get_rank(params)
@@ -86,17 +87,5 @@ skynet.start(function()
 	end)
 
 	skynet.register("ram_s")
-
-	-- local rankname = "rank_"..os.date("%Y%m%d")
-	-- ssdb_client:zadd(rankname, 12300, "chris1")
-	-- ssdb_client:zadd(rankname, 12400, "chris2")
-	-- ssdb_client:zadd(rankname, 12500, "chris3")
-	-- ssdb_client:zadd(rankname, 12600, "chris4")
-	-- ssdb_client:zadd(rankname, 12700, "chris5")
-	-- ssdb_client:zadd(rankname, 12800, "chris6")
-	-- ssdb_client:zadd(rankname, 12900, "chris7")
-	-- print(cjson.encode(ssdb_client:zrange(rankname, 0, -1, "WITHSCORES")))
-	-- print(rankname)
-
 	print("[ram]start service ram...")
 end)
