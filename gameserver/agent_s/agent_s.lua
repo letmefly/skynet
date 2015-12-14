@@ -91,29 +91,36 @@ function CLIENT_API.game_result(msg)
 	send_client_msg("game_result_ack", msg_ack)
 end
 
-function CLIENT_API.game_get_ranking(msg)
+function CLIENT_API.game_lobby(msg)
+	local msg_ack = game:result(msg)
+	send_client_msg("game_lobby_ack", msg_ack)
 end
 
-function CLIENT_API.game_get_mission(msg)
+function CLIENT_API.game_missions(msg)
+	local msg_ack = game:missions(msg)
+	send_client_msg("game_missions_ack", msg_ack)
 end
 
-function CLIENT_API.game_get_achievements(msg)
-end
+-- function CLIENT_API.game_get_ranking(msg)
+-- end
 
-function CLIENT_API.game_set_achievement(msg)
-end
+-- function CLIENT_API.game_get_achievements(msg)
+-- end
 
-function CLIENT_API.game_get_achievement_info(msg)
-end
+-- function CLIENT_API.game_set_achievement(msg)
+-- end
 
-function CLIENT_API.game_get_userdetail(msg)
-end
+-- function CLIENT_API.game_get_achievement_info(msg)
+-- end
 
-function CLIENT_API.game_unlock_achievement(msg)
-end
+-- function CLIENT_API.game_get_userdetail(msg)
+-- end
 
-function CLIENT_API.game_tutorial(msg)
-end
+-- function CLIENT_API.game_unlock_achievement(msg)
+-- end
+
+-- function CLIENT_API.game_tutorial(msg)
+-- end
 
 
 ------------------------ shop controller ------------------------

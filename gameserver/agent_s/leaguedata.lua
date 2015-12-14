@@ -12,7 +12,7 @@ end
 
 function leaguedata:update_user_leagueranking(score)
 	local userid = userdata:get("user_id")
-	local result = skynet.call("ram_s", "lua", "update_score", {userid = userid, score = score})
+	local result = skynet.call("ram_s", "lua", "update_score", {userid=userid, score=score})
 end
 
 return leaguedata

@@ -21,8 +21,6 @@ function game:get_playcode()
 	return self.playcode
 end
 
-function game:lobby(msg)
-end
 
 function game:start(msg)
 	local msg_ack = {errno = 0}
@@ -77,6 +75,7 @@ function game:start(msg)
 
 	return msg_ack
 end
+
 
 function game:result(msg)
 	local msg_ack = {errno = 0}
@@ -186,8 +185,23 @@ function game:result(msg)
 	return msg_ack
 end
 
-function function_name( ... )
-	-- body
+
+function game:lobby(msg)
+	local msg_ack = {errno = 0}
+	msg_ack["money"] = userdata:get("money")
+	msg_ack["cash"] = userdata:get("cash")
+	msg_ack["lotteryPoint"] = userdata:get("lottery_point")
+	msg_ack["lotteryHighCoupon"] = userdata:get("lottery_high_coupon")
+	msg_ack["lotteryCoupon"] = userdata:get("lottery_coupon")
+	msg_ack["heart"] = userdata:get("heart")
+	msg_ack["heartTime"] = userdata:get("heart_time")
+	msg_ack["heartTimeSeconds"] = userdata:get("heart_time_seconds")
+	return msg_ack
+end
+
+
+function game:missions(msg)
+
 end
 
 return game
