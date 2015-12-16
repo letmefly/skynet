@@ -86,4 +86,28 @@ function util.recvmsg(fd)
 	end
 end
 
+function util.sendmsg2(fd, msgname, msg)
+    print("---"..msgname.."---")
+    util.print(msg)
+    local msgdata, size = netutil.jsonencode(msgname, msg)
+    socket.send(fd, msgdata, size)
+end
+
+function util.recvmsg2(fd)
+    while true do
+        local buff, size = socket.recv(fd)
+        if size and size > 0 then
+            -- print ("msg size:" .. size)
+            local msgname, msg = netutil.jsondecode(buff, size)
+            -- print(msgname .. ":" .. msg.errno)
+            -- print(msgname..":"..cjson.encode(msg))
+            print("---"..msgname.."---")
+            util.print(msg)
+            return msg
+        else
+            socket.usleep(100)
+        end
+    end
+end
+
 return util

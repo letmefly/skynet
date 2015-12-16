@@ -509,6 +509,44 @@ lunpackpbc(lua_State *L) {
 	return 3;
 }
 
+static int
+lpackjson(lua_State *L) {
+	size_t prototype = luaL_checkinteger(L, 1);
+	size_t len;
+	const char * ptr = tolstring(L, &len, 2);
+	if (len > 0x10000) {
+		return luaL_error(L, "Invalid size (too long) of data : %d", (int)len);
+	}
+
+	uint8_t * buffer = skynet_malloc(len + 2 + 2);
+	write_2byte(buffer, len + 2);
+	write_2byte(buffer + 2, prototype);
+	memcpy(buffer + 2 + 2, ptr, len);
+
+	lua_pushlightuserdata(L, buffer);
+	lua_pushinteger(L, len + 2 + 2);
+
+	return 2;
+}
+
+static int
+lunpackjson(lua_State *L) {
+	size_t len;
+	const char * ptr = tolstring(L, &len, 1);
+	if (len > 0x10000) {
+		return luaL_error(L, "Invalid size (too long) of data : %d", (int)len);
+	}
+	size_t prototype = read_2byte(ptr);
+	lua_pushinteger(L, prototype);
+	//lua_pushlightuserdata(L, (void*)(ptr + 2));
+	//lua_pushinteger(L, len - 2);
+
+	lua_pushlstring(L, (const char *)(ptr + 2), len - 2);
+	// skynet_free((void *)ptr);
+	
+	return 2;
+}
+
 int
 luaopen_netpack(lua_State *L) {
 	luaL_checkversion(L);
@@ -519,6 +557,8 @@ luaopen_netpack(lua_State *L) {
 		{ "tostring", ltostring },
 		{ "packpbc", lpackpbc },
 		{ "unpackpbc", lunpackpbc},
+		{ "packjson", lpackjson },
+		{ "unpackjson", lunpackjson},		
 		{ NULL, NULL },
 	};
 	luaL_newlib(L,l);

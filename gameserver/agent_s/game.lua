@@ -201,7 +201,17 @@ end
 
 
 function game:missions(msg)
+	local mission_id =  msg["missionID"]
+	local eventfactor = msg["factor"]
 
+	local msg_ack = {errno = 0}
+	local missions = gamedata:get_missions()
+	if missions == {} then
+		msg_ack.errno = 207
+		return msg_ack
+	end
+
+	return msg_ack
 end
 
 return game

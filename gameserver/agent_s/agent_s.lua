@@ -13,6 +13,8 @@ local SERVICE_API = {}
 local CLIENT_API = {}
 local client_fd
 
+-- 1 is protobuf, 2 is json
+local PROTO_TYPE = 2
 
 ------------------------ controllers ----------------------------
 local user = require "agent_s.user"
@@ -21,8 +23,13 @@ local game = require "agent_s.game"
 
 ------------------------ helper function ------------------------
 local function send_client_msg(msgname, msg)
-	local buff, size = netutil.pbencode(msgname, msg)
-	socket.write(client_fd, buff, size)
+	if 1 == PROTO_TYPE then
+		local buff, size = netutil.pbencode(msgname, msg)
+		socket.write(client_fd, buff, size)
+	else
+		local buff, size = netutil.jsonencode(msgname, msg)
+		socket.write(client_fd, buff, size)
+	end
 end
 
 local function client_msg_handler(msgname, msg)
@@ -66,7 +73,7 @@ function CLIENT_API.user_login(msg)
 	local msg_ack = user:login(msg)
 	send_client_msg("user_login_ack", msg_ack)
 	if msg_ack["errno"] == 0 then
-		print("skyent register:".."agent_"..tostring(msg_ack["userID"]))
+		print("skyent register agent:".."agent_"..tostring(msg_ack["userID"]))
 		skynet.register("agent_"..tostring(msg_ack["userID"]))
 	end
 end
@@ -192,8 +199,13 @@ skynet.register_protocol {
 	name = "client",
 	id = skynet.PTYPE_CLIENT,
 	unpack = function (data, sz)
-		local msgname, msg = netutil.pbdecode(data, sz)
-		return msgname, msg
+		if 1 == PROTO_TYPE then
+			local msgname, msg = netutil.pbdecode(data, sz)
+			return msgname, msg
+		else
+			local msgname, msg = netutil.jsondecode(data, sz)
+			return msgname, msg			
+		end
 	end,
 	dispatch = function (_, _, msgname, ...)
 		client_msg_handler(msgname, ...)

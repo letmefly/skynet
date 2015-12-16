@@ -66,4 +66,11 @@ function gamedata:insert_user_stageinfo(stageinfo)
 	return ~is_exist
 end
 
+function gamedata:get_missions()
+	local missions = {}
+	local userid = userdata:get("user_id")
+	return missions
+end
+
+
 return gamedata
