@@ -308,7 +308,8 @@ message game_notice_ack {
 local type2name_json = [[
 
 {
-	"1": "user_register",
+	"1": "user_check_version",
+	"10": "user_register",
 	"2": "user_register_ack", 
 	"3": "user_login", 
 	"4": "user_login_ack",

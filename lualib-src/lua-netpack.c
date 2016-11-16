@@ -538,13 +538,10 @@ lunpackjson(lua_State *L) {
 	}
 	size_t prototype = read_2byte(ptr);
 	lua_pushinteger(L, prototype);
-	//lua_pushlightuserdata(L, (void*)(ptr + 2));
-	//lua_pushinteger(L, len - 2);
-
-	lua_pushlstring(L, (const char *)(ptr + 2), len - 2);
-	// skynet_free((void *)ptr);
-	
-	return 2;
+	// lua_pushlightuserdata(L, (void*)(ptr + 2));
+	lua_pushlstring(L, (const char *)(ptr+2), len - 2);
+	lua_pushinteger(L, len - 2);
+	return 3;
 }
 
 int

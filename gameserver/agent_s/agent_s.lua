@@ -64,6 +64,11 @@ end
 
 
 ------------------------ user controller ------------------------
+function CLIENT_API.user_check_version(msg)
+	local msg_ack = {version=1, packageURL="xxx", maintenanceTime=0}
+	send_client_msg("user_check_version", msg_ack)
+end
+
 function CLIENT_API.user_register(msg)
 	local msg_ack = user:register(msg)
 	send_client_msg("user_register_ack", msg_ack)
@@ -199,6 +204,8 @@ skynet.register_protocol {
 	name = "client",
 	id = skynet.PTYPE_CLIENT,
 	unpack = function (data, sz)
+		print("fuck!!!! sz:"..sz)
+		if sz == 0 then return end
 		if 1 == PROTO_TYPE then
 			local msgname, msg = netutil.pbdecode(data, sz)
 			return msgname, msg

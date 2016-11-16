@@ -26,18 +26,22 @@ end
 function netutil.jsonencode(msgname, msg)
 	local msgtype = protohelper.gettype(msgname)
 	local msgdata = cjson.encode(msg)
-	local base64fmt = crypt.base64encode(msgdata)
-	local desfmt = crypt.desencode(deskey, base64fmt)
-	local buff, size = netpack.packjson(msgtype, desfmt)
+	print("-> "..msgdata)
+	--local base64fmt = crypt.base64encode(msgdata)
+	--local desfmt = crypt.desencode(deskey, base64fmt)
+	--local buff, size = netpack.packjson(msgtype, desfmt)
+	local buff, size = netpack.packjson(msgtype, msgdata)
 	return buff, size
 end
 
 function netutil.jsondecode(msgbuff, buffsize)
-	local msgtype, buff = netpack.unpackjson(msgbuff, buffsize)
+	local msgtype, buff, size= netpack.unpackjson(msgbuff, buffsize)
 	local msgname = protohelper.getname(msgtype)
-	local base64fmt = crypt.desdecode(deskey, buff)
-	local jsonfmt = crypt.base64decode(base64fmt)
-	local msg = cjson.decode(jsonfmt)
+	--local base64fmt = crypt.desdecode(deskey, buff)
+	--local jsonfmt = crypt.base64decode(base64fmt)
+	--local msg = cjson.decode(jsonfmt)
+	local msg = cjson.decode(buff)
+	print("<- "..buff)
 	return msgname, msg
 end
 
