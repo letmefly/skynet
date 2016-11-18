@@ -10,21 +10,22 @@ local host
 local send_request
 
 local SERVICE_API = {}
-local CLIENT_API = {}
+local CLIENT_REQ = {}
 local client_fd
 
 -- 1 is protobuf, 2 is json
-local PROTO_TYPE = 2
+local PROTO_TYPE = 1
 
 ------------------------ controllers ----------------------------
-local user = require "agent_s.user"
-local game = require "agent_s.game"
+--local user = require "agent_s.user"
+--local game = require "agent_s.game"
 
 
 ------------------------ helper function ------------------------
 local function send_client_msg(msgname, msg)
 	if 1 == PROTO_TYPE then
 		local buff, size = netutil.pbencode(msgname, msg)
+		print(size)
 		socket.write(client_fd, buff, size)
 	else
 		local buff, size = netutil.jsonencode(msgname, msg)
@@ -33,7 +34,7 @@ local function send_client_msg(msgname, msg)
 end
 
 local function client_msg_handler(msgname, msg)
-	local handler = CLIENT_API[msgname]
+	local handler = CLIENT_REQ[msgname]
 	if handler then
 		handler(msg)
 	else
@@ -41,29 +42,42 @@ local function client_msg_handler(msgname, msg)
 	end
 end
 
-
------------------------- common client request ------------------
-function CLIENT_API:get()
-	print("get", self.what)
-	--local r = skynet.call("SIMPLEDB", "lua", "get", self.what)
-	return { result = r }
+------------------------ client request -------------------------
+function CLIENT_REQ.handshake(msg)
+	--skynet.error("handshake-"..msg.sn)
+	send_client_msg("handshake", {sn = msg.sn})
 end
 
-function CLIENT_API:set()
-	print("set", self.what, self.value)
-	--local r = skynet.call("SIMPLEDB", "lua", "set", self.what, self.value)
-end
-
-function CLIENT_API:handshake()
-	return { msg = "Welcome to skynet, I will send heartbeat every 5 sec." }
-end
-
-function CLIENT_API:quit()
+function CLIENT_REQ.quit()
 	skynet.call(WATCHDOG, "lua", "close", client_fd)
 end
 
+function CLIENT_REQ.gameLogin(msg)
+end
 
------------------------- user controller ------------------------
+function CLIENT_REQ.createRoom(msg)
+end
+
+function CLIENT_REQ.joinRoom(msg)
+end
+
+function CLIENT_REQ.leaveRoom(msg)
+end
+
+function CLIENT_REQ.ready(msg)
+end
+
+function CLIENT_REQ.grabLandlord(msg)
+end
+
+function CLIENT_REQ.playPokeInfo(msg)
+end
+
+function CLIENT_REQ.chat(msg)
+end
+
+
+--[[
 function CLIENT_API.user_check_version(msg)
 	local msg_ack = {version=1, packageURL="xxx", maintenanceTime=0}
 	send_client_msg("user_check_version", msg_ack)
@@ -87,124 +101,13 @@ function CLIENT_API.user_change_nickname(msg)
 	local msg_ack = user:change_nickname(msg)
 	send_client_msg("user_change_nickname_ack", msg_ack)
 end
-
-
------------------------- game controller ------------------------
-function CLIENT_API:game_enterlobby(msg)
-end
-
-function CLIENT_API.game_start(msg)
-	local msg_ack = game:start(msg)
-	send_client_msg("game_start_ack", msg_ack)
-end
-
-function CLIENT_API.game_result(msg)
-	local msg_ack = game:result(msg)
-	send_client_msg("game_result_ack", msg_ack)
-end
-
-function CLIENT_API.game_lobby(msg)
-	local msg_ack = game:result(msg)
-	send_client_msg("game_lobby_ack", msg_ack)
-end
-
-function CLIENT_API.game_missions(msg)
-	local msg_ack = game:missions(msg)
-	send_client_msg("game_missions_ack", msg_ack)
-end
-
--- function CLIENT_API.game_get_ranking(msg)
--- end
-
--- function CLIENT_API.game_get_achievements(msg)
--- end
-
--- function CLIENT_API.game_set_achievement(msg)
--- end
-
--- function CLIENT_API.game_get_achievement_info(msg)
--- end
-
--- function CLIENT_API.game_get_userdetail(msg)
--- end
-
--- function CLIENT_API.game_unlock_achievement(msg)
--- end
-
--- function CLIENT_API.game_tutorial(msg)
--- end
-
-
------------------------- shop controller ------------------------
-function CLIENT_API.shop_pay_item(msg)
-end
-
-function CLIENT_API.shop_buy_item(msg)
-end
-
-function CLIENT_API.shop_buy_character(msg)
-end
-
-function CLIENT_API.shop_buy_skill(msg)
-end
-
-function CLIENT_API.shop_buy_treasure(msg)
-end
-
-function CLIENT_API.shop_sell_treasure(msg)
-end
-
-function CLIENT_API.shop_buy_skillslot(msg)
-end
-
-function CLIENT_API.shop_buy_treasureslot(msg)
-end
-
-function CLIENT_API.shop_buy_treasure_inventory(msg)
-end
-
-function CLIENT_API.shop_buy_instant_item(msg)
-end
-
-function CLIENT_API.shop_get_lottery(msg)
-end
-
-
------------------------- shop controller ------------------------
-function CLIENT_API.friend_get_friends(msg)
-end
-
-function CLIENT_API.friend_get_suggest_friends(msg)
-end
-
-function CLIENT_API.friend_find(msg)
-end
-
-function CLIENT_API.friend_add(msg)
-end
-
-function CLIENT_API.friend_accept(msg)
-end
-
-function CLIENT_API.friend_remove(msg)
-end
-
-function CLIENT_API.friend_send_gift(msg)
-end
-
-function CLIENT_API.friend_get_invitations(msg)
-end
-
-function CLIENT_API.friend_invite(msg)
-end
-
+]]
 
 ------------------------ register client dispatch -----------------
 skynet.register_protocol {
 	name = "client",
 	id = skynet.PTYPE_CLIENT,
 	unpack = function (data, sz)
-		print("fuck!!!! sz:"..sz)
 		if sz == 0 then return end
 		if 1 == PROTO_TYPE then
 			local msgname, msg = netutil.pbdecode(data, sz)
@@ -227,16 +130,6 @@ function SERVICE_API.start(conf)
 	WATCHDOG = conf.watchdog
 	client_fd = fd
 	skynet.call(gate, "lua", "forward", fd)
-
-	-- skynet.fork(function()
-	-- 	while true do
-	-- 		send_package(send_request "heartbeat")
-	-- 		skynet.sleep(500)
-	-- 	end
-	-- end)
-end
-
-function SERVICE_API.has_new_mail(mail)
 end
 
 function SERVICE_API.disconnect()
@@ -256,4 +149,3 @@ skynet.start(function()
 		skynet.ret(skynet.pack(f(...)))
 	end)
 end)
-

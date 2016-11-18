@@ -7,7 +7,7 @@ skynet.start(function()
 	local console = skynet.newservice("console")
 	skynet.newservice("debug_console",8000)
 	--skynet.newservice("ram_s")
-	skynet.newservice("db_s")
+	--skynet.newservice("db_s")
 	-- skynet.newservice("sharedata_s")
 	local watchdog_s = skynet.newservice("watchdog_s")
 	
