@@ -24,38 +24,39 @@ message createRoom {
 message createRoom_ack {
 	// 0 success, -1 room card not enough
 	optional int32 errno = 1;
-	optional string roomNum = 2;
+	optional string roomNo = 2;
 }
 
 message joinRoom {
-	optional string roomNum = 1;
+	optional string roomNo = 1;
 }
 
 message joinRoom_ack {
 	// 0 success, -1 room number invalid
 	optional int32 errno = 1;
+	optional int32 playerId = 2;
 }
 
 message leaveRoom {
 	// player 1, 2, 3
-	optional int32 who = 1;
+	optional int32 playerId = 1;
 }
 
 message leaveRoom_ntf {
 	// player 1, 2, 3
-	optional int32 who = 1;
+	optional int32 playerId = 1;
 }
 
 // when client load res ok and switch to game screen, 
 // notify server that client is ready
-message ready {
-	optional int32 ready = 1;
+message getReady {
+	optional int32 status = 1;
 }
 
-message ready_ntf {
+message getReady_ntf {
 	message UserInfo {
 		// player 1, 2, 3
-		optional int32 who = 1;
+		optional int32 playerId = 1;
 		optional string nickname = 2;
 		// 1 male or 2 female
 		optional int32 sexType = 3;
@@ -71,45 +72,52 @@ message start_ntf {
 	repeated int32 pokerList = 1;
 }
 
+message restartGame_ntf {
+	optional int32 errno = 1;
+}
+
 message whoGrabLandlord_ntf {
 	// player 1, 2, 3
-	optional int32 who = 1;
+	optional int32 playerId = 1;
 }
 
 message grabLandlord {
-	// 1 grab, 2 skip
-	optional int32 grabAction = 1;
+	// player 1, 2, 3
+	optional int32 playerId = 1;
+	// 0, skip, 1 grab level 1, 2 grab level 2
+	optional int32 grabAction = 2;
 }
 
 message grabLandlord_ntf {
 	// player 1, 2, 3
-	optional int32 who = 1;
+	optional int32 playerId = 1;
 	// 1 grab, 2 skip
 	optional int32 grabAction = 2;
 }
 
 message landlord_ntf {
-	optional int32 landlord = 1;
+	optional int32 playerId = 1;
 }
 
 // whose token for choosing poker 
 message whoPlay_ntf {
 	// player 1, 2, 3
-	optional int32 who = 1;
+	optional int32 playerId = 1;
 }
 
-message playPokeInfo {
-	// 1 skip, 2 grab landlord, 3 skip
-	optional int32 playAction = 1;
+message playPoker {
+	optional int32 playerId = 1;
+	// 0 skip, 1 play
+	optional int32 playAction = 2;
 	// 1 - single, 2 - pair, 3 - joker boom, 4 - 3poker, 5 - boom, 6 - 3+1,
 	// 7 - sequence, 8 - 4+2, 9 - pair sequence, 10 - airplane
-	optional int32 pokerType = 2;
-	repeated int32 pokerList = 3;
+	optional int32 pokerType = 3;
+	repeated int32 pokerList = 4;
 }
 
-message playPokeInfo_ntf {
+message playPoker_ntf {
 	// player 1, 2, 3
-	optional int32 who = 1;
+	optional int32 playerId = 1;
 	// 1 skip, 2 grab landlord, 3 skip
 	optional int32 playAction = 2;
 	optional int32 pokerType = 3;
@@ -118,11 +126,11 @@ message playPokeInfo_ntf {
 
 message playTimeout_ntf {
 	// player 1, 2, 3
-	optional int32 who = 1;
+	optional int32 playerId = 1;
 }
 
 message last2Poker_ntf {
-	optional int32 who = 1;
+	optional int32 playerId = 1;
 	// 2 or 1
 	optional int32 pokerNum = 2;
 }
@@ -134,7 +142,7 @@ message chat {
 
 message chat_ntf {
 	// player 1, 2, 3
-	optional int32 who = 1;
+	optional int32 playerId = 1;
 	optional int32 fastTalkId = 2;
 	optional string talkText = 3;
 }
@@ -147,7 +155,7 @@ message gameResult_ntf {
 	optional int32 springFactor = 5;
 
 	message GameResultInfo {
-		optional int32 who = 1;
+		optional int32 playerId = 1;
 		// 1 win, 2 lose
 		optional int32 result = 2;
 		optional int32 isLandlord = 3;

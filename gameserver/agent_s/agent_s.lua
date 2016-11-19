@@ -16,10 +16,8 @@ local client_fd
 -- 1 is protobuf, 2 is json
 local PROTO_TYPE = 1
 
------------------------- controllers ----------------------------
---local user = require "agent_s.user"
---local game = require "agent_s.game"
-
+local room_sid = -1
+local user_info = {}
 
 ------------------------ helper function ------------------------
 local function send_client_msg(msgname, msg)
@@ -53,55 +51,59 @@ function CLIENT_REQ.quit()
 end
 
 function CLIENT_REQ.gameLogin(msg)
+	local userId = msg.userId
+	local authCode = msg.authCode
+	local version = msg.version
+	-- verify user auth
+	send_client_msg("gameLogin_ack", {errno = 0})
 end
 
 function CLIENT_REQ.createRoom(msg)
+	-- first check if there is room card
+	local roomType = msg.roomType
+	local ret = skynet.call("roomManager_s", "lua", "createRoom", roomType)
+	room_sid = ret.sid
+	local roomNo = ret.roomNo
+	send_client_msg("createRoom_ack", {errno = 0, roomNo = roomNo})
 end
 
 function CLIENT_REQ.joinRoom(msg)
+	local roomNo = msg.roomNo
+	room_sid = skynet.call("roomManager_s", "lua", "queryRoom", roomNo)
+	local errno = -1
+	local playerId = -1
+	if room_sid ~= nil then
+		errno = 0
+		playerId = skynet.call(room_sid, "lua", "join", {sid = skynet.self()})
+	end
+	send_client_msg("joinRoom_ack", {errno = errno, playerId = playerId})
 end
 
-function CLIENT_REQ.leaveRoom(msg)
-end
-
-function CLIENT_REQ.ready(msg)
+function CLIENT_REQ.getReady(msg)
+	local status = msg.status
+	skynet.call(room_sid, "lua", "getReady", playerId)
 end
 
 function CLIENT_REQ.grabLandlord(msg)
+	local playerId = msg.playerId
+	local grabAction = msg.grabAction
+	skynet.call(room_sid, "lua", "grabLandlord", {playerId = playerId, grabAction = grabAction})
 end
 
-function CLIENT_REQ.playPokeInfo(msg)
+function CLIENT_REQ.playPoker(msg)
+	local playerId = msg.playerId
+	local playAction = msg.playAction
+	local pokerType = msg.pokerType
+	local pokerList = msg.pokerList
+	skynet.call(room_sid, "lua", "playPoker", {playerId = playerId, playAction =playAction, 
+		pokerType=pokerType, pokerList=pokerList})
 end
 
 function CLIENT_REQ.chat(msg)
 end
 
-
---[[
-function CLIENT_API.user_check_version(msg)
-	local msg_ack = {version=1, packageURL="xxx", maintenanceTime=0}
-	send_client_msg("user_check_version", msg_ack)
+function CLIENT_REQ.leaveRoom(msg)
 end
-
-function CLIENT_API.user_register(msg)
-	local msg_ack = user:register(msg)
-	send_client_msg("user_register_ack", msg_ack)
-end
-
-function CLIENT_API.user_login(msg)
-	local msg_ack = user:login(msg)
-	send_client_msg("user_login_ack", msg_ack)
-	if msg_ack["errno"] == 0 then
-		print("skyent register agent:".."agent_"..tostring(msg_ack["userID"]))
-		skynet.register("agent_"..tostring(msg_ack["userID"]))
-	end
-end
-
-function CLIENT_API.user_change_nickname(msg)
-	local msg_ack = user:change_nickname(msg)
-	send_client_msg("user_change_nickname_ack", msg_ack)
-end
-]]
 
 ------------------------ register client dispatch -----------------
 skynet.register_protocol {
