@@ -84,19 +84,20 @@ message whoGrabLandlord_ntf {
 message grabLandlord {
 	// player 1, 2, 3
 	optional int32 playerId = 1;
-	// 0, skip, 1 grab level 1, 2 grab level 2
+	// 1, skip, 2 grab level 1, 3 grab level 2
 	optional int32 grabAction = 2;
 }
 
 message grabLandlord_ntf {
 	// player 1, 2, 3
 	optional int32 playerId = 1;
-	// 1 grab, 2 skip
+	// 1, skip, 2 grab level 1, 3 grab level 2
 	optional int32 grabAction = 2;
 }
 
 message landlord_ntf {
 	optional int32 playerId = 1;
+	repeated int32 bottomPokerList = 2;
 }
 
 // whose token for choosing poker 
@@ -107,7 +108,7 @@ message whoPlay_ntf {
 
 message playPoker {
 	optional int32 playerId = 1;
-	// 0 skip, 1 play
+	// 1 skip, 2 play poker
 	optional int32 playAction = 2;
 	// 1 - single, 2 - pair, 3 - joker boom, 4 - 3poker, 5 - boom, 6 - 3+1,
 	// 7 - sequence, 8 - 4+2, 9 - pair sequence, 10 - airplane
@@ -129,7 +130,7 @@ message playTimeout_ntf {
 	optional int32 playerId = 1;
 }
 
-message last2Poker_ntf {
+message lastPoker_ntf {
 	optional int32 playerId = 1;
 	// 2 or 1
 	optional int32 pokerNum = 2;
@@ -175,16 +176,37 @@ message roomResult_ntf {
 local type2name_json = [[
 
 {
-	"1": "user_check_version",
-	"10": "user_register",
-	"2": "user_register_ack", 
-	"3": "user_login", 
-	"4": "user_login_ack",
-	"5": "handshake",
-	"6": "game_start",
-	"7": "game_start_ack",
-	"8": "game_result",
-	"9": "game_result_ack"
+	"1": "handshake",
+	"2": "gameLogin",
+	"3": "gameLogin_ack", 
+	"4": "createRoom", 
+	"5": "createRoom_ack",
+	"6": "joinRoom",
+	"7": "joinRoom_ack",
+	"8": "leaveRoom",
+	"9": "leaveRoom_ntf",
+	"10": "getReady",
+	"11": "getReady_ntf",
+	"12": "start_ntf",
+	"13": "restartGame_ntf",
+	"14": "whoGrabLandlord_ntf",
+	"15": "grabLandlord_ntf",
+	"16": "landlord_ntf",
+	"17": "grabLandlord",
+	"18": "whoPlay_ntf",
+	"19": "playPoker",
+	"20": "playPoker_ntf",
+	"21": "playTimeout_ntf",
+	"22": "lastPoker_ntf",
+	"23": "chat",
+	"24": "chat_ntf",
+	"25": "gameResult_ntf",
+	"26": "roomResult_ntf",
+	"27": "",
+	"28": "",
+	"29": "",
+	"30": "",
+	"31": ""
 }
 
 ]]

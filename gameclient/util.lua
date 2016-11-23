@@ -10,7 +10,7 @@ local socket = require "clientsocket"
 local cjson = require "cjson"
 
 local util = {}
-
+local msg_handler_tab = {}
 
 local function dump(obj)
     local getIndent, quoteStr, wrapKey, wrapVal, dumpObj
@@ -56,6 +56,29 @@ local function dump(obj)
     return dumpObj(obj, 0)
 end
 
+function util.reg(msgname, msghandler)
+    msg_handler_tab[msgname] = msghandler
+end
+
+function util.msg_poll(fd)
+    while true do
+        local buff, size = socket.recv(fd)
+        if size and size > 0 then
+            -- print ("msg size:" .. size)
+            local msgname, msg = netutil.pbdecode(buff, size)
+            -- print(msgname .. ":" .. msg.errno)
+            -- print(msgname..":"..cjson.encode(msg))
+            print("---"..msgname.."---")
+            util.print(msg)
+            if msg_handler_tab[msgname] then
+                msg_handler_tab[msgname](msg)
+            end
+        else
+            socket.usleep(100)
+        end
+    end
+end
+
 function util.print(t)
 	-- print("")
 	print(dump(t))
@@ -79,9 +102,9 @@ function util.recvmsg(fd)
 			-- print(msgname..":"..cjson.encode(msg))
 			print("---"..msgname.."---")
 			util.print(msg)
-			return msg
+			return msgname, msg
 		else
-			socket.usleep(100)
+			socket.usleep(5)
 		end
 	end
 end

@@ -8,7 +8,7 @@ skynet.start(function()
 	skynet.newservice("debug_console",8000)
 	--skynet.newservice("ram_s")
 	--skynet.newservice("db_s")
-	-- skynet.newservice("sharedata_s")
+	skynet.newservice("roomManager_s")
 	local watchdog_s = skynet.newservice("watchdog_s")
 	
 	skynet.call(watchdog_s, "lua", "start", {
