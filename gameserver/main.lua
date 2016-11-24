@@ -6,6 +6,9 @@ skynet.start(function()
 	print("Server start")
 	local console = skynet.newservice("console")
 	skynet.newservice("debug_console",8000)
+
+	require("room_s.test_pokerType").test()
+
 	--skynet.newservice("ram_s")
 	--skynet.newservice("db_s")
 	skynet.newservice("roomManager_s")
