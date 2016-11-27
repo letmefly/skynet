@@ -55,13 +55,15 @@ function CLIENT_REQ.gameLogin(msg)
 	local userId = msg.userId
 	local authCode = msg.authCode
 	local version = msg.version
-	user_info.nickname = msg.userId
+	user_info.userId = "chris123"
+	user_info.nickname = "chris"
 	user_info.sexType = 1
 	user_info.iconUrl = "http://"
 	user_info.level = 1
 	user_info.roomCardNum = 100
+	user_info.playerId = 0
 	-- verify user auth
-	send_client_msg("gameLogin_ack", {errno = 1000})
+	send_client_msg("gameLogin_ack", {errno = 1000, userInfo = user_info})
 end
 
 function CLIENT_REQ.createRoom(msg)
