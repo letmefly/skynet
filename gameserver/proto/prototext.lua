@@ -70,7 +70,11 @@ message getReady_ntf {
     repeated UserInfo_t userInfoList = 1;
 }
 
-message start_ntf {
+message startGame {
+    optional int32 playerId = 1;
+}
+
+message startGame_ntf {
     // 17 poker
     repeated int32 pokerList = 1;
 }

@@ -9,6 +9,7 @@ this.roomNo = nil
 this.maxPlayerNum = 3
 this.grabLandlordMode = 1 --1 random mode, 2 score mode
 this.currPlayerNum = 0
+this.roomOwner = 0
 
 -- game state data
 this.bottomPokerList = {}
@@ -19,6 +20,7 @@ this.currLandlord = 0
 this.currGrabLevel = 0
 this.prevPlayerId = 0
 this.prevPokerList = {}
+this.readyPlayerNum = 0
 
 function this.sendAllPlayer(msgname, msg)
 	for k, v in ipairs(this.playerInfoList) do
@@ -81,7 +83,7 @@ function this.startGame()
 			table.remove(pokerSet, random)
 		end
 		--table.insert(allPokerList, pokerList)
-		this.sendPlayer(sid, "start_ntf", {pokerList = pokerList})
+		this.sendPlayer(sid, "startGame_ntf", {pokerList = pokerList})
 	end
 	for i = 1, 3 do
 		this.bottomPokerList[i] = pokerSet[i]
@@ -207,6 +209,7 @@ end
 
 function SAPI.init(conf)
 	this.roomNo = conf.roomNo
+	this.roomOwner = 1
 	this.grabLandlordMode =  conf.grabMode
 	if 1 == this.grabLandlordMode then
 		this.currWhoGrab = math.random(1, 3)
@@ -231,11 +234,10 @@ function SAPI.getReady(playerId)
 	local userInfo = this.playerInfoList[playerId]
 	userInfo.status = 1 -- now ready
 
-	local readyNum = 0
 	local readyUserList = {}
 	for k, v in ipairs(this.playerInfoList) do
 		if v.status == 1 then
-			readyNum = readyNum + 1
+			this.readyPlayerNum = this.readyPlayerNum + 1
 			local readyUser = {}
 			readyUser.playerId = v.playerId
 			readyUser.nickname = v.userInfo.nickname
@@ -249,8 +251,14 @@ function SAPI.getReady(playerId)
 	this.sendAllPlayer("getReady_ntf", {userInfoList = readyUserList})
 
 	-- check if all players get ready
-	if readyNum == this.maxPlayerNum then
-		skynet.timeout(100, this.startGame)
+	--if this.readyPlayerNum == this.maxPlayerNum then
+	--	skynet.timeout(100, this.startGame)
+	--end
+end
+
+function SAPI.startGame(msg)
+	if this.readyPlayerNum == this.maxPlayerNum then
+		this.startGame()
 	end
 end
 

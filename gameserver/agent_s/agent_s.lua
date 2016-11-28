@@ -91,6 +91,11 @@ function CLIENT_REQ.getReady(msg)
 	skynet.call(room_sid, "lua", "getReady", room_playerId)
 end
 
+function CLIENT_REQ.startGame(msg)
+	local playerId = msg.playerId
+	skynet.call(room_sid, "lua", "startGame", room_playerId)
+end
+
 function CLIENT_REQ.grabLandlord(msg)
 	local playerId = room_playerId
 	local grabAction = msg.grabAction
