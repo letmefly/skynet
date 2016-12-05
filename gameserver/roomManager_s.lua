@@ -14,7 +14,7 @@ function SERVICE_API.createRoom(roomType)
 	end
 	local roomNo = room_seq .. ""
 	local sid = skynet.newservice("room_s")
-	skynet.call(sid, "lua", "init", {roomNo = roomNo, grabMode = 1})
+	skynet.call(sid, "lua", "init", {roomNo = roomNo, grabMode = 2})
 	rooms[roomNo] = sid
 	total_room = total_room + 1
 	return {sid = sid, roomNo = roomNo}

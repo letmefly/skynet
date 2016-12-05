@@ -569,5 +569,69 @@ function this.getTipPoker(pokerList, currPlayPoker)
 	table.sort(pokerList)
 end
 
+-- invalid comparation, means invalid picking poker
+function this.pokerCmp(srcPokerList, destPokerList)
+    local srcType, srcLevel = this.getPokerType(srcPokerList)
+    if srcType == -1 then 
+        return -1 
+    end
+    
+    if #destPokerList == 0 then
+        return 1
+    end
+
+    local destType, destLevel = this.getPokerType(destPokerList)
+    if destType == this.TYPE_KING_BOOM then 
+        return -1
+    end
+    if srcType == destType then
+        if #srcPokerList ~= #destPokerList then
+            return -1
+        else
+            if srcLevel > destLevel then
+                return 1
+            else
+                return -1
+            end
+        end
+    end
+    
+    if srcType == this.TYPE_BOOM or srcType == this.TYPE_KING_BOOM then
+        return 1
+    end
+    return -1
+end
+
+function table_remove(srcTable, removeItems)
+	local t = {}
+	for k, v in pairs(removeItems) do
+		t[k] = v
+	end
+	local function local_table_remove(srcTable, removeItems)
+	    for i = 1, #srcTable do
+	        for j = 1, #removeItems do
+	            if srcTable[i] == removeItems[j] then
+	                table.remove(srcTable, i)
+	                table.remove(removeItems, j)
+	                return local_table_remove(srcTable, removeItems)
+	            end
+	        end
+	    end
+	    return srcTable
+	end	
+
+	return local_table_remove(srcTable, t)
+end
+
+
+
+function table_insert(srcTable, insertItems)
+    for i = 1, #insertItems do
+        table.insert(srcTable, insertItems[i])
+    end
+    table.sort(srcTable)
+    return srcTable
+end
+
 return this
 

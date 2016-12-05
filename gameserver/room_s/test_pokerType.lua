@@ -16,9 +16,9 @@ function M.test()
 	t, l = pokerUtil.isThree(pokerList)
 	print("{5,6,7} "..t..","..l)
 
-	pokerList = {5,6,7,32}
+	pokerList = {38,39,40,2}
 	t, l = pokerUtil.isThreeSingle(pokerList)
-	print("{5,6,7,32} "..t..","..l)
+	print("{38,39,40,2} "..t..","..l)
 
 	pokerList = {5,6,7,32,31}
 	t, l = pokerUtil.isThreeDouble(pokerList)
@@ -70,6 +70,12 @@ function M.test()
 	end
 	print(cjson.encode(pokerList).."--"..cjson.encode(playPoker).."--"..cjson.encode(tip))
 
+	print("{5,6,7,20} > {1,2,3,19} -- "..pokerUtil.pokerCmp({5,6,7,20}, {1,2,3,19}))
+	print("{5} > {1} -- "..pokerUtil.pokerCmp({5}, {1}))
+	print("{1} > {5} -- "..pokerUtil.pokerCmp({1}, {5}))
+	print("{1,2,3,4} > {5,6,7,9} -- "..pokerUtil.pokerCmp({1,2,3,4}, {5,6,7,9}))
+
+	print("{29,32,38,39,40} > {1,3,4,7,8} --"..pokerUtil.pokerCmp({29,32,38,39,40}, {1,3,4,7,8}))
 end
 
 return M

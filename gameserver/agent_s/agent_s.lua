@@ -16,13 +16,14 @@ local client_fd
 -- 1 is protobuf, 2 is json
 local PROTO_TYPE = 1
 
-local room_sid = -1
+local my_room_sid = -1
 local room_playerId = -1
 local user_info = {}
 
 
 ------------------------ helper function ------------------------
 local function send_client_msg(msgname, msg)
+	print(msgname..": "..cjson.encode(msg))
 	if 1 == PROTO_TYPE then
 		local buff, size = netutil.pbencode(msgname, msg)
 		socket.write(client_fd, buff, size)
@@ -33,6 +34,7 @@ local function send_client_msg(msgname, msg)
 end
 
 local function client_msg_handler(msgname, msg)
+	print(msgname..": "..cjson.encode(msg))
 	local handler = CLIENT_REQ[msgname]
 	if handler then
 		handler(msg)
@@ -70,45 +72,48 @@ function CLIENT_REQ.createRoom(msg)
 	-- first check if there is room card
 	local roomType = msg.roomType
 	local ret = skynet.call("roomManager_s", "lua", "createRoom", roomType)
-	room_sid = ret.sid
+	my_room_sid = ret.sid
 	local roomNo = ret.roomNo
 	send_client_msg("createRoom_ack", {errno = 1000, roomNo = roomNo})
 end
 
 function CLIENT_REQ.joinRoom(msg)
-	local roomNo = msg.roomNo
-	room_sid = skynet.call("roomManager_s", "lua", "queryRoom", roomNo)
 	local errno = -1
-	if room_sid ~= nil then
+	local roomNo = msg.roomNo
+	my_room_sid = skynet.call("roomManager_s", "lua", "queryRoom", roomNo)
+	if my_room_sid ~= nil then
 		errno = 1000
-		room_playerId = skynet.call(room_sid, "lua", "join", {sid = skynet.self(), userInfo = user_info})
+		room_playerId = skynet.call(my_room_sid, "lua", "joinRoom", {sid = skynet.self(), userInfo = user_info})
 	end
 	send_client_msg("joinRoom_ack", {errno = errno, playerId = room_playerId})
 end
 
+function CLIENT_REQ.joinRoomOk(msg)
+	local playerId = msg.playerId
+	skynet.call(my_room_sid, "lua", "joinRoomOk", {playerId = playerId})
+end
+
 function CLIENT_REQ.getReady(msg)
 	local status = msg.status
-	skynet.call(room_sid, "lua", "getReady", room_playerId)
+	skynet.call(my_room_sid, "lua", "getReady", room_playerId)
 end
 
 function CLIENT_REQ.startGame(msg)
 	local playerId = msg.playerId
-	skynet.call(room_sid, "lua", "startGame", room_playerId)
+	skynet.call(my_room_sid, "lua", "startGame", room_playerId)
 end
 
 function CLIENT_REQ.grabLandlord(msg)
 	local playerId = room_playerId
 	local grabAction = msg.grabAction
-	skynet.call(room_sid, "lua", "grabLandlord", {playerId = playerId, grabAction = grabAction})
+	skynet.call(my_room_sid, "lua", "grabLandlord", {playerId = playerId, grabAction = grabAction})
 end
 
 function CLIENT_REQ.playPoker(msg)
 	local playerId = msg.playerId
 	local playAction = msg.playAction
-	local pokerType = msg.pokerType
 	local pokerList = msg.pokerList
-	skynet.call(room_sid, "lua", "playPoker", {playerId = playerId, playAction =playAction, 
-		pokerType=pokerType, pokerList=pokerList})
+	skynet.call(my_room_sid, "lua", "playPoker", {playerId = playerId, playAction =playAction, pokerList=pokerList})
 end
 
 function CLIENT_REQ.chat(msg)
@@ -148,7 +153,7 @@ end
 
 function SERVICE_API.disconnect()
 	-- todo: do something before exit
-	--skynet.call(room_sid, "lua", "leave", room_playerId)
+	--skynet.call(my_room_sid, "lua", "leave", room_playerId)
 	skynet.exit()
 end
 

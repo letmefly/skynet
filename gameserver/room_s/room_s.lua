@@ -1,62 +1,97 @@
 local skynet = require "skynet"
 require "skynet.manager"	-- import skynet.register
+local cjson = require "cjson"
+local pokerUtil = require "room_s.pokerUtil"
 
-local SERVICE_API = {}
-local timer_callback_list = {}
-local player_info_list = {}
-local room_no = nil
-local max_player_num = 3
-local grab_landlord_mode = 1 --1 random mode, 2 score mode
-local curr_player_num = 0
+local SAPI = {}
+
+local this = {}
+
+this.timerCallbackList = {}
+this.secondsTimerCallbackList = {}
+this.playerInfoList = {}
+this.roomNo = nil
+this.maxPlayerNum = 3
+this.grabLandlordMode = 1 --1 random mode, 2 score mode
+this.currPlayerNum = 0
+this.roomOwner = 0
 
 -- game state data
-local last_poker = {}
-local curr_who_grab = 1
-local grab_times = 0
-local curr_who_play = 1
-local curr_landlord = 0
-local curr_grab_level = 0
+this.bottomPokerList = {}
+this.currWhoGrab = 1
+this.grabTimes = 0
+this.currWhoPlay = 1
+this.currLandlord = 0
+this.currGrabLevel = 0
+this.prevPlayerId = 0
+this.prevPokerList = {}
+this.readyPlayerNum = 0
+-- all player's pokerList
+this.allPlayerPokerSet = {}
 
-local function send_all_player(msgname, msg)
-	for k, v in ipairs(player_info_list) do
-		local sid = v.sid
-		skynet.send(sid, "lua", "send_client", msgname, msg)
-	end
-end
-
-local function send_player(sid, msgname, msg)
-	skynet.send(sid, "lua", "send_client", msgname, msg)
-end
-
-local function set_timer(name, time, callback)
-	timer_callback_list[name] = callback
-	skynet.timeout(time, function()
-		local callback = timer_callback_list[name]
-		if nil ~= callback then
-			callback()
-			timer_callback_list[name] = nil
+function this.sendAllPlayer(msgname, msg)
+	for k, v in pairs(this.playerInfoList) do
+		if v then
+			local sid = v.sid
+			skynet.call(sid, "lua", "sendClient", msgname, msg)
 		end
-	end)
+	end
 end
 
-local function unset_timer(name)
-	if nil ~= timer_callback_list[name] then
-		timer_callback_list[name] = nil
+function this.sendPlayer(sid, msgname, msg)
+	skynet.call(sid, "lua", "sendClient", msgname, msg)
+end
+
+--------------------------------game timer ----------------------------------
+this.gameTimers = {}
+function this.startGameTimer()
+	local function tick()
+		for k, v in pairs(this.gameTimers) do
+			if v then
+				local sec = v.sec
+				local cb = v.cb
+				local t = v.t
+				if t == 2 and sec >= 0 and sec % 10 == 0 then
+					cb(sec/10)
+				elseif t == 1 and sec == 0 then
+					cb()
+				end
+				v.sec = v.sec - 1
+			end
+		end
+		skynet.timeout(10, tick)
 	end
+	skynet.timeout(10, tick)
+end
+function this.setTimer(name, time, callback)
+	this.gameTimers[name] = {sec = time/10, cb = callback, t = 1}
+end
+function this.unsetTimer(name)
+	this.gameTimers[name] = nil
+end
+function this.setSecondTimer(name, seconds, callback)
+	this.gameTimers[name] = {sec = seconds*10, cb = callback, t = 2}
+end
+function this.unsetSecondTimer(name)
+	this.gameTimers[name] = nil
 end
 
 -- send 17 poker to all player
-local function start_play_poker()
-	local pokerSet = {
-		103,104,105,106,107,108,109,110,111,112,113,114,115, -- heart
-		203,204,205,206,207,208,209,210,211,212,213,214,215, -- diamod
-		303,304,305,306,307,308,309,310,311,312,313,314,315, -- club
-		403,404,405,406,407,408,409,410,411,412,413,414,415, -- spade
-		516,517												 -- small joker and big joker
-	}
-	--local allPokerList = {}
-	for k, v in ipairs(player_info_list) do
+function this.startGame()
+	-- 1,2,3,4,means that heart-3,diamod-3,club-3,spade-3
+	local pokerSet = {}
+	for i = 1, 54 do
+		pokerSet[i] = i
+	end
+
+	for i = 1, 3 do
+		local random = math.random(#pokerSet)
+		this.bottomPokerList[i] = pokerSet[random]
+		table.remove(pokerSet, random)
+	end
+	for k, v in ipairs(this.playerInfoList) do
 		local sid = v.sid
+		local playerId = v.playerId
 		local pokerList = {}
 		-- random choose poker
 		for i=1, 17 do
@@ -64,176 +99,279 @@ local function start_play_poker()
 			table.insert(pokerList, pokerSet[random])
 			table.remove(pokerSet, random)
 		end
+		this.allPlayerPokerSet[playerId] = pokerList
 		--table.insert(allPokerList, pokerList)
-		send_player(sid, "start_ntf", {pokerList = pokerList})
+		this.sendPlayer(sid, "startGame_ntf", {pokerList = pokerList, bottomList = this.bottomPokerList})
 	end
-	for i = 1, 3 do
-		last_poker[i] = pokerSet[i]
-	end
+
 
 	-- notify who grab landlord after 2s
-	skynet.timeout(200, grab_landlord)
+	skynet.timeout(200, this.grabLandlord)
 end
 
-local function get_next_player(playerId)
-	return (playerId + 1) % 3 + 1
+function this.getNextPlayer(playerId)
+	return playerId % this.maxPlayerNum + 1
 end
 
-local function grab_landlord()
-	send_all_player("whoGrabLandlord_ntf", {playerId = curr_who_grab})
-	set_timer("play_timer", 1500, function()
-		grab_landlord_handler(curr_who_grab, 0)
+function this.grabLandlord()
+	this.sendAllPlayer("whoGrabLandlord_ntf", {playerId = this.currWhoGrab})
+	this.setSecondTimer("grab"..this.currWhoGrab, 10, function(timerVal)
+		if timerVal == 0 then
+			this.grabTimeout(this.currWhoGrab)
+		else
+			this.alarmTimerNtf("grab", this.currWhoGrab, timerVal)
+		end
 	end)
 end
 
-local function grab_landlord_over(playerId)
-	send_all_player("landlord_ntf", {playerId = playerId})
-	curr_who_play = playerId
-	skynet.timeout(10, play_poker)
+function this.grabLandlordOver(playerId)
+	this.sendAllPlayer("landlord_ntf", {playerId = playerId, bottomPokerList = this.bottomPokerList})
+	this.currWhoPlay = playerId
+	skynet.timeout(20, this.playPoker)
 end
 
-local function grab_landlord_handler(playerId, grabAction)
-	unset_timer("play_timer")
-	grab_times = grab_times + 1
+function this.unsetSecondTimerNtf(timerType, playerId)
+	this.unsetSecondTimer(timerType..playerId)
+	this.sendAllPlayer("stopAlarmTimer_ntf", {playerId = playerId, timerType = timerType})
+end
 
-	if grabAction > curr_grab_level then
-		curr_grab_level = grabAction
-		curr_landlord = playerId
+function this.grabTimeout(playerId)
+	this.grabLandlordHandler(playerId, 1)
+end
+
+function this.grabLandlordHandler(playerId, grabAction)
+	this.unsetSecondTimerNtf("grab", playerId)
+	this.grabTimes = this.grabTimes + 1
+	if grabAction - 1 > this.currGrabLevel then
+		this.currGrabLevel = grabAction - 1
+		this.currLandlord = playerId
 	end
 	-- check if grab is over
 	-- 1. random grab mode
-	if grab_landlord_mode == 1 then
-		if curr_grab_level > 0 then
+	if this.grabLandlordMode == 1 then
+		if this.currGrabLevel > 0 then
 			-- now landlord is known
-			grab_landlord_over(curr_landlord)
+			this.grabLandlordOver(this.currLandlord)
 			return
 		end
 	-- 2. score grab mode
-	else if grab_landlord_mode == 2 then
+	elseif this.grabLandlordMode == 2 then
 		-- the one who give level 3 first get landlord
-		if curr_grab_level == 3 then
+		if this.currGrabLevel == 3 then
 			-- now landlord is known
-			grab_landlord_over(curr_landlord)
+			this.grabLandlordOver(this.currLandlord)
 			return
 		end
 	end
 
 	-- now nobody want to grab landlord
-	if grab_times >= 3 then
-		if curr_landlord > 0 then
-			grab_landlord_over(curr_landlord)
+	if this.grabTimes >= 3 then
+		if this.currLandlord > 0 then
+			this.grabLandlordOver(this.currLandlord)
 		else
-			restart_game()
+			this.restartGame()
 		end
 		return
 	end
 
-	curr_who_grab = get_next_player(curr_who_grab)
-	send_all_player("grabLandlord_ntf", {playerId=playerId, grabAction=grabAction})
-	skynet.timeout(10, function()
-		grab_landlord()
+	this.currWhoGrab = this.getNextPlayer(this.currWhoGrab)
+	this.sendAllPlayer("grabLandlord_ntf", {playerId=playerId, grabAction=grabAction})
+	skynet.timeout(10, this.grabLandlord)
+end
+
+function this.playPoker()
+	this.sendAllPlayer("whoPlay_ntf", {playerId = this.currWhoPlay, prevPlayerId = this.prevPlayerId})
+	this.setSecondTimer("play"..this.currWhoPlay, 15, function(timerVal)
+		if timerVal == 0 then
+			this.playTimeout(this.currWhoPlay)
+		else
+			this.alarmTimerNtf("play", this.currWhoPlay, timerVal)
+		end
 	end)
 end
 
-local function play_poker()
-	send_all_player("whoPlay_ntf", {playerId = curr_who_play})
-	set_timer("play_timer", 1500, function()
-		play_poker_handler(curr_who_play, 2, nil, nil)
-	end)
+function this.playTimeout(playerId)
+	this.playPokerHandler(playerId, 1, {})
 end
 
-local function play_poker_handler(playerId, playAction, pokerType, pokerList)
-	unset_timer("play_timer")
-
+function this.playPokerHandler(playerId, playAction, pokerList)
+	this.unsetSecondTimerNtf("play", playerId)
 	-- check if game is over
 
-	curr_who_play = get_next_player(curr_who_play)
-	send_all_player("playPoker_ntf", {playerId=playerId, playAction=playAction, pokerType=pokerType, pokerList=pokerList})
+	-- check client error
+	if playAction == 1 then
+		if #this.prevPokerList == 0 then
+			skynet.error("ERR: the player that should play can not skip")
+			return
+		end
+	elseif playAction == 2 then
+		-- check curr player's poker bigger than prev one
+		if pokerUtil.pokerCmp(pokerList, this.prevPokerList) == -1 then
+			skynet.error("ERR: smaller pokerList is submmit")
+			skynet.error(cjson.encode(pokerList))
+			skynet.error(cjson.encode(this.prevPokerList))
+			return
+		end
+	end
+
+	this.sendAllPlayer("playPoker_ntf", {playerId=playerId, playAction=playAction, pokerType=pokerType, pokerList=pokerList})
+
+	-- update this player's pokers and previous pokers
+	this.allPlayerPokerSet[playerId] = table_remove(this.allPlayerPokerSet[playerId], pokerList)
+	this.currWhoPlay = this.getNextPlayer(this.currWhoPlay)
+	-- nobody can pay aginest prev player, clear prev play info
+	if this.currWhoPlay == this.prevPlayerId then
+		this.prevPlayerId = this.currWhoPlay
+		this.prevPokerList = {}
+	end
+
 	skynet.timeout(10, function()
-		play_poker()
+		this.playPoker()
 	end)
-end
 
-local function restart_game()
-	last_poker = {}
-	curr_who_grab = 1
-	grab_times = 0
-	curr_who_play = 1
-
-	send_all_player("restartGame_ntf", {errno = 0})
-	skynet.timeout(50, start_play_poker)
-end
-
-function SERVICE_API.init(conf)
-	room_no = conf.roomNo
-	grab_landlord_mode =  conf.grabMode
-	if 1 == grab_landlord_mode then
-		curr_who_grab = math.random(1, 3)
+	if #pokerList > 0 then
+		this.prevPlayerId = playerId
+		this.prevPokerList = pokerList
 	end
 end
 
-function SERVICE_API.join(agent)
+function this.restartGame()
+	this.bottomPokerList = {}
+	this.currWhoGrab = 1
+	this.grabTimes = 0
+	this.currWhoPlay = 1
+
+	this.sendAllPlayer("restartGame_ntf", {errno = 0})
+	skynet.timeout(50, this.startGame)
+end
+
+function this.joinRoomOkNtf(playerId)
+	local userInfoList = {}
+	for k, v in ipairs(this.playerInfoList) do
+		if v then
+			local userInfo = {}
+			userInfo.playerId = v.playerId
+			userInfo.nickname = v.userInfo.nickname
+			userInfo.sexType = v.userInfo.sexType
+			userInfo.iconUrl = v.userInfo.iconUrl
+			userInfo.level = v.userInfo.level
+			userInfo.roomCardNum = v.userInfo.roomCardNum
+			table.insert(userInfoList, userInfo)
+		end
+	end
+	this.sendAllPlayer("joinRoomOk_ntf", {userInfoList = userInfoList})
+	local timerName = "ready".. playerId
+	this.setSecondTimer(timerName, 15, function(timerVal)
+		if timerVal == 0 then
+			this.leaveRoom(playerId)
+		else
+			this.alarmTimerNtf("ready", playerId, timerVal)
+		end
+	end)
+end
+
+function this.alarmTimerNtf(timerType, playerId, timerVal)
+	this.sendAllPlayer("alarmTimer_ntf", {playerId = playerId, timerVal = timerVal, timerType = timerType})
+end
+
+function this.leaveRoom(playerId)
+	this.sendAllPlayer("leaveRoom_ntf", {playerId = playerId})
+	this.playerInfoList[playerId] = nil
+	this.currPlayerNum = this.currPlayerNum - 1
+end
+
+----------------------------- sevevice api -------------------------------
+function SAPI.init(conf)
+	this.roomNo = conf.roomNo
+	this.roomOwner = 1
+	this.readyPlayerNum = 0
+	this.grabLandlordMode =  conf.grabMode
+	if 1 == this.grabLandlordMode then
+		this.currWhoGrab = math.random(1, 3)
+	end
+	this.startGameTimer()
+	return 0
+end
+
+function SAPI.joinRoom(agent)
 	local sid = agent.sid
 	local userInfo = agent.userInfo
-	curr_player_num = curr_player_num + 1
-	local playerId = curr_player_num
-	player_info_list[curr_player_num] = {
+	this.currPlayerNum = this.currPlayerNum + 1
+	local playerId = this.currPlayerNum
+	for k, v in pairs(this.playerInfoList) do
+		if v == nil then
+			playerId = k
+		end
+	end
+	
+	this.playerInfoList[playerId] = {
 		sid = sid,
 		status = 0,
 		playerId = playerId,
 		userInfo = userInfo
 	}
+
+	-- notify all join user info
+	--skynet.timeout(5, this.joinNtf)
+
 	return playerId
 end
 
-function SERVICE_API.getReady(playerId)
-	local userInfo = player_info_list[playerId]
-	userInfo.status = 1 // now ready
+function SAPI.joinRoomOk(msg)
+	local playerId = msg.playerId
+	this.joinRoomOkNtf(playerId)
+end
 
-	local readyNum = 0
-	local readyUserList = {}
-	for k, v in ipairs(player_info_list) do
-		if v.status == 1 then
-			readyNum = readyNum + 1
-			local readyUser = {}
-			readyUser.playerId = playerId
-			readyUser.nickname = v.userInfo.nickname
-			readyUser.sexType = v.userInfo.sexType
-			readyUser.iconUrl = v.userInfo.iconUrl
-			readyUser.level = v.userInfo.level
-			readyUser.roomCardNum = v.userInfo.roomCardNum
-			table.insert(readyUserList, readyUser)
+function SAPI.getReady(playerId)
+	this.unsetSecondTimerNtf("ready", playerId)
+	local userInfo = this.playerInfoList[playerId]
+	if userInfo.status == 1 then return end
+
+	userInfo.status = 1 -- now ready
+	local readyList = {}
+	for k, v in pairs(this.playerInfoList) do
+		if v and v.status == 1 then
+			local readyPlayerId = v.playerId
+			table.insert(readyList, readyPlayerId)
 		end
 	end
-	send_all_player("getReady_ntf", readyUserList)
 
 	-- check if all players get ready
-	if readyNum == max_player_num then
-		skynet.timeout(100, start_play_poker)
+	this.readyPlayerNum = #readyList
+	if this.readyPlayerNum == this.maxPlayerNum then
+		skynet.timeout(50, this.startGame)
+	end
+	this.sendAllPlayer("getReady_ntf", {readyList = readyList})
+end
+
+function SAPI.startGame(msg)
+	if this.readyPlayerNum == this.maxPlayerNum then
+		this.startGame()
 	end
 end
 
-function SERVICE_API.grabLandlord(msg)
+function SAPI.grabLandlord(msg)
 	local playerId = msg.playerId
 	local grabAction = msg.grabAction
-	grab_landlord_handler(playerId, grabAction)
+	this.grabLandlordHandler(playerId, grabAction)
 end
 
-function SERVICE_API.playPoker(msg)
+function SAPI.playPoker(msg)
 	local playerId = msg.playerId
 	local playAction = msg.playAction
-	local pokerType = msg.pokerType
 	local pokerList = msg.pokerList
-	play_poker_handler(playerId, playAction, pokerType, pokerList)
+	this.playPokerHandler(playerId, playAction, pokerList)
 end
 
-function SERVICE_API.leave(playerId)
-	local playerInfo = player_info_list[playerId]
+function SAPI.leave(playerId)
+	print ("player "..playerId.." leave room")
+	local playerInfo = this.playerInfoList[playerId]
+	this.playerInfoList[playerId] = nil
 end
 
 skynet.start(function()
 	skynet.dispatch("lua", function(session, address, cmd, ...)
-		local f = SERVICE_API[cmd]
+		local f = SAPI[cmd]
 		if f then
 			skynet.ret(skynet.pack(f(...)))
 		else
