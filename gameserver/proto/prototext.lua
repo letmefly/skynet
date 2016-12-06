@@ -149,20 +149,20 @@ message chat_ntf {
     optional string talkText = 3;
 }
 message gameResult_ntf {
-    optional int32 totalFactor = 1;
-    optional int32 visiblePokeFactor = 2;
-    optional int32 grapLandlordFactor = 3;
-    optional int32 boomFactor = 4;
-    optional int32 springFactor = 5;
+    //optional int32 totalFactor = 1;
+    //optional int32 visiblePokeFactor = 2;
+    //optional int32 grapLandlordFactor = 3;
+    //optional int32 boomFactor = 4;
+    //optional int32 springFactor = 5;
     message GameResultInfo {
         optional int32 playerId = 1;
-        // 1 win, 2 lose
+        // 1 lose, 2 win
         optional int32 result = 2;
-        optional int32 isLandlord = 3;
-        optional int32 totalFactor = 4;
+        optional int32 leftPokerNum = 3;
+        optional int32 boomNum = 4;
         optional int32 score = 5;
     }
-    repeated GameResultInfo resultList = 6;
+    repeated GameResultInfo resultList = 1;
 }
 message roomResult_ntf {
 }

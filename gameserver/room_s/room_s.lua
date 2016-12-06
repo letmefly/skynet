@@ -196,7 +196,6 @@ end
 
 function this.playPokerHandler(playerId, playAction, pokerList)
 	this.unsetSecondTimerNtf("play", playerId)
-	-- check if game is over
 
 	-- check client error
 	if playAction == 1 then
@@ -218,6 +217,46 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 
 	-- update this player's pokers and previous pokers
 	this.allPlayerPokerSet[playerId] = table_remove(this.allPlayerPokerSet[playerId], pokerList)
+	-- according to player's newest pokers, check if game is over
+	if #this.allPlayerPokerSet[playerId] == 0 then
+		local isLandlordWin = false
+		if this.currLandlord == playerId then
+			isLandlordWin = true
+		end
+		local totalBoom = 0
+		for k, v in pairs(this.playerInfoList) do
+			totalBoom = totalBoom + this.playerInfoList[i].boomNum
+		end
+		local resultList = {}
+		for i = 1, this.maxPlayerNum do
+			local item = {}
+			item.playerId = i
+			item.leftPokerNum = #this.allPlayerPokerSet[i]
+			item.boomNum = this.playerInfoList[i].boomNum
+			if i == this.currLandlord then
+				if isLandlordWin then
+					item.result = 2
+					item.score = 2*math.pow(2, totalBoom)
+				else
+					item.result = 1
+					item.score = -2*math.pow(2, totalBoom)
+				end
+			else
+				if isLandlordWin then
+					item.result = 1
+					item.score = -1*math.pow(2, totalBoom)
+				else
+					item.result = 2
+					item.score = 1*math.pow(2, totalBoom)
+				end
+			end
+			item.score = this.playerInfoList[i].spring *item.score
+			table.insert(resultList, item)
+		end
+		this.sendAllPlayer("gameResult_ntf", {resultList = resultList}
+		return
+	end
+
 	this.currWhoPlay = this.getNextPlayer(this.currWhoPlay)
 	-- nobody can pay aginest prev player, clear prev play info
 	if this.currWhoPlay == this.prevPlayerId then
@@ -240,6 +279,7 @@ function this.restartGame()
 	this.currWhoGrab = 1
 	this.grabTimes = 0
 	this.currWhoPlay = 1
+	this.landlordPlayerId = 0
 
 	this.sendAllPlayer("restartGame_ntf", {errno = 0})
 	skynet.timeout(50, this.startGame)
@@ -285,6 +325,7 @@ function SAPI.init(conf)
 	this.roomNo = conf.roomNo
 	this.roomOwner = 1
 	this.readyPlayerNum = 0
+	this.maxPlayerNum = 3
 	this.grabLandlordMode =  conf.grabMode
 	if 1 == this.grabLandlordMode then
 		this.currWhoGrab = math.random(1, 3)
@@ -308,6 +349,8 @@ function SAPI.joinRoom(agent)
 		sid = sid,
 		status = 0,
 		playerId = playerId,
+		boomNum = 0,
+		spring = 1, -- 1 no spring, 2 spring
 		userInfo = userInfo
 	}
 
