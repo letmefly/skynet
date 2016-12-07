@@ -110,7 +110,11 @@ function this.startGame()
 end
 
 function this.getNextPlayer(playerId)
-	return playerId % this.maxPlayerNum + 1
+	playerId = playerId - 1
+	if playerId == 0 then
+		playerId = this.maxPlayerNum
+	end
+	return playerId
 end
 
 function this.grabLandlord()
@@ -225,7 +229,7 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 		end
 		local totalBoom = 0
 		for k, v in pairs(this.playerInfoList) do
-			totalBoom = totalBoom + this.playerInfoList[i].boomNum
+			totalBoom = totalBoom + this.playerInfoList[k].boomNum
 		end
 		local resultList = {}
 		for i = 1, this.maxPlayerNum do
@@ -236,24 +240,24 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 			if i == this.currLandlord then
 				if isLandlordWin then
 					item.result = 2
-					item.score = 2*math.pow(2, totalBoom)
+					item.score = 2*math_pow(2, totalBoom)
 				else
 					item.result = 1
-					item.score = -2*math.pow(2, totalBoom)
+					item.score = -2*math_pow(2, totalBoom)
 				end
 			else
 				if isLandlordWin then
 					item.result = 1
-					item.score = -1*math.pow(2, totalBoom)
+					item.score = -1*math_pow(2, totalBoom)
 				else
 					item.result = 2
-					item.score = 1*math.pow(2, totalBoom)
+					item.score = 1*math_pow(2, totalBoom)
 				end
 			end
 			item.score = this.playerInfoList[i].spring *item.score
 			table.insert(resultList, item)
 		end
-		this.sendAllPlayer("gameResult_ntf", {resultList = resultList}
+		this.sendAllPlayer("gameResult_ntf", {resultList = resultList})
 		return
 	end
 

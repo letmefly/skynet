@@ -30,11 +30,14 @@ this.TYPE_KING_BOOM = 12 --王炸
 
 
 function this.isSingle(pokerList)
-	if #pokerList == 1 then
-		local seq = math.ceil(pokerList[1]/4)
-		return this.TYPE_SINGLE,seq
-	end
-	return -1,-1
+    if #pokerList == 1 then
+        local seq = math.ceil(pokerList[1]/4)
+        if pokerList[1] == 54 then
+            seq = seq + 1
+        end
+        return this.TYPE_SINGLE,seq
+    end
+    return -1,-1
 end
 
 function this.isDouble(pokerList)
@@ -631,6 +634,13 @@ function table_insert(srcTable, insertItems)
     end
     table.sort(srcTable)
     return srcTable
+end
+
+function math_pow(a, b)
+	if b == 0 then
+		return 1
+	end
+	return a * math_pow(a, b-1)
 end
 
 return this
