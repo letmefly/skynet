@@ -15,6 +15,9 @@ this.maxPlayerNum = 3
 this.grabLandlordMode = 1 --1 random mode, 2 score mode
 this.currPlayerNum = 0
 this.roomOwner = 0
+this.currPlayTimes = 0
+this.maxPlayTimes = 6
+this.playResultList = {}
 
 -- game state data
 this.bottomPokerList = {}
@@ -78,6 +81,8 @@ end
 
 -- send 17 poker to all player
 function this.startGame()
+	this.unsetSecondTimer("s"..999)
+	this.currPlayTimes = this.currPlayTimes + 1
 	-- 1,2,3,4,means that heart-3,diamod-3,club-3,spade-3
 	local pokerSet = {}
 	for i = 1, 54 do
@@ -119,11 +124,11 @@ end
 
 function this.grabLandlord()
 	this.sendAllPlayer("whoGrabLandlord_ntf", {playerId = this.currWhoGrab})
-	this.setSecondTimer("grab"..this.currWhoGrab, 10, function(timerVal)
+	this.setSecondTimer("g"..this.currWhoGrab, 10, function(timerVal)
 		if timerVal == 0 then
 			this.grabTimeout(this.currWhoGrab)
 		else
-			this.alarmTimerNtf("grab", this.currWhoGrab, timerVal)
+			this.alarmTimerNtf("g", this.currWhoGrab, timerVal)
 		end
 	end)
 end
@@ -144,7 +149,7 @@ function this.grabTimeout(playerId)
 end
 
 function this.grabLandlordHandler(playerId, grabAction)
-	this.unsetSecondTimerNtf("grab", playerId)
+	this.unsetSecondTimerNtf("g", playerId)
 	this.grabTimes = this.grabTimes + 1
 	if grabAction - 1 > this.currGrabLevel then
 		this.currGrabLevel = grabAction - 1
@@ -185,11 +190,11 @@ end
 
 function this.playPoker()
 	this.sendAllPlayer("whoPlay_ntf", {playerId = this.currWhoPlay, prevPlayerId = this.prevPlayerId})
-	this.setSecondTimer("play"..this.currWhoPlay, 15, function(timerVal)
+	this.setSecondTimer("p"..this.currWhoPlay, 15, function(timerVal)
 		if timerVal == 0 then
 			this.playTimeout(this.currWhoPlay)
 		else
-			this.alarmTimerNtf("play", this.currWhoPlay, timerVal)
+			this.alarmTimerNtf("p", this.currWhoPlay, timerVal)
 		end
 	end)
 end
@@ -199,7 +204,7 @@ function this.playTimeout(playerId)
 end
 
 function this.playPokerHandler(playerId, playAction, pokerList)
-	this.unsetSecondTimerNtf("play", playerId)
+	this.unsetSecondTimerNtf("p", playerId)
 
 	-- check client error
 	if playAction == 1 then
@@ -214,6 +219,10 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 			skynet.error(cjson.encode(pokerList))
 			skynet.error(cjson.encode(this.prevPokerList))
 			return
+		end
+		local pokerType, level = pokerUtil.getPokerType(pokerList)
+		if pokerType == 11 or pokerType == 12 then
+			this.playerInfoList[playerId].boomNum = this.playerInfoList[playerId].boomNum + 1
 		end
 	end
 
@@ -258,6 +267,24 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 			table.insert(resultList, item)
 		end
 		this.sendAllPlayer("gameResult_ntf", {resultList = resultList})
+		this.playResultList[this.currPlayTimes] = resultList
+
+		-- all games are over, dismiss room
+		if this.currPlayTimes >= this.maxPlayTimes then
+			local roomResultList = this.calcRoomResult()
+			this.setTimer("roomResult", 100, function()
+				this.sendAllPlayer("roomResult_ntf", {roomResultList = roomResultList})
+			end)
+		else
+			this.resetGame()
+			this.setSecondTimer("s"..999, 15, function(timerVal)
+				if timerVal == 0 then
+					this.restartGame()
+				else
+					this.alarmTimerNtf("s", 999, timerVal)
+				end
+			end)
+		end
 		return
 	end
 
@@ -278,15 +305,57 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 	end
 end
 
-function this.restartGame()
+function this.calcRoomResult()
+	print(cjson.encode(this.playResultList))
+	local roomResultList = {}
+	for k, v in pairs(this.playerInfoList) do
+		local item = {}
+		item.playerId = v.playerId
+		item.nickname = v.userInfo.nickname
+		item.totalBoom = 0
+		item.maxScore = 0
+		item.winTimes = 0
+		item.totalScore = 0
+		for kk, vv in pairs(this.playResultList) do
+			for kkk, vvv in pairs(vv) do
+				if vvv.playerId == item.playerId then
+					item.totalBoom = item.totalBoom + vvv.boomNum
+					if vvv.score > item.maxScore then
+						item.maxScore = vvv.score
+					end
+					item.totalScore = item.totalScore + vvv.score
+					if vvv.result == 2 then
+						item.winTimes = item.winTimes + 1
+					end
+				end
+			end
+		end
+		table.insert(roomResultList, item)
+	end
+	return roomResultList
+end
+
+function this.resetGame()
 	this.bottomPokerList = {}
 	this.currWhoGrab = 1
 	this.grabTimes = 0
 	this.currWhoPlay = 1
-	this.landlordPlayerId = 0
+	this.currLandlord = 0
+	this.currGrabLevel = 0
+	this.prevPlayerId = 0
+	this.prevPokerList = {}
+	this.readyPlayerNum = 0
+	-- all player's pokerList
+	this.allPlayerPokerSet = {}
 
-	this.sendAllPlayer("restartGame_ntf", {errno = 0})
-	skynet.timeout(50, this.startGame)
+	for k, v in pairs(this.playerInfoList) do
+		v.status = 0
+	end
+end
+
+function this.restartGame()
+	this.resetGame()
+	this.sendAllPlayer("restartGame_ntf", {errno = 1000})
 end
 
 function this.joinRoomOkNtf(playerId)
@@ -304,12 +373,11 @@ function this.joinRoomOkNtf(playerId)
 		end
 	end
 	this.sendAllPlayer("joinRoomOk_ntf", {userInfoList = userInfoList})
-	local timerName = "ready".. playerId
-	this.setSecondTimer(timerName, 15, function(timerVal)
+	this.setSecondTimer("r"..playerId, 15, function(timerVal)
 		if timerVal == 0 then
 			this.leaveRoom(playerId)
 		else
-			this.alarmTimerNtf("ready", playerId, timerVal)
+			this.alarmTimerNtf("r", playerId, timerVal)
 		end
 	end)
 end
@@ -327,10 +395,13 @@ end
 ----------------------------- sevevice api -------------------------------
 function SAPI.init(conf)
 	this.roomNo = conf.roomNo
+	this.currPlayTimes = 0
+	this.maxPlayTimes = 1
 	this.roomOwner = 1
 	this.readyPlayerNum = 0
 	this.maxPlayerNum = 3
 	this.grabLandlordMode =  conf.grabMode
+	this.playResultList = {}
 	if 1 == this.grabLandlordMode then
 		this.currWhoGrab = math.random(1, 3)
 	end
@@ -361,7 +432,7 @@ function SAPI.joinRoom(agent)
 	-- notify all join user info
 	--skynet.timeout(5, this.joinNtf)
 
-	return playerId
+	return {playerId=playerId, maxPlayTimes=this.maxPlayTimes}
 end
 
 function SAPI.joinRoomOk(msg)
@@ -370,7 +441,7 @@ function SAPI.joinRoomOk(msg)
 end
 
 function SAPI.getReady(playerId)
-	this.unsetSecondTimerNtf("ready", playerId)
+	this.unsetSecondTimerNtf("r", playerId)
 	local userInfo = this.playerInfoList[playerId]
 	if userInfo.status == 1 then return end
 

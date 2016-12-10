@@ -44,7 +44,7 @@ function this.isDouble(pokerList)
 	if #pokerList == 2 then
 		local seq1 = math.ceil(pokerList[1]/4)
 		local seq2 = math.ceil(pokerList[2]/4)
-		if seq1 == seq2 then
+		if seq1 == seq2 and seq2 < 14 then
 			return this.TYPE_DOUBLE,seq1
 		end
 	end

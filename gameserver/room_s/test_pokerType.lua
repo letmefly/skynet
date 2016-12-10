@@ -59,6 +59,10 @@ function M.test()
 	t, l = pokerUtil.getPokerType(pokerList)
 	print("{2,3,4, 6,7,8, 10,11,12, 14,15,16, 18,19,20, 22,23,24, 41,47,33,31,35,1} "..t..","..l)
 
+	local playPoker = {53,54}
+	t,l = pokerUtil.getPokerType(playPoker)
+	print("{53,54} "..t..","..l)
+
 	local playPoker = {2,3,4,30}
 	local tip = {}
 	t,l = pokerUtil.getPokerType(playPoker)

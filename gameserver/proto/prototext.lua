@@ -40,6 +40,8 @@ message joinRoom_ack {
     // 0 success, -1 room number invalid
     optional int32 errno = 1;
     optional int32 playerId = 2;
+    optional int32 currPlayTimes = 3;
+    optional int32 maxPlayTimes = 4;
 }
 message joinRoomOk {
     optional int32 playerId = 1;
@@ -161,11 +163,22 @@ message gameResult_ntf {
         optional int32 leftPokerNum = 3;
         optional int32 boomNum = 4;
         optional int32 score = 5;
+        optional string nickname = 6;
     }
     repeated GameResultInfo resultList = 1;
 }
 message roomResult_ntf {
+    message RoomResultItem_t {
+        optional int32 playerId = 1;
+        optional int32 totalBoom = 2;
+        optional int32 maxScore = 3;
+        optional int32 winTimes = 4;
+        optional int32 totalScore = 5;
+        optional string nickname = 6;
+    }
+    repeated RoomResultItem_t roomResultList = 1;
 }
+
 ]]
 
 

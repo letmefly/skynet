@@ -80,12 +80,15 @@ end
 function CLIENT_REQ.joinRoom(msg)
 	local errno = -1
 	local roomNo = msg.roomNo
+	local maxPlayTimes = 6
 	my_room_sid = skynet.call("roomManager_s", "lua", "queryRoom", roomNo)
 	if my_room_sid ~= nil then
 		errno = 1000
-		room_playerId = skynet.call(my_room_sid, "lua", "joinRoom", {sid = skynet.self(), userInfo = user_info})
+		local ret = skynet.call(my_room_sid, "lua", "joinRoom", {sid = skynet.self(), userInfo = user_info})
+		room_playerId = ret.playerId
+		maxPlayTimes = ret.maxPlayTimes
 	end
-	send_client_msg("joinRoom_ack", {errno = errno, playerId = room_playerId})
+	send_client_msg("joinRoom_ack", {errno=errno, playerId=room_playerId, maxPlayTimes=maxPlayTimes, currPlayTimes=0})
 end
 
 function CLIENT_REQ.joinRoomOk(msg)
