@@ -7,14 +7,25 @@ local rooms = {}
 local total_room = 0
 
 
-function SERVICE_API.createRoom(roomType)
+function SERVICE_API.createRoom(msg)
+	local roomType = msg.roomType
+	local playTimes = msg.playTimes
+	local grabMode = msg.grabMode
+	local maxBoom = msg.maxBoom
+
 	room_seq = room_seq + 1
 	if (room_seq > 900000) then
 		room_seq = 100000
 	end
 	local roomNo = room_seq .. ""
 	local sid = skynet.newservice("room_s")
-	skynet.call(sid, "lua", "init", {roomNo = roomNo, grabMode = 2})
+	skynet.call(sid, "lua", "init", {
+		roomNo = roomNo, 
+		roomType =roomType,
+		playTimes = playTimes,
+		grabMode = grabMode,
+		maxBoom = maxBoom
+	})
 	rooms[roomNo] = sid
 	total_room = total_room + 1
 	return {sid = sid, roomNo = roomNo}

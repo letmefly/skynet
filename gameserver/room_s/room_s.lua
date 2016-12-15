@@ -29,6 +29,8 @@ this.currGrabLevel = 0
 this.prevPlayerId = 0
 this.prevPokerList = {}
 this.readyPlayerNum = 0
+this.isFirstOneGrab = false
+this.firstGrabPlayerId = 0
 -- all player's pokerList
 this.allPlayerPokerSet = {}
 
@@ -149,16 +151,26 @@ function this.grabTimeout(playerId)
 end
 
 function this.grabLandlordHandler(playerId, grabAction)
+	this.sendAllPlayer("grabLandlord_ntf", {playerId=playerId, grabAction=grabAction})
 	this.unsetSecondTimerNtf("g", playerId)
 	this.grabTimes = this.grabTimes + 1
-	if grabAction - 1 > this.currGrabLevel then
+	if grabAction - 1 >= this.currGrabLevel then
 		this.currGrabLevel = grabAction - 1
 		this.currLandlord = playerId
+	end
+
+	if this.firstGrabPlayerId == playerId and grabAction > 1 then
+		this.isFirstOneGrab = true
+	end
+
+	local maxGrabTimes = this.maxPlayerNum
+	if this.isFirstOneGrab and this.currLandlord ~= this.firstGrabPlayerId then
+		maxGrabTimes = this.maxPlayerNum + 1
 	end
 	-- check if grab is over
 	-- 1. random grab mode
 	if this.grabLandlordMode == 1 then
-		if this.currGrabLevel > 0 then
+		if this.currGrabLevel > 0 and this.grabTimes >= maxGrabTimes then
 			-- now landlord is known
 			this.grabLandlordOver(this.currLandlord)
 			return
@@ -166,7 +178,8 @@ function this.grabLandlordHandler(playerId, grabAction)
 	-- 2. score grab mode
 	elseif this.grabLandlordMode == 2 then
 		-- the one who give level 3 first get landlord
-		if this.currGrabLevel == 3 then
+		if this.currGrabLevel == 3 or 
+			(this.currGrabLevel>0 and this.grabTimes==maxGrabTimes) then
 			-- now landlord is known
 			this.grabLandlordOver(this.currLandlord)
 			return
@@ -174,17 +187,12 @@ function this.grabLandlordHandler(playerId, grabAction)
 	end
 
 	-- now nobody want to grab landlord
-	if this.grabTimes >= 3 then
-		if this.currLandlord > 0 then
-			this.grabLandlordOver(this.currLandlord)
-		else
-			this.restartGame()
-		end
+	if this.grabTimes > maxGrabTimes then
+		this.restartGame()
 		return
 	end
 
 	this.currWhoGrab = this.getNextPlayer(this.currWhoGrab)
-	this.sendAllPlayer("grabLandlord_ntf", {playerId=playerId, grabAction=grabAction})
 	skynet.timeout(10, this.grabLandlord)
 end
 
@@ -200,7 +208,13 @@ function this.playPoker()
 end
 
 function this.playTimeout(playerId)
-	this.playPokerHandler(playerId, 1, {})
+	local playPokerList = {}
+	local playAction = 1
+	if #this.prevPokerList == 0 then
+		playAction = 2
+		table.insert(playPokerList, this.allPlayerPokerSet[playerId][1])
+	end
+	this.playPokerHandler(playerId, playAction, playPokerList)
 end
 
 function this.playPokerHandler(playerId, playAction, pokerList)
@@ -347,7 +361,11 @@ function this.resetGame()
 	this.readyPlayerNum = 0
 	-- all player's pokerList
 	this.allPlayerPokerSet = {}
-
+	if 1 == this.grabLandlordMode or 2 == this.grabLandlordMode then
+		this.currWhoGrab = math.random(1, this.maxPlayerNum)
+	end
+	this.firstGrabPlayerId = this.currWhoGrab
+	this.isFirstOneGrab = false
 	for k, v in pairs(this.playerInfoList) do
 		v.status = 0
 	end
@@ -395,16 +413,21 @@ end
 ----------------------------- sevevice api -------------------------------
 function SAPI.init(conf)
 	this.roomNo = conf.roomNo
+	this.maxPlayerNum = conf.roomType
+	this.maxPlayTimes = conf.playTimes
+	this.grabLandlordMode = conf.grabMode
+	this.maxBoom = conf.maxBoom
+
 	this.currPlayTimes = 0
-	this.maxPlayTimes = 1
 	this.roomOwner = 1
 	this.readyPlayerNum = 0
-	this.maxPlayerNum = 3
-	this.grabLandlordMode =  conf.grabMode
 	this.playResultList = {}
-	if 1 == this.grabLandlordMode then
-		this.currWhoGrab = math.random(1, 3)
+	if 1 == this.grabLandlordMode or 2 == this.grabLandlordMode then
+		this.currWhoGrab = math.random(1, this.maxPlayerNum)
 	end
+	this.firstGrabPlayerId = this.currWhoGrab
+	this.isFirstOneGrab = false
+
 	this.startGameTimer()
 	return 0
 end
@@ -432,7 +455,7 @@ function SAPI.joinRoom(agent)
 	-- notify all join user info
 	--skynet.timeout(5, this.joinNtf)
 
-	return {playerId=playerId, maxPlayTimes=this.maxPlayTimes}
+	return {playerId=playerId, maxPlayTimes=this.maxPlayTimes, grabMode = this.grabLandlordMode}
 end
 
 function SAPI.joinRoomOk(msg)
@@ -485,6 +508,10 @@ function SAPI.leave(playerId)
 	print ("player "..playerId.." leave room")
 	local playerInfo = this.playerInfoList[playerId]
 	this.playerInfoList[playerId] = nil
+end
+
+function SAPI.chat(msg)
+	this.sendAllPlayer("chat_ntf", msg)
 end
 
 skynet.start(function()

@@ -71,7 +71,15 @@ end
 function CLIENT_REQ.createRoom(msg)
 	-- first check if there is room card
 	local roomType = msg.roomType
-	local ret = skynet.call("roomManager_s", "lua", "createRoom", roomType)
+	local playTimes = msg.playTimes
+	local grabMode = msg.grabMode
+	local maxBoom = msg.maxBoom
+	local ret = skynet.call("roomManager_s", "lua", "createRoom", {
+		roomType = roomType,
+		playTimes = playTimes,
+		grabMode = grabMode,
+		maxBoom = maxBoom
+	})
 	my_room_sid = ret.sid
 	local roomNo = ret.roomNo
 	send_client_msg("createRoom_ack", {errno = 1000, roomNo = roomNo})
@@ -81,14 +89,16 @@ function CLIENT_REQ.joinRoom(msg)
 	local errno = -1
 	local roomNo = msg.roomNo
 	local maxPlayTimes = 6
+	local grabMode = 1
 	my_room_sid = skynet.call("roomManager_s", "lua", "queryRoom", roomNo)
 	if my_room_sid ~= nil then
 		errno = 1000
 		local ret = skynet.call(my_room_sid, "lua", "joinRoom", {sid = skynet.self(), userInfo = user_info})
 		room_playerId = ret.playerId
 		maxPlayTimes = ret.maxPlayTimes
+		grabMode = ret.grabMode
 	end
-	send_client_msg("joinRoom_ack", {errno=errno, playerId=room_playerId, maxPlayTimes=maxPlayTimes, currPlayTimes=0})
+	send_client_msg("joinRoom_ack", {errno=errno, playerId=room_playerId, maxPlayTimes=maxPlayTimes, currPlayTimes=0, grabMode=grabMode})
 end
 
 function CLIENT_REQ.joinRoomOk(msg)
@@ -120,6 +130,10 @@ function CLIENT_REQ.playPoker(msg)
 end
 
 function CLIENT_REQ.chat(msg)
+	local playerId = msg.playerId
+	local t = msg.t
+	local v = msg.v
+	skynet.call(my_room_sid, "lua", "chat", {playerId = playerId, t = t, v = v})
 end
 
 function CLIENT_REQ.leaveRoom(msg)

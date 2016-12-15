@@ -26,7 +26,12 @@ message gameLogin_ack {
     optional userInfo_t userInfo = 2;
 }
 message createRoom {
+    // 3, or 4 
     optional int32 roomType = 1;
+    optional int32 playTimes = 2;
+    // 1 - roll mode, 2 - score mode
+    optional int32 grabMode = 3;
+    optional int32 maxBoom = 4;
 }
 message createRoom_ack {
     // 0 success, -1 room card not enough
@@ -42,6 +47,7 @@ message joinRoom_ack {
     optional int32 playerId = 2;
     optional int32 currPlayTimes = 3;
     optional int32 maxPlayTimes = 4;
+    optional int32 grabMode = 5;
 }
 message joinRoomOk {
     optional int32 playerId = 1;
@@ -141,14 +147,14 @@ message lastPoker_ntf {
     optional int32 pokerNum = 2;
 }
 message chat {
-    optional int32 fastTalkId = 1;
-    optional string talkText = 2;
+    optional int32 playerId = 1;
+    optional string t = 2;
+    optional string v = 3;
 }
 message chat_ntf {
-    // player 1, 2, 3
     optional int32 playerId = 1;
-    optional int32 fastTalkId = 2;
-    optional string talkText = 3;
+    optional string t = 2;
+    optional string v = 3;
 }
 message gameResult_ntf {
     //optional int32 totalFactor = 1;
