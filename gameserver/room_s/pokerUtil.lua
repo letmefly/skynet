@@ -146,16 +146,36 @@ function this.isThreeDouble(pokerList)
 end
 
 function this.isBoom(pokerList)
-    if #pokerList ~= 4 then
+    if #pokerList < 4 then
         return -1,-1
     end
     table.sort(pokerList)
-    local idxList = this.findEqualPoker(pokerList, 4)
-    if #idxList == 0 then
-        return -1,-1
+    local idxList = this.findEqualPoker(pokerList, 8)
+    if #idxList == 8 then
+        local level = math.ceil(pokerList[idxList[1]]/4)
+        return this.TYPE_BOOM,level+80
     end
-    local level = math.ceil(pokerList[idxList[1]]/4)
-    return this.TYPE_BOOM,level
+    local idxList = this.findEqualPoker(pokerList, 7)
+    if #idxList == 7 then
+        local level = math.ceil(pokerList[idxList[1]]/4)
+        return this.TYPE_BOOM,level+70
+    end
+    local idxList = this.findEqualPoker(pokerList, 6)
+    if #idxList == 6 then
+        local level = math.ceil(pokerList[idxList[1]]/4)
+        return this.TYPE_BOOM,level+60    
+    end    
+    local idxList = this.findEqualPoker(pokerList, 5)
+    if #idxList == 5 then
+        local level = math.ceil(pokerList[idxList[1]]/4)
+        return this.TYPE_BOOM,level+50          
+    end    
+    local idxList = this.findEqualPoker(pokerList, 4)
+    if #idxList == 4 then
+        local level = math.ceil(pokerList[idxList[1]]/4)
+        return this.TYPE_BOOM,level          
+    end
+    return -1,-1
 end
 
 function this.isKingBoom(pokerList)
@@ -267,7 +287,14 @@ function this.isThreeByThree(pokerList)
     return this.TYPE_THREE_BY_THREE, level
 end
 
-function this.getPokerType(pokerList)
+function this.getPokerType(pokers)
+    local pokerList = {}
+    for k, v in pairs(pokers) do
+        if v > 54 then
+            v = v - 54
+        end
+        pokerList[k] = v
+    end
     table.sort(pokerList)
     local pokerType, level = this.isSingle(pokerList)
     if pokerType ~= -1 then
@@ -573,7 +600,23 @@ function this.getTipThreeByThree(pokerList, count, level)
     return {}
 end
 
-function this.getTipPoker(pokerList, currPlayPoker)
+function this.getTipPoker(pokers, playPokers)
+    local pokerList = {}
+    local currPlayPoker = {}
+    for k, v in pairs(pokers) do
+        if v > 54 then
+            v = v - 54
+        end
+        pokerList[k] = v
+    end
+    for k, v in pairs(playPokers) do
+        if v > 54 then
+            v = v - 54
+        end
+        currPlayPoker[k] = v
+    end
+
+
     local tipPokers = {}
     local tipPokerIdxs = {}
     table.sort(pokerList)
@@ -608,7 +651,7 @@ function this.getTipPoker(pokerList, currPlayPoker)
     end
     for i = 1, #tipPokerIdxs do
         local idx = tipPokerIdxs[i]
-        table.insert(tipPokers, pokerList[idx])
+        table.insert(tipPokers, pokers[idx])
     end
     return tipPokers
 end
@@ -644,6 +687,18 @@ function this.pokerCmp(srcPokerList, destPokerList)
         return 1
     end
     return -1
+end
+
+function this.sortPoker(pokers)
+    table.sort(pokers, function(a, b)
+        if a > 54 then
+            a = a - 54
+        end
+        if b > 54 then
+            b = b - 54
+        end
+        return a < b
+    end)
 end
 
 function table_remove(srcTable, removeItems)

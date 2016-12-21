@@ -3,6 +3,8 @@ local nothing = require "skynet.manager"
 local netpack = require "netpack"
 local socket = require "socket"
 local netutil = require "agent_s.netutil"
+local httpc = require "http.httpc"
+local dns = require "dns"
 local cjson = require "cjson"
 
 local WATCHDOG
@@ -17,8 +19,12 @@ local client_fd
 local PROTO_TYPE = 1
 
 local my_room_sid = -1
+local my_room_no = 0
+local my_room_type = 0
+local my_room_maxplaytimes = 0
 local room_playerId = -1
 local user_info = {}
+local http_server_addr = "127.0.0.1:80"
 
 
 ------------------------ helper function ------------------------
@@ -57,13 +63,21 @@ function CLIENT_REQ.gameLogin(msg)
 	local userId = msg.userId
 	local authCode = msg.authCode
 	local version = msg.version
-	user_info.userId = "chris123"
-	user_info.nickname = "chris"
-	user_info.sexType = 1
-	user_info.iconUrl = "http://"
-	user_info.level = 1
-	user_info.roomCardNum = 100
+
+	local status, body = httpc.post2(http_server_addr, "/php_01/html/v0/service_getUser.php", cjson.encode({unionid=userId}))
+	local userData = cjson.decode(body)
+	user_info.userId = userData['unionid']
+	user_info.nickname = userData['nickname']
+	user_info.sexType = userData['sex']
+	user_info.iconUrl = userData['headimgurl']
+	user_info.level = userData['level']
+	user_info.roomCardNum = userData['roomCardNum']
 	user_info.playerId = 0
+	user_info.win = userData['win']
+	user_info.lose = userData['lose']
+	user_info.score = userData['score']
+	user_info.ip = userData['ip']
+	
 	-- verify user auth
 	send_client_msg("gameLogin_ack", {errno = 1000, userInfo = user_info})
 end
@@ -90,6 +104,7 @@ function CLIENT_REQ.joinRoom(msg)
 	local roomNo = msg.roomNo
 	local maxPlayTimes = 6
 	local grabMode = 1
+	local roomType = 3
 	my_room_sid = skynet.call("roomManager_s", "lua", "queryRoom", roomNo)
 	if my_room_sid ~= nil then
 		errno = 1000
@@ -97,8 +112,20 @@ function CLIENT_REQ.joinRoom(msg)
 		room_playerId = ret.playerId
 		maxPlayTimes = ret.maxPlayTimes
 		grabMode = ret.grabMode
+		roomType = ret.roomType
+
+		my_room_no = roomNo
+		my_room_type = roomType
+		my_room_maxplaytimes = maxPlayTimes
 	end
-	send_client_msg("joinRoom_ack", {errno=errno, playerId=room_playerId, maxPlayTimes=maxPlayTimes, currPlayTimes=0, grabMode=grabMode})
+	send_client_msg("joinRoom_ack", {
+		errno = errno, 
+		playerId = room_playerId, 
+		maxPlayTimes = maxPlayTimes, 
+		currPlayTimes = 0, 
+		grabMode = grabMode,
+		roomType = roomType
+	})
 end
 
 function CLIENT_REQ.joinRoomOk(msg)
@@ -137,6 +164,17 @@ function CLIENT_REQ.chat(msg)
 end
 
 function CLIENT_REQ.leaveRoom(msg)
+	skynet.call(my_room_sid, "lua", "leave", room_playerId)	
+end
+
+function CLIENT_REQ.rejoinRoom(msg)
+	local errno = -1
+	my_room_sid = skynet.call("roomManager_s", "lua", "queryRoom", msg.roomNo)
+	if my_room_sid ~= nil then
+		errno = 1000
+		skynet.call(my_room_sid, "lua", "rejoin", {playerId=msg.playerId, sid=skynet.self()})
+	end
+	send_client_msg("rejoinRoom_ack", {errno = 1000})
 end
 
 ------------------------ register client dispatch -----------------
@@ -170,7 +208,7 @@ end
 
 function SERVICE_API.disconnect()
 	-- todo: do something before exit
-	--skynet.call(my_room_sid, "lua", "leave", room_playerId)
+	skynet.call(my_room_sid, "lua", "disconnect", room_playerId)
 	skynet.exit()
 end
 
@@ -178,6 +216,35 @@ function SERVICE_API.sendClient(msgname, msg)
 	send_client_msg(msgname, msg)
 end
 
+function SERVICE_API.saveGameResult(msg)
+	local roomResultList = msg
+	local postData = {}
+	postData.userData = {}
+	postData.roomResult = {}
+	postData.roomResult.roomNo = my_room_no
+	postData.roomResult.roomType = my_room_type
+	postData.roomResult.history = {}
+
+	for k, v in pairs(roomResultList) do
+		if v.playerId == room_playerId then
+			postData.userData.unionid = user_info.userId
+			if v.totalScore > 0 then
+				postData.userData.win = user_info.win + 1
+			else
+				postData.userData.lose = user_info.lose + 1
+			end
+			postData.userData.score = user_info.score + v.totalScore
+		end
+		table.insert(postData.roomResult.history, {n=user_info.nickname, s=v.totalScore})
+	end
+	if my_room_maxplaytimes == 6 then
+		postData.userData.roomCardNum = user_info.roomCardNum - 2
+	elseif my_room_maxplaytimes == 12 then
+		postData.userData.roomCardNum = user_info.roomCardNum - 3
+	end
+
+	local status, body = httpc.post2(http_server_addr, "/php_01/html/v0/service_updateUser.php", cjson.encode(postData))
+end
 
 ------------------------ service start! -----------------------------
 skynet.start(function()

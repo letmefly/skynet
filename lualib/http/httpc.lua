@@ -144,4 +144,12 @@ function httpc.post(host, url, form, recvheader)
 	return httpc.request("POST", host, url, recvheader, header, table.concat(body , "&"))
 end
 
+function httpc.post2(host, url, body)
+	local recvheader = {}
+	local header = {
+		["content-type"] = "application/json"
+	}
+	return httpc.request("POST", host, url, recvheader, header, body)
+end
+
 return httpc

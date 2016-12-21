@@ -36,7 +36,7 @@ this.allPlayerPokerSet = {}
 
 function this.sendAllPlayer(msgname, msg)
 	for k, v in pairs(this.playerInfoList) do
-		if v then
+		if v and v.sid then
 			local sid = v.sid
 			skynet.call(sid, "lua", "sendClient", msgname, msg)
 		end
@@ -44,7 +44,18 @@ function this.sendAllPlayer(msgname, msg)
 end
 
 function this.sendPlayer(sid, msgname, msg)
-	skynet.call(sid, "lua", "sendClient", msgname, msg)
+	if sid then
+		skynet.call(sid, "lua", "sendClient", msgname, msg)
+	end
+end
+
+function this.sendAllAgent(cmd, msg)
+	for k, v in pairs(this.playerInfoList) do
+		if v and v.sid then
+			local sid = v.sid
+			skynet.call(sid, "lua", cmd, msg)
+		end
+	end
 end
 
 --------------------------------game timer ----------------------------------
@@ -86,12 +97,20 @@ function this.startGame()
 	this.unsetSecondTimer("s"..999)
 	this.currPlayTimes = this.currPlayTimes + 1
 	-- 1,2,3,4,means that heart-3,diamod-3,club-3,spade-3
+	local factor1 = 54
+	local factor2 = 17
+	local factor3 = 3
+	if this.maxPlayerNum == 4 then
+		factor1 = 108
+		factor2 = 25
+		factor3 = 8
+	end
 	local pokerSet = {}
-	for i = 1, 54 do
-		pokerSet[i] = i
+	for i = 1, factor1 do
+		table.insert(pokerSet, i)
 	end
 
-	for i = 1, 3 do
+	for i = 1, factor3 do
 		local random = math.random(#pokerSet)
 		this.bottomPokerList[i] = pokerSet[random]
 		table.remove(pokerSet, random)
@@ -101,11 +120,12 @@ function this.startGame()
 		local playerId = v.playerId
 		local pokerList = {}
 		-- random choose poker
-		for i=1, 17 do
+		for i=1, factor2 do
 			local random = math.random(#pokerSet)
 			table.insert(pokerList, pokerSet[random])
 			table.remove(pokerSet, random)
 		end
+		pokerUtil.sortPoker(pokerList)
 		this.allPlayerPokerSet[playerId] = pokerList
 		--table.insert(allPokerList, pokerList)
 		this.sendPlayer(sid, "startGame_ntf", {pokerList = pokerList, bottomList = this.bottomPokerList})
@@ -285,10 +305,8 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 
 		-- all games are over, dismiss room
 		if this.currPlayTimes >= this.maxPlayTimes then
-			local roomResultList = this.calcRoomResult()
-			this.setTimer("roomResult", 100, function()
-				this.sendAllPlayer("roomResult_ntf", {roomResultList = roomResultList})
-			end)
+			this.roomOver()
+			return
 		else
 			this.resetGame()
 			this.setSecondTimer("s"..999, 15, function(timerVal)
@@ -349,6 +367,16 @@ function this.calcRoomResult()
 	return roomResultList
 end
 
+function this.roomOver()
+	local roomResultList = this.calcRoomResult()
+	this.setTimer("roomResult", 100, function()
+		this.sendAllPlayer("roomResult_ntf", {roomResultList = roomResultList})
+	end)
+
+	-- save user game data
+	this.sendAllAgent("saveGameResult", roomResultList)
+end
+
 function this.resetGame()
 	this.bottomPokerList = {}
 	this.currWhoGrab = 1
@@ -406,8 +434,21 @@ end
 
 function this.leaveRoom(playerId)
 	this.sendAllPlayer("leaveRoom_ntf", {playerId = playerId})
-	this.playerInfoList[playerId] = nil
 	this.currPlayerNum = this.currPlayerNum - 1
+	local playerNum = 0
+	for k, v in pairs(this.playerInfoList) do
+		if v then
+			playerNum = playerNum + 1
+		end
+	end
+	skynet.kill(this.playerInfoList[playerId].sid)
+	this.playerInfoList[playerId] = nil
+	-- dismiss room
+	if playerNum == 0 then
+		skynet.timeout(100, function()
+			skynet.call("roomManager_s", "lua", "destroyRoom", this.roomNo)
+		end)
+	end
 end
 
 ----------------------------- sevevice api -------------------------------
@@ -429,6 +470,10 @@ function SAPI.init(conf)
 	this.isFirstOneGrab = false
 
 	this.startGameTimer()
+
+	this.setTimer("destroyRoom", 2*3600*100, function() 
+		skynet.call("roomManager_s", "lua", "destroyRoom", this.roomNo)
+	end)
 	return 0
 end
 
@@ -455,7 +500,7 @@ function SAPI.joinRoom(agent)
 	-- notify all join user info
 	--skynet.timeout(5, this.joinNtf)
 
-	return {playerId=playerId, maxPlayTimes=this.maxPlayTimes, grabMode = this.grabLandlordMode}
+	return {playerId=playerId, maxPlayTimes=this.maxPlayTimes, grabMode=this.grabLandlordMode, roomType = this.maxPlayerNum}
 end
 
 function SAPI.joinRoomOk(msg)
@@ -506,12 +551,21 @@ end
 
 function SAPI.leave(playerId)
 	print ("player "..playerId.." leave room")
-	local playerInfo = this.playerInfoList[playerId]
-	this.playerInfoList[playerId] = nil
+	this.leaveRoom(playerId)
 end
 
 function SAPI.chat(msg)
 	this.sendAllPlayer("chat_ntf", msg)
+end
+
+function SAPI.rejoin(msg)
+	local playerId = msg.playerId
+	local sid = msg.sid
+	this.playerInfoList[playerId].sid = sid
+end
+
+function SAPI.disconnect(playerId)
+	this.playerInfoList[playerId].sid = nil
 end
 
 skynet.start(function()

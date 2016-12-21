@@ -11,6 +11,10 @@ message userInfo_t {
     optional int32 level = 5;
     optional int32 roomCardNum = 6;
     optional int32 playerId = 7;
+    optional int32 win = 8;
+    optional int32 lose = 9;
+    optional int32 score = 10;
+    optional string ip = 11;
 }
 message handshake {
   optional int32 sn = 1;
@@ -48,7 +52,18 @@ message joinRoom_ack {
     optional int32 currPlayTimes = 3;
     optional int32 maxPlayTimes = 4;
     optional int32 grabMode = 5;
+    optional int32 roomType = 6;
 }
+
+message rejoinRoom {
+    optional string roomNo = 1;
+    optional int32 playerId = 2;
+}
+
+message rejoinRoom_ack {
+    optional int32 errno = 1;
+}
+
 message joinRoomOk {
     optional int32 playerId = 1;
 }
