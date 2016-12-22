@@ -434,6 +434,8 @@ end
 
 function this.leaveRoom(playerId)
 	this.sendAllPlayer("leaveRoom_ntf", {playerId = playerId})
+	local playerInfo = this.playerInfoList[playerId]
+	this.playerInfoList[playerId] = nil		
 	this.currPlayerNum = this.currPlayerNum - 1
 	local playerNum = 0
 	for k, v in pairs(this.playerInfoList) do
@@ -441,8 +443,13 @@ function this.leaveRoom(playerId)
 			playerNum = playerNum + 1
 		end
 	end
-	skynet.kill(this.playerInfoList[playerId].sid)
-	this.playerInfoList[playerId] = nil
+
+	if playerInfo.sid then
+		skynet.timeout(100, function()
+			skynet.kill(playerInfo.sid)
+		end)
+	end
+	
 	-- dismiss room
 	if playerNum == 0 then
 		skynet.timeout(100, function()
@@ -478,6 +485,9 @@ function SAPI.init(conf)
 end
 
 function SAPI.joinRoom(agent)
+	if this.maxPlayerNum == this.currPlayerNum then
+		return {errno = -1}
+	end
 	local sid = agent.sid
 	local userInfo = agent.userInfo
 	this.currPlayerNum = this.currPlayerNum + 1

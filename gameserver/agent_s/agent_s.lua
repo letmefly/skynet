@@ -109,14 +109,18 @@ function CLIENT_REQ.joinRoom(msg)
 	if my_room_sid ~= nil then
 		errno = 1000
 		local ret = skynet.call(my_room_sid, "lua", "joinRoom", {sid = skynet.self(), userInfo = user_info})
-		room_playerId = ret.playerId
-		maxPlayTimes = ret.maxPlayTimes
-		grabMode = ret.grabMode
-		roomType = ret.roomType
+		if ret.errno == -1 then
+			errno = 1009
+		else
+			room_playerId = ret.playerId
+			maxPlayTimes = ret.maxPlayTimes
+			grabMode = ret.grabMode
+			roomType = ret.roomType
 
-		my_room_no = roomNo
-		my_room_type = roomType
-		my_room_maxplaytimes = maxPlayTimes
+			my_room_no = roomNo
+			my_room_type = roomType
+			my_room_maxplaytimes = maxPlayTimes
+		end
 	end
 	send_client_msg("joinRoom_ack", {
 		errno = errno, 
@@ -208,7 +212,9 @@ end
 
 function SERVICE_API.disconnect()
 	-- todo: do something before exit
-	skynet.call(my_room_sid, "lua", "disconnect", room_playerId)
+	if my_room_sid then
+		skynet.call(my_room_sid, "lua", "disconnect", room_playerId)
+	end
 	skynet.exit()
 end
 
