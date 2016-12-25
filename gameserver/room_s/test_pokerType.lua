@@ -28,6 +28,10 @@ function M.test()
 	t, l = pokerUtil.isBoom(pokerList)
 	print("{5,6,7,8} "..t..","..l)
 
+	pokerList = {5,6,7,8,9,20}
+	t, l = pokerUtil.getPokerType(pokerList)
+	print("{5,6,7,8,9,20} "..t..","..l)
+
 	pokerList = {5,6}
 	t, l = pokerUtil.isKingBoom(pokerList)
 	print("{5,6} "..t..","..l)

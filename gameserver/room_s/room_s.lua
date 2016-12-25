@@ -410,6 +410,7 @@ function this.joinRoomOkNtf(playerId)
 		if v then
 			local userInfo = {}
 			userInfo.playerId = v.playerId
+			userInfo.userId = v.userInfo.userId
 			userInfo.nickname = v.userInfo.nickname
 			userInfo.sexType = v.userInfo.sexType
 			userInfo.iconUrl = v.userInfo.iconUrl
@@ -561,7 +562,16 @@ end
 
 function SAPI.leave(playerId)
 	print ("player "..playerId.." leave room")
-	this.leaveRoom(playerId)
+	if playerId == 1 then
+		for k, v in pairs(this.playerInfoList) do
+			if v then
+				local tmpPlayerId = v.playerId
+				this.leaveRoom(tmpPlayerId)
+			end
+		end
+	else
+		this.leaveRoom(playerId)
+	end
 end
 
 function SAPI.chat(msg)
@@ -575,7 +585,9 @@ function SAPI.rejoin(msg)
 end
 
 function SAPI.disconnect(playerId)
-	this.playerInfoList[playerId].sid = nil
+	if this.playerInfoList[playerId] then 
+		this.playerInfoList[playerId].sid = nil
+	end
 end
 
 skynet.start(function()

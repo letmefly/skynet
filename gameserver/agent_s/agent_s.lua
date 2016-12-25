@@ -88,6 +88,25 @@ function CLIENT_REQ.createRoom(msg)
 	local playTimes = msg.playTimes
 	local grabMode = msg.grabMode
 	local maxBoom = msg.maxBoom
+	if playTimes == 6 or playTimes == 1 then
+		if user_info.roomCardNum > 2 then
+			user_info.roomCardNum = user_info.roomCardNum - 2
+		else
+			send_client_msg("createRoom_ack", {errno = 1007, roomNo = 0})
+			return
+		end
+	elseif playTimes == 12 or playTimes == 2 then
+		if user_info.roomCardNum > 3 then
+			user_info.roomCardNum = user_info.roomCardNum - 3
+		else
+			send_client_msg("createRoom_ack", {errno = 1007, roomNo = 0})
+			return
+		end
+	else
+		send_client_msg("createRoom_ack", {errno = 1007, roomNo = 0})
+		return
+	end
+
 	local ret = skynet.call("roomManager_s", "lua", "createRoom", {
 		roomType = roomType,
 		playTimes = playTimes,

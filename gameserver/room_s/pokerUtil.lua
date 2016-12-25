@@ -151,27 +151,27 @@ function this.isBoom(pokerList)
     end
     table.sort(pokerList)
     local idxList = this.findEqualPoker(pokerList, 8)
-    if #idxList == 8 then
+    if #idxList == 8 and #idxList==#pokerList then
         local level = math.ceil(pokerList[idxList[1]]/4)
         return this.TYPE_BOOM,level+80
     end
     local idxList = this.findEqualPoker(pokerList, 7)
-    if #idxList == 7 then
+    if #idxList == 7 and #idxList==#pokerList then
         local level = math.ceil(pokerList[idxList[1]]/4)
         return this.TYPE_BOOM,level+70
     end
     local idxList = this.findEqualPoker(pokerList, 6)
-    if #idxList == 6 then
+    if #idxList == 6 and #idxList==#pokerList then
         local level = math.ceil(pokerList[idxList[1]]/4)
         return this.TYPE_BOOM,level+60    
     end    
     local idxList = this.findEqualPoker(pokerList, 5)
-    if #idxList == 5 then
+    if #idxList == 5 and #idxList==#pokerList then
         local level = math.ceil(pokerList[idxList[1]]/4)
         return this.TYPE_BOOM,level+50          
     end    
     local idxList = this.findEqualPoker(pokerList, 4)
-    if #idxList == 4 then
+    if #idxList == 4 and #idxList==#pokerList then
         local level = math.ceil(pokerList[idxList[1]]/4)
         return this.TYPE_BOOM,level          
     end
