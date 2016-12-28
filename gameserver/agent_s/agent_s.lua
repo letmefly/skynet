@@ -124,6 +124,7 @@ function CLIENT_REQ.joinRoom(msg)
 	local maxPlayTimes = 6
 	local grabMode = 1
 	local roomType = 3
+	local maxBoom = 3
 	my_room_sid = skynet.call("roomManager_s", "lua", "queryRoom", roomNo)
 	if my_room_sid ~= nil then
 		errno = 1000
@@ -135,6 +136,7 @@ function CLIENT_REQ.joinRoom(msg)
 			maxPlayTimes = ret.maxPlayTimes
 			grabMode = ret.grabMode
 			roomType = ret.roomType
+			maxBoom = ret.maxBoom
 
 			my_room_no = roomNo
 			my_room_type = roomType
@@ -147,7 +149,8 @@ function CLIENT_REQ.joinRoom(msg)
 		maxPlayTimes = maxPlayTimes, 
 		currPlayTimes = 0, 
 		grabMode = grabMode,
-		roomType = roomType
+		roomType = roomType,
+		maxBoom = maxBoom
 	})
 end
 

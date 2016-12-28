@@ -424,7 +424,11 @@ function this.joinRoomOkNtf(playerId)
 		if timerVal == 0 then
 			this.leaveRoom(playerId)
 		else
-			this.alarmTimerNtf("r", playerId, timerVal)
+			if this.playerInfoList[playerId] then
+				this.alarmTimerNtf("r", playerId, timerVal)
+			else
+				this.unsetSecondTimerNtf("r", playerId)
+			end
 		end
 	end)
 end
@@ -434,9 +438,23 @@ function this.alarmTimerNtf(timerType, playerId, timerVal)
 end
 
 function this.leaveRoom(playerId)
+	--[[
+	this.sendAllPlayer("leaveRoom_ntf", {playerId = playerId})	
+	for k, v in pairs(this.playerInfoList) do
+		if v then
+			skynet.timeout(100, function()
+				skynet.kill(v.sid)
+			end)
+		end
+	end
+	skynet.timeout(150, function()
+		skynet.call("roomManager_s", "lua", "destroyRoom", this.roomNo)
+	end)
+	]]
+	
 	this.sendAllPlayer("leaveRoom_ntf", {playerId = playerId})
 	local playerInfo = this.playerInfoList[playerId]
-	this.playerInfoList[playerId] = nil		
+	this.playerInfoList[playerId] = nil
 	this.currPlayerNum = this.currPlayerNum - 1
 	local playerNum = 0
 	for k, v in pairs(this.playerInfoList) do
@@ -511,7 +529,7 @@ function SAPI.joinRoom(agent)
 	-- notify all join user info
 	--skynet.timeout(5, this.joinNtf)
 
-	return {playerId=playerId, maxPlayTimes=this.maxPlayTimes, grabMode=this.grabLandlordMode, roomType = this.maxPlayerNum}
+	return {playerId=playerId, maxPlayTimes=this.maxPlayTimes, grabMode=this.grabLandlordMode, roomType = this.maxPlayerNum, maxBoom = this.maxBoom}
 end
 
 function SAPI.joinRoomOk(msg)
@@ -562,6 +580,8 @@ end
 
 function SAPI.leave(playerId)
 	print ("player "..playerId.." leave room")
+	this.leaveRoom(playerId)
+	--[[
 	if playerId == 1 then
 		for k, v in pairs(this.playerInfoList) do
 			if v then
@@ -572,6 +592,7 @@ function SAPI.leave(playerId)
 	else
 		this.leaveRoom(playerId)
 	end
+	]]
 end
 
 function SAPI.chat(msg)

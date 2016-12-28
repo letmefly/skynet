@@ -53,6 +53,7 @@ message joinRoom_ack {
     optional int32 maxPlayTimes = 4;
     optional int32 grabMode = 5;
     optional int32 roomType = 6;
+    optional int32 maxBoom = 7;
 }
 
 message rejoinRoom {

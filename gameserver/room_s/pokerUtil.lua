@@ -396,8 +396,8 @@ end
 
 function this.getTipThreeSingle(pokerList, level)
     local tipThree = this.getTipThree(pokerList, level)
-    if tipThree == {} then
-        return ret
+    if #tipThree == 0 then
+        return {}
     end
     local idxList = this.findEqualPoker(pokerList, 1, {math.ceil(pokerList[tipThree[1]]/4)})
     table.insert(tipThree, idxList[1])
@@ -406,7 +406,7 @@ end
 
 function this.getTipThreeDouble(pokerList, level)
     local tipThree = this.getTipThree(pokerList, level)
-    if tipThree == {} then
+    if #tipThree == 0 then
         return {}
     end
     local idxList = this.findEqualPoker(pokerList, 2, {math.ceil(pokerList[tipThree[1]]/4)})
