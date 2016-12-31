@@ -15,6 +15,10 @@ message userInfo_t {
     optional int32 lose = 9;
     optional int32 score = 10;
     optional string ip = 11;
+    optional int32 status = 12;
+    optional int32 isLandlord = 13;
+    optional int32 boom = 14;
+    optional int32 leftPoker = 15;
 }
 message handshake {
   optional int32 sn = 1;
@@ -71,6 +75,11 @@ message joinRoomOk {
 message joinRoomOk_ntf {
     repeated userInfo_t userInfoList = 1;
 }
+message reJoinRoomOk_ack {
+    repeated userInfo_t userInfoList = 1;
+    repeated int32 pokerList = 2;
+    repeated int32 bottomList = 3;
+}
 message leaveRoom {
     // player 1, 2, 3
     optional int32 playerId = 1;
@@ -95,6 +104,7 @@ message startGame_ntf {
     // 17 poker
     repeated int32 pokerList = 1;
     repeated int32 bottomList = 2;
+    optional int32 status = 3;
 }
 message restartGame_ntf {
     optional int32 errno = 1;
@@ -236,7 +246,7 @@ local type2name_json = [[
     "28": "joinRoomOk",
     "29": "alarmTimer_ntf",
     "30": "stopAlarmTimer_ntf",
-    "31": ""
+    "31": "reJoinRoomOk_ack"
 }
 ]]
 
