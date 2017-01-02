@@ -29,6 +29,10 @@ this.TYPE_BOOM = 11 --炸弹
 this.TYPE_KING_BOOM = 12 --王炸
 
 
+function this.getLevel(pokerId)
+    return math.ceil(pokerId/4)
+end
+
 function this.isSingle(pokerList)
     if #pokerList == 1 then
         local seq = math.ceil(pokerList[1]/4)
@@ -433,7 +437,7 @@ function this.getTipBoom(pokerList, level)
     for i = 0, 13 do
         table.insert(exclude, i)
     end
-    idxList = this.findEqualPoker(pokerList, 4, exclude)
+    idxList = this.findEqualPoker(pokerList, 2, exclude)
     if #idxList ~= 0 then
         return idxList
     end
@@ -513,6 +517,7 @@ function this.getTipSequence(pokerList, count, level)
     local currCount = 0
     for i = 1, #pokerList do
         local tmpLevel = math.ceil(pokerList[i]/4)
+        if tmpLevel >= 13 then return {} end
         if tmpLevel == currLevel then
             table.insert(ret, i)
             currLevel = currLevel + 1
@@ -643,11 +648,14 @@ function this.getTipPoker(pokers, playPokers)
     elseif pokerType == this.TYPE_FOUR_FOUR then
         tipPokerIdxs = this.getTipFourFour(pokerList, level)    
     elseif pokerType == this.TYPE_SEQUENCE then
-        tipPokerIdxs = this.getTipSequence(pokerList, level) 
+        tipPokerIdxs = this.getTipSequence(pokerList, #currPlayPoker, level) 
     elseif pokerType == this.TYPE_DOUBLE_BY_DOUBLE then
         tipPokerIdxs = this.getTipDoubleByDouble(pokerList, level) 
     elseif pokerType == this.TYPE_THREE_BY_THREE then
         tipPokerIdxs = this.getTipThreeByThree(pokerList, level) 
+    end
+    if #tipPokerIdxs==0 and pokerType ~= this.TYPE_BOOM then
+        tipPokerIdxs = this.getTipBoom(pokerList, 0)
     end
     for i = 1, #tipPokerIdxs do
         local idx = tipPokerIdxs[i]
@@ -672,6 +680,11 @@ function this.pokerCmp(srcPokerList, destPokerList)
         return -1
     end
     if srcType == destType then
+        if srcType == this.TYPE_BOOM then
+            if #srcPokerList > #destPokerList then
+                return 1
+            end
+        end
         if #srcPokerList ~= #destPokerList then
             return -1
         else
@@ -681,11 +694,12 @@ function this.pokerCmp(srcPokerList, destPokerList)
                 return -1
             end
         end
+    else
+        if srcType == this.TYPE_BOOM or srcType == this.TYPE_KING_BOOM then
+            return 1
+        end
     end
     
-    if srcType == this.TYPE_BOOM or srcType == this.TYPE_KING_BOOM then
-        return 1
-    end
     return -1
 end
 
@@ -699,6 +713,174 @@ function this.sortPoker(pokers)
         end
         return a < b
     end)
+end
+
+function this.getAllSameLevelList(pokerList, sameNum)
+    local retList = {}
+    local tmpPokerList = {}
+    for k, v in pairs(pokerList) do
+        tmpPokerList[k] = v
+    end
+    for i = 1, #tmpPokerList do
+        local idxList = this.findEqualPoker(tmpPokerList, sameNum, retList)
+        if #idxList == sameNum then
+            table.insert(retList, this.getLevel(pokerList[idxList[1]]))
+        end
+    end
+    return retList
+end
+
+function this.getAllBoomLevel(pokerList)
+    local boomLevelList = this.getAllSameLevelList(pokerList, 4)
+    -- get king boom
+    local exclude = {}
+    for i = 1, 13 do
+        table.insert(exclude, i)
+    end
+    local idxList = this.findEqualPoker(pokerList, 2, exclude)
+    if #idxList ~= 0 then
+        table.insert(boomLevelList, 14)
+    end
+
+    return boomLevelList
+end
+
+function this.getAllDoubleLevel(pokerList)
+    local retList = this.getAllSameLevelList(pokerList, 2)
+    return retList
+end
+
+function this.getAllThreeLevel(pokerList)
+    local retList = this.getAllSameLevelList(pokerList, 3)
+    return retList
+end
+
+function this.isContains(t, var)
+    for k, v in pairs(t) do
+        if v == var then
+            return true
+        end
+    end
+    return false
+end
+
+function this.getLightPokerIdList(pokerList, playPokerList)
+    local retLightPokerIdList = {}
+    local tmpPokerList = {}
+    for k, v in pairs(pokerList) do
+        if v > 54 then
+            v = v - 54
+        end
+        tmpPokerList[k] = v
+    end
+    local tmpPlayPokerList = {}
+    for k, v in pairs(playPokerList) do
+        if v > 54 then
+            v = v - 54
+        end
+        tmpPlayPokerList[k] = v
+    end
+
+    local t, l = this.getPokerType(tmpPlayPokerList)
+    if t == this.TYPE_SINGLE then
+        local allBoomLevelList = this.getAllBoomLevel(tmpPokerList)
+        for i = 1, #tmpPokerList do
+            local level = this.getLevel(tmpPokerList[i])
+            if level > l or this.isContains(allBoomLevelList, level) == true then
+                table.insert(retLightPokerIdList, tmpPokerList[i])
+            end
+        end
+    elseif t ==  this.TYPE_DOUBLE then
+        local allBoomLevelList = this.getAllBoomLevel(tmpPokerList)
+        local allDoubleLevel = this.getAllDoubleLevel(tmpPokerList)
+        for i = 1, #tmpPokerList do
+            local level = this.getLevel(tmpPokerList[i])
+            if ((this.isContains(allDoubleLevel, level) == true and level > l)) or 
+                this.isContains(allBoomLevelList, level) == true then
+                table.insert(retLightPokerIdList, tmpPokerList[i])
+            end
+        end
+    elseif t == this.TYPE_THREE then
+        local allBoomLevelList = this.getAllBoomLevel(tmpPokerList)
+        local allThreeLevel = this.getAllThreeLevel(tmpPokerList)
+        for i = 1, #tmpPokerList do
+            local level = this.getLevel(tmpPokerList[i])
+            if (this.isContains(allThreeLevel, level) == true and level > l) or 
+                this.isContains(allBoomLevelList, level) == true then
+                table.insert(retLightPokerIdList, tmpPokerList[i])
+            end
+        end
+    elseif t == this.TYPE_THREE_SINGLE then
+        local allBoomLevelList = this.getAllBoomLevel(tmpPokerList)
+        local allThreeLevel = this.getAllThreeLevel(tmpPokerList)
+        for i = 1, #tmpPokerList do
+            local level = this.getLevel(tmpPokerList[i])
+            if (this.isContains(allThreeLevel, level) == true and level > l) or 
+                this.isContains(allBoomLevelList, level) == true then
+                table.insert(retLightPokerIdList, tmpPokerList[i])
+            end
+        end
+    elseif t == this.TYPE_THREE_DOUBLE then
+        local allBoomLevelList = this.getAllBoomLevel(tmpPokerList)
+        local allThreeLevel = this.getAllThreeLevel(tmpPokerList)
+        for i = 1, #tmpPokerList do
+            local level = this.getLevel(tmpPokerList[i])
+            if (this.isContains(allThreeLevel, level) == true and level > l) or
+                this.isContains(allBoomLevelList, level) == true then
+                table.insert(retLightPokerIdList, tmpPokerList[i])
+            end
+        end
+    elseif t == this.TYPE_BOOM then
+        local allBoomLevelList = this.getAllBoomLevel(tmpPokerList)
+        for i = 1, #tmpPokerList do
+            local level = this.getLevel(tmpPokerList[i])
+            if (this.isContains(allBoomLevelList, level) == true and level > l) then
+                table.insert(retLightPokerIdList, tmpPokerList[i])
+            end
+        end
+    elseif t == this.TYPE_FOUR_TWO then
+        local allBoomLevelList = this.getAllBoomLevel(tmpPokerList)
+        for i = 1, #tmpPokerList do
+            local level = this.getLevel(tmpPokerList[i])
+            if (this.isContains(allBoomLevelList, level) == true and level > l) then
+                table.insert(retLightPokerIdList, tmpPokerList[i])
+            end
+        end
+    elseif t == this.TYPE_FOUR_FOUR then
+        local allBoomLevelList = this.getAllBoomLevel(tmpPokerList)
+        for i = 1, #tmpPokerList do
+            local level = this.getLevel(tmpPokerList[i])
+            if (this.isContains(allBoomLevelList, level) == true and level > l) then
+                table.insert(retLightPokerIdList, tmpPokerList[i])
+            end
+        end
+    elseif t == this.TYPE_SEQUENCE then
+        local allBoomLevelList = this.getAllBoomLevel(tmpPokerList)
+        for i = 1, #tmpPokerList do
+            local level = this.getLevel(tmpPokerList[i])
+            if level > l or this.isContains(allBoomLevelList, level) == true then
+                table.insert(retLightPokerIdList, tmpPokerList[i])
+            end
+        end
+    elseif t == this.TYPE_DOUBLE_BY_DOUBLE then
+        local allBoomLevelList = this.getAllBoomLevel(tmpPokerList)
+        for i = 1, #tmpPokerList do
+            local level = this.getLevel(tmpPokerList[i])
+            if this.isContains(allBoomLevelList, level) == true then
+                table.insert(retLightPokerIdList, tmpPokerList[i])
+            end
+        end
+    elseif t == this.TYPE_THREE_BY_THREE then
+        local allBoomLevelList = this.getAllBoomLevel(tmpPokerList)
+        for i = 1, #tmpPokerList do
+            local level = this.getLevel(tmpPokerList[i])
+            if this.isContains(allBoomLevelList, level) == true then
+                table.insert(retLightPokerIdList, tmpPokerList[i])
+            end
+        end        
+    end
+
+    return retLightPokerIdList
 end
 
 function table_remove(srcTable, removeItems)

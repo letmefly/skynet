@@ -63,6 +63,10 @@ function M.test()
 	t, l = pokerUtil.getPokerType(pokerList)
 	print("{2,3,4, 6,7,8, 10,11,12, 14,15,16, 18,19,20, 22,23,24, 41,47,33,31,35,1} "..t..","..l)
 
+	pokerList = {1,2,3,4,9,10,11,12}
+	local boomLevelList = pokerUtil.getAllBoomLevel(pokerList)
+	print(cjson.encode(pokerList).."--boomLevelList-->"..cjson.encode(boomLevelList))
+
 	local playPoker = {53,54}
 	t,l = pokerUtil.getPokerType(playPoker)
 	print("{53,54} "..t..","..l)
@@ -77,6 +81,17 @@ function M.test()
 		table.insert(tip, pokerList[tipIdx[i]])
 	end
 	print(cjson.encode(pokerList).."--"..cjson.encode(playPoker).."--"..cjson.encode(tip))
+
+	local playPoker = {1,5,9,13,17}
+	local tip = {}
+	t,l = pokerUtil.getPokerType(playPoker)
+	print("{1,5,9,13,17} "..t..","..l)
+	pokerList = {1,2,3,5,5,9,11,13,17,18,21,22}
+	local tipIdx = pokerUtil.getTipSequence(pokerList, #playPoker, l)
+	for i = 1, #tipIdx do
+		table.insert(tip, pokerList[tipIdx[i]])
+	end
+	print(cjson.encode(pokerList).."--"..cjson.encode(playPoker).."--tip-->"..cjson.encode(tip))	
 
 	print("{5,6,7,20} > {1,2,3,19} -- "..pokerUtil.pokerCmp({5,6,7,20}, {1,2,3,19}))
 	print("{5} > {1} -- "..pokerUtil.pokerCmp({5}, {1}))

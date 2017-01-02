@@ -284,7 +284,7 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 			local item = {}
 			item.playerId = i
 			item.leftPokerNum = #this.allPlayerPokerSet[i]
-			item.boomNum = this.playerInfoList[i].boomNum
+			item.boomNum = this.playerInfoList[i].userInfo.boom
 			if i == this.currLandlord then
 				if isLandlordWin then
 					item.result = 2
@@ -305,7 +305,13 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 			item.score = this.playerInfoList[i].spring *item.score
 			table.insert(resultList, item)
 		end
-		this.sendAllPlayer("gameResult_ntf", {resultList = resultList})
+		local allPlayerLeftPokerSet = {}
+		for k, v in pairs(this.allPlayerPokerSet) do
+			if #v > 0 then
+				table.insert(allPlayerLeftPokerSet, {playerId = k, pokerList = v})
+			end
+		end
+		this.sendAllPlayer("gameResult_ntf", {resultList = resultList, allPlayerPokerSet=allPlayerLeftPokerSet})
 		this.playResultList[this.currPlayTimes] = resultList
 
 		-- all games are over, dismiss room

@@ -197,7 +197,12 @@ message gameResult_ntf {
         optional int32 score = 5;
         optional string nickname = 6;
     }
+    message PokerList_t {
+        optional int32 playerId = 1;
+        repeated int32 pokerList = 2;
+    }
     repeated GameResultInfo resultList = 1;
+    repeated PokerList_t allPlayerPokerSet = 2;
 }
 message roomResult_ntf {
     message RoomResultItem_t {

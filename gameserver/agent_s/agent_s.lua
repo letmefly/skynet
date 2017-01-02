@@ -17,6 +17,7 @@ local client_fd
 
 -- 1 is protobuf, 2 is json
 local PROTO_TYPE = 1
+local client_is_alive = true
 
 local my_room_sid = -1
 local my_room_no = 0
@@ -40,6 +41,7 @@ local function send_client_msg(msgname, msg)
 end
 
 local function client_msg_handler(msgname, msg)
+	client_is_alive = true
 	print(msgname..": "..cjson.encode(msg))
 	local handler = CLIENT_REQ[msgname]
 	if handler then
@@ -52,7 +54,7 @@ end
 ------------------------ client request -------------------------
 function CLIENT_REQ.handshake(msg)
 	--skynet.error("handshake-"..msg.sn)
-	send_client_msg("handshake", {sn = msg.sn})
+	--send_client_msg("handshake", {sn = msg.sn})
 end
 
 function CLIENT_REQ.quit()
@@ -222,7 +224,13 @@ skynet.register_protocol {
 	end
 }
 
-
+local function on_client_disconnect()
+	-- todo: do something before exit
+	if my_room_sid then
+		skynet.call(my_room_sid, "lua", "disconnect", room_playerId)
+	end
+	skynet.exit()
+end
 ------------------------ service API -------------------------------
 function SERVICE_API.start(conf)
 	local fd = conf.client
@@ -230,14 +238,23 @@ function SERVICE_API.start(conf)
 	WATCHDOG = conf.watchdog
 	client_fd = fd
 	skynet.call(gate, "lua", "forward", fd)
+	skynet.fork(function()
+		local sn = 0
+		while true do
+			sn = sn + 1
+			send_client_msg("handshake",{sn=sn})
+			client_is_alive = false
+			skynet.sleep(30*100)
+			if client_is_alive == false then
+				print("clinet handshake timeout, now disconnect")
+				on_client_disconnect()
+			end
+		end
+	end)
 end
 
 function SERVICE_API.disconnect()
-	-- todo: do something before exit
-	if my_room_sid then
-		skynet.call(my_room_sid, "lua", "disconnect", room_playerId)
-	end
-	skynet.exit()
+	on_client_disconnect()
 end
 
 function SERVICE_API.sendClient(msgname, msg)
