@@ -99,6 +99,30 @@ function M.test()
 	print("{1,2,3,4} > {5,6,7,9} -- "..pokerUtil.pokerCmp({1,2,3,4}, {5,6,7,9}))
 
 	print("{29,32,38,39,40} > {1,3,4,7,8} --"..pokerUtil.pokerCmp({29,32,38,39,40}, {1,3,4,7,8}))
+
+	print("test table_remove")
+	print("{6,15,19,20,25,33,35,36,38,41,42,44,45,47,48,49,52,51,53,21}")
+	local t1 = {6,15,19,20,25,33,35,36,38,41,42,44,45,47,48,49,52,51,53,21}
+	local t2 = {6}
+	print(cjson.encode(table_remove(t1, t2)))
+	t1 = {15,19,20,25,33,35,36,38,41,42,44,45,47,48,49,52,51,53,21}
+	t2 = {36,35,33,19,20}
+	print(cjson.encode(t1))
+	print(cjson.encode(t2))
+	print(cjson.encode(table_remove(t1, t2)))
+	print(#table_remove(t1, t2))
+	t1 = {15,25,38,41,42,44,45,47,48,49,52,51,53,21}
+	t2 = {45,42,41,44,48,47,15,21}
+	print(cjson.encode(t1))
+	print(cjson.encode(t2))
+	print(cjson.encode(table_remove(t1, t2)))
+	print(#table_remove(t1, t2))
+	t1 = {25,38,49,52,51,53}
+	t2 = {49,52,51,25}
+	print(cjson.encode(t1))
+	print(cjson.encode(t2))	
+	print(cjson.encode(table_remove(t1, t2)))	
+	print(#table_remove(t1, t2))
 end
 
 return M

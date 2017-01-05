@@ -161,6 +161,7 @@ function this.grabLandlordOver(playerId)
 	local playerInfo = this.playerInfoList[playerId]
 	playerInfo.userInfo.isLandlord = 2
 	this.sendAllPlayer("landlord_ntf", {playerId = playerId, bottomPokerList = this.bottomPokerList})
+	this.allPlayerPokerSet[playerId] = table_insert(this.allPlayerPokerSet[playerId], this.bottomPokerList)
 	this.currWhoPlay = playerId
 	skynet.timeout(20, this.playPoker)
 end
@@ -269,7 +270,10 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 	this.sendAllPlayer("playPoker_ntf", {playerId=playerId, playAction=playAction, pokerType=pokerType, pokerList=pokerList})
 
 	-- update this player's pokers and previous pokers
+	--print(playerId..":"..cjson.encode(this.allPlayerPokerSet[playerId]))
 	this.allPlayerPokerSet[playerId] = table_remove(this.allPlayerPokerSet[playerId], pokerList)
+	--print(playerId..":"..cjson.encode(this.allPlayerPokerSet[playerId]))
+	--print(playerId..":"..#this.allPlayerPokerSet[playerId])
 	this.playerInfoList[playerId].userInfo.leftPoker = #this.allPlayerPokerSet[playerId]
 	-- according to player's newest pokers, check if game is over
 	if #this.allPlayerPokerSet[playerId] == 0 then
@@ -314,7 +318,9 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 				table.insert(allPlayerLeftPokerSet, {playerId = k, pokerList = v})
 			end
 		end
-		this.sendAllPlayer("gameResult_ntf", {resultList = resultList, allPlayerPokerSet=allPlayerLeftPokerSet})
+		this.setTimer("gameResult", 150, function()
+			this.sendAllPlayer("gameResult_ntf", {resultList = resultList, allPlayerPokerSet=allPlayerLeftPokerSet})
+		end)
 		this.playResultList[this.currPlayTimes] = resultList
 
 		-- all games are over, dismiss room

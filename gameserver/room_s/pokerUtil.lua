@@ -737,10 +737,9 @@ function this.getAllBoomLevel(pokerList)
     for i = 1, 13 do
         table.insert(exclude, i)
     end
-    local idxList = this.findEqualPoker(pokerList, 1, exclude)
-    if #idxList == 2 then
-        table.insert(boomLevelList, 14)
-        table.insert(boomLevelList, 15)
+    if this.isContains(pokerList, 53) and this.isContains(pokerList, 54) then
+        table.insert(boomLevelList, this.getLevel(53))
+        table.insert(boomLevelList, this.getLevel(54))
     end
     return boomLevelList
 end
@@ -917,23 +916,15 @@ function this.getLightPokerIdList(pokerList, playPokerList)
     return retLightPokerIdList
 end
 function table_remove(srcTable, removeItems)
-    local t = {}
-    for k, v in pairs(removeItems) do
-        t[k] = v
-    end
-    local function local_table_remove(srcTable, removeItems)
-        for i = 1, #srcTable do
-            for j = 1, #removeItems do
-                if srcTable[i] == removeItems[j] then
-                    table.remove(srcTable, i)
-                    table.remove(removeItems, j)
-                    return local_table_remove(srcTable, removeItems)
-                end
-            end
+    table.sort(srcTable)
+    table.sort(removeItems)
+    local newTable = {}
+    for i = 1, #srcTable do
+        if this.isContains(removeItems, srcTable[i])==false then
+            table.insert(newTable, srcTable[i])
         end
-        return srcTable
-    end 
-    return local_table_remove(srcTable, t)
+    end
+    return newTable
 end
 function table_insert(srcTable, insertItems)
     for i = 1, #insertItems do
