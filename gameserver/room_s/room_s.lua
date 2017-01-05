@@ -62,17 +62,19 @@ end
 this.gameTimers = {}
 function this.startGameTimer()
 	local function tick()
-		for k, v in pairs(this.gameTimers) do
-			if v then
-				local sec = v.sec
-				local cb = v.cb
-				local t = v.t
-				if t == 2 and sec >= 0 and sec % 10 == 0 then
-					cb(sec/10)
-				elseif t == 1 and sec == 0 then
-					cb()
+		if this.gameTimers then
+			for k, v in pairs(this.gameTimers) do
+				if v then
+					local sec = v.sec
+					local cb = v.cb
+					local t = v.t
+					if t == 2 and sec >= 0 and sec % 10 == 0 then
+						cb(sec/10)
+					elseif t == 1 and sec == 0 then
+						cb()
+					end
+					v.sec = v.sec - 1
 				end
-				v.sec = v.sec - 1
 			end
 		end
 		skynet.timeout(10, tick)
@@ -450,7 +452,9 @@ function this.joinRoomOkNtf(playerId)
 		this.sendPlayer(sid, "reJoinRoomOk_ack", {
 			userInfoList = userInfoList,
 			pokerList = this.allPlayerPokerSet[playerId],
-			bottomList = this.bottomPokerList
+			bottomList = this.bottomPokerList,
+			prevPlayerId = this.prevPlayerId,
+			prevPlayPokerList = this.prevPokerList
 		})
 	else
 		this.sendAllPlayer("joinRoomOk_ntf", {userInfoList = userInfoList})

@@ -79,6 +79,8 @@ message reJoinRoomOk_ack {
     repeated userInfo_t userInfoList = 1;
     repeated int32 pokerList = 2;
     repeated int32 bottomList = 3;
+    optional int32 prevPlayerId = 4;
+    repeated int32 prevPlayPokerList = 5;
 }
 message leaveRoom {
     // player 1, 2, 3

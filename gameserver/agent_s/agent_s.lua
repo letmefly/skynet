@@ -77,7 +77,7 @@ function CLIENT_REQ.gameLogin(msg)
 	user_info.playerId = 0
 	user_info.win = userData['win']
 	user_info.lose = userData['lose']
-	user_info.score = userData['score']
+	user_info.score = 0
 	user_info.ip = userData['ip']
 	
 	-- verify user auth
@@ -241,14 +241,14 @@ function SERVICE_API.start(conf)
 	skynet.fork(function()
 		local sn = 0
 		while true do
-			sn = sn + 1
-			send_client_msg("handshake",{sn=sn})
-			client_is_alive = false
-			skynet.sleep(30*100)
+			skynet.sleep(10*100)
 			if client_is_alive == false then
 				print("clinet handshake timeout, now disconnect")
 				on_client_disconnect()
 			end
+			sn = sn + 1
+			client_is_alive = false
+			send_client_msg("handshake",{sn=sn})
 		end
 	end)
 end
