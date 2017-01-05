@@ -305,6 +305,7 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 				end
 			end
 			item.score = this.playerInfoList[i].spring *item.score
+			this.playerInfoList[i].userInfo.score = item.score
 			table.insert(resultList, item)
 		end
 		local allPlayerLeftPokerSet = {}
@@ -382,7 +383,7 @@ end
 
 function this.roomOver()
 	local roomResultList = this.calcRoomResult()
-	this.setTimer("roomResult", 100, function()
+	this.setTimer("roomResult", 300, function()
 		this.sendAllPlayer("roomResult_ntf", {roomResultList = roomResultList})
 	end)
 
@@ -454,7 +455,8 @@ function this.joinRoomOkNtf(playerId)
 			pokerList = this.allPlayerPokerSet[playerId],
 			bottomList = this.bottomPokerList,
 			prevPlayerId = this.prevPlayerId,
-			prevPlayPokerList = this.prevPokerList
+			prevPlayPokerList = this.prevPokerList,
+			currPlayTimes = this.currPlayTimes
 		})
 	else
 		this.sendAllPlayer("joinRoomOk_ntf", {userInfoList = userInfoList})
@@ -511,6 +513,7 @@ function this.leaveRoom(playerId)
 	-- dismiss room
 	if playerNum == 0 then
 		skynet.timeout(100, function()
+			this.gameTimers = nil
 			skynet.call("roomManager_s", "lua", "destroyRoom", this.roomNo)
 		end)
 	end

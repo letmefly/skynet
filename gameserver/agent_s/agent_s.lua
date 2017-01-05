@@ -57,6 +57,10 @@ function CLIENT_REQ.handshake(msg)
 	--send_client_msg("handshake", {sn = msg.sn})
 end
 
+function CLIENT_REQ.clientHandshake(msg)
+	send_client_msg("clientHandshake", {sn = msg.sn})
+end
+
 function CLIENT_REQ.quit()
 	skynet.call(WATCHDOG, "lua", "close", client_fd)
 end

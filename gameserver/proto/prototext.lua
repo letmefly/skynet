@@ -23,6 +23,9 @@ message userInfo_t {
 message handshake {
   optional int32 sn = 1;
 }
+message clientHandshake {
+  optional int32 sn = 1;
+}
 message gameLogin {
     optional string userId = 1;
     optional string authCode = 2;
@@ -81,6 +84,7 @@ message reJoinRoomOk_ack {
     repeated int32 bottomList = 3;
     optional int32 prevPlayerId = 4;
     repeated int32 prevPlayPokerList = 5;
+    optional int32 currPlayTimes = 6;
 }
 message leaveRoom {
     // player 1, 2, 3
@@ -253,7 +257,8 @@ local type2name_json = [[
     "28": "joinRoomOk",
     "29": "alarmTimer_ntf",
     "30": "stopAlarmTimer_ntf",
-    "31": "reJoinRoomOk_ack"
+    "31": "reJoinRoomOk_ack",
+    "32": "clientHandshake"
 }
 ]]
 
