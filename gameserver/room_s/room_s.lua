@@ -119,6 +119,8 @@ function this.startGame()
 	end
 	for k, v in ipairs(this.playerInfoList) do
 		v.userInfo.status = 3
+		v.userInfo.hasPlay = 1
+		v.userInfo.leftPoker = factor2
 		local sid = v.sid
 		local playerId = v.playerId
 		local pokerList = {}
@@ -318,7 +320,7 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 				table.insert(allPlayerLeftPokerSet, {playerId = k, pokerList = v})
 			end
 		end
-		this.setTimer("gameResult", 150, function()
+		this.setTimer("gameResult", 50, function()
 			this.sendAllPlayer("gameResult_ntf", {resultList = resultList, allPlayerPokerSet=allPlayerLeftPokerSet})
 		end)
 		this.playResultList[this.currPlayTimes] = resultList
@@ -445,6 +447,7 @@ function this.joinRoomOkNtf(playerId)
 			userInfo.score = v.userInfo.score
 			userInfo.ip = v.userInfo.ip
 			userInfo.status = v.userInfo.status
+			userInfo.hasPlay = v.userInfo.hasPlay
 			userInfo.isLandlord = v.userInfo.isLandlord
 			userInfo.boom = v.userInfo.boom
 			userInfo.leftPoker = v.userInfo.leftPoker
@@ -452,9 +455,11 @@ function this.joinRoomOkNtf(playerId)
 		end
 	end
 
+	this.sendAllPlayer("joinRoomOk_ntf", {userInfoList = userInfoList})
+
 	-- If rejoin room, no need start ready timer
 	--print(cjson.encode(this.playerInfoList))
-	if this.playerInfoList[playerId].userInfo.status > 1 then
+	if this.playerInfoList[playerId].userInfo.status > 0 then
 		local sid =this.playerInfoList[playerId].sid
 		this.sendPlayer(sid, "reJoinRoomOk_ack", {
 			userInfoList = userInfoList,
@@ -464,8 +469,9 @@ function this.joinRoomOkNtf(playerId)
 			prevPlayPokerList = this.prevPokerList,
 			currPlayTimes = this.currPlayTimes
 		})
-	else
-		this.sendAllPlayer("joinRoomOk_ntf", {userInfoList = userInfoList})
+	end
+
+	if this.playerInfoList[playerId].userInfo.status < 2 then	
 		this.setSecondTimer("r"..playerId, 15, function(timerVal)
 			if timerVal == 0 then
 				this.leaveRoom(playerId)
@@ -498,24 +504,26 @@ function this.leaveRoom(playerId)
 		skynet.call("roomManager_s", "lua", "destroyRoom", this.roomNo)
 	end)
 	]]
-	
+	this.unsetSecondTimerNtf("r", playerId)
+	this.currPlayerNum = this.currPlayerNum - 1
 	this.sendAllPlayer("leaveRoom_ntf", {playerId = playerId})
 	local playerInfo = this.playerInfoList[playerId]
-	this.playerInfoList[playerId] = nil
-	this.currPlayerNum = this.currPlayerNum - 1
+	if playerInfo.sid then
+		skynet.kill(playerInfo.sid)
+	end
+	if playerInfo.userInfo.hasPlay == 0 then
+		playerInfo.userInfo.status = -1
+		this.playerInfoList[playerId] = nil
+	else
+		playerInfo.sid = nil
+	end
+	
 	local playerNum = 0
 	for k, v in pairs(this.playerInfoList) do
-		if v then
+		if v.sid then
 			playerNum = playerNum + 1
 		end
 	end
-
-	if playerInfo.sid then
-		skynet.timeout(100, function()
-			skynet.kill(playerInfo.sid)
-		end)
-	end
-	
 	-- dismiss room
 	if playerNum == 0 then
 		skynet.timeout(100, function()
@@ -523,6 +531,15 @@ function this.leaveRoom(playerId)
 			skynet.call("roomManager_s", "lua", "destroyRoom", this.roomNo)
 		end)
 	end
+end
+
+function this.assignPlayerId()
+	for i = 1, this.maxPlayerNum do
+		if this.playerInfoList[i] == nil then
+			return i
+		end
+	end
+	return -1
 end
 
 ----------------------------- sevevice api -------------------------------
@@ -553,7 +570,6 @@ end
 
 function SAPI.joinRoom(agent)
 	local sid = agent.sid
-	local status = 1
 	local playerId = 0
 	local boomNum = 0
 	local spring = 1
@@ -561,10 +577,9 @@ function SAPI.joinRoom(agent)
 	for k, v in pairs(agent.userInfo) do
 		userInfo[k] = v
 	end
-
 	-- First check if this user join room before
 	for k, v in pairs(this.playerInfoList) do
-		if v and v.sid == nil and userInfo.userId == v.userInfo.userId then
+		if v and userInfo.userId == v.userInfo.userId then
 			playerId = v.playerId
 			v.sid = sid
 		end
@@ -575,12 +590,13 @@ function SAPI.joinRoom(agent)
 			return {errno = -1}
 		end
 		this.currPlayerNum = this.currPlayerNum + 1
-		playerId = this.currPlayerNum
-		userInfo.status = status
+		playerId = this.assignPlayerId()
+		userInfo.status = -1
 		userInfo.isLandlord = 1 -- 1 is not landlord, 2 is landlord
 		userInfo.boom = 0
 		userInfo.leftPoker = 0
 		userInfo.playerId = playerId
+		userInfo.hasPlay = 0
 
 		this.playerInfoList[playerId] = {
 			sid = sid,
@@ -604,7 +620,7 @@ end
 function SAPI.getReady(playerId)
 	this.unsetSecondTimerNtf("r", playerId)
 	local playerInfo = this.playerInfoList[playerId]
-	if playerInfo.userInfo.status == 2 then return end
+	if playerInfo.userInfo.status > 2 then return end
 
 	playerInfo.userInfo.status = 2 -- now ready
 	local readyList = {}

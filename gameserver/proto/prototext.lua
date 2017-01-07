@@ -19,6 +19,7 @@ message userInfo_t {
     optional int32 isLandlord = 13;
     optional int32 boom = 14;
     optional int32 leftPoker = 15;
+    optional int32 hasPlay = 16;
 }
 message handshake {
   optional int32 sn = 1;
@@ -123,7 +124,7 @@ message alarmTimer_ntf {
     // player 1, 2, 3
     optional int32 playerId = 1;
     optional int32 timerVal = 2;
-    optional string timerType = 3;    
+    optional string timerType = 3; 
 }
 message stopAlarmTimer_ntf {
     // player 1, 2, 3

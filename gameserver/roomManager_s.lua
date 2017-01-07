@@ -42,6 +42,7 @@ end
 function SERVICE_API.destroyRoom(roomNo)
 	if nil ~= rooms[roomNo] then
 		total_room = total_room - 1
+		print("[roomManager_s]destroy roomNo "..roomNo)
 		skynet.kill(rooms[roomNo])
 	end
 	rooms[roomNo] = nil

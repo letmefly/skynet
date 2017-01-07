@@ -51,6 +51,14 @@ local function client_msg_handler(msgname, msg)
 	end
 end
 
+local function on_client_disconnect()
+	-- todo: do something before exit
+	if my_room_sid then
+		skynet.call(my_room_sid, "lua", "disconnect", room_playerId)
+	end
+	skynet.exit()
+end
+
 ------------------------ client request -------------------------
 function CLIENT_REQ.handshake(msg)
 	--skynet.error("handshake-"..msg.sn)
@@ -197,6 +205,7 @@ end
 
 function CLIENT_REQ.leaveRoom(msg)
 	skynet.call(my_room_sid, "lua", "leave", room_playerId)	
+	---on_client_disconnect()
 end
 
 function CLIENT_REQ.rejoinRoom(msg)
@@ -228,13 +237,7 @@ skynet.register_protocol {
 	end
 }
 
-local function on_client_disconnect()
-	-- todo: do something before exit
-	if my_room_sid then
-		skynet.call(my_room_sid, "lua", "disconnect", room_playerId)
-	end
-	skynet.exit()
-end
+
 ------------------------ service API -------------------------------
 function SERVICE_API.start(conf)
 	local fd = conf.client
