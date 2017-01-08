@@ -86,6 +86,7 @@ message reJoinRoomOk_ack {
     optional int32 prevPlayerId = 4;
     repeated int32 prevPlayPokerList = 5;
     optional int32 currPlayTimes = 6;
+    optional int32 grabLevel = 7;
 }
 message leaveRoom {
     // player 1, 2, 3
@@ -142,6 +143,7 @@ message grabLandlord_ntf {
     optional int32 playerId = 1;
     // 1, skip, 2 grab level 1, 3 grab level 2
     optional int32 grabAction = 2;
+    optional int32 grabLevel = 3;
 }
 message landlord_ntf {
     optional int32 playerId = 1;

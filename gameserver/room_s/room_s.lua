@@ -160,6 +160,8 @@ function this.grabLandlord()
 end
 
 function this.grabLandlordOver(playerId)
+	if this.isGrabOver == true then return end
+	this.isGrabOver = true
 	local playerInfo = this.playerInfoList[playerId]
 	playerInfo.userInfo.isLandlord = 2
 	this.sendAllPlayer("landlord_ntf", {playerId = playerId, bottomPokerList = this.bottomPokerList})
@@ -178,13 +180,24 @@ function this.grabTimeout(playerId)
 end
 
 function this.grabLandlordHandler(playerId, grabAction)
-	this.sendAllPlayer("grabLandlord_ntf", {playerId=playerId, grabAction=grabAction})
 	this.unsetSecondTimerNtf("g", playerId)
 	this.grabTimes = this.grabTimes + 1
-	if grabAction - 1 >= this.currGrabLevel then
-		this.currGrabLevel = grabAction - 1
-		this.currLandlord = playerId
+	if this.grabLandlordMode == 1 then
+		if grabAction > 1 then
+			if this.currGrabLevel == 0 then
+				this.currGrabLevel = 1
+			else
+				this.currGrabLevel = this.currGrabLevel*2
+			end
+			this.currLandlord = playerId
+		end
+	else
+		if grabAction - 1 >= this.currGrabLevel then
+			this.currGrabLevel = grabAction - 1
+			this.currLandlord = playerId
+		end
 	end
+	this.sendAllPlayer("grabLandlord_ntf", {playerId=playerId, grabAction=grabAction, grabLevel=this.currGrabLevel})
 
 	if this.firstGrabPlayerId == playerId and grabAction > 1 then
 		this.isFirstOneGrab = true
@@ -310,7 +323,7 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 					item.score = 1*math_pow(2, totalBoom)
 				end
 			end
-			item.score = this.playerInfoList[i].spring *item.score
+			item.score = this.currGrabLevel*this.playerInfoList[i].spring *item.score
 			this.playerInfoList[i].userInfo.score = item.score
 			table.insert(resultList, item)
 		end
@@ -393,8 +406,11 @@ function this.roomOver()
 	local roomResultList = this.calcRoomResult()
 	this.setTimer("roomResult", 300, function()
 		this.sendAllPlayer("roomResult_ntf", {roomResultList = roomResultList})
+		skynet.timeout(100, function()
+			skynet.call("roomManager_s", "lua", "destroyRoom", this.roomNo)
+			this.gameTimers = nil
+		end)
 	end)
-
 	-- save user game data
 	this.sendAllAgent("saveGameResult", roomResultList)
 end
@@ -409,6 +425,7 @@ function this.resetGame()
 	this.prevPlayerId = 0
 	this.prevPokerList = {}
 	this.readyPlayerNum = 0
+	this.isGrabOver = false
 	-- all player's pokerList
 	this.allPlayerPokerSet = {{},{},{}}
 	if 1 == this.grabLandlordMode or 2 == this.grabLandlordMode then
@@ -467,7 +484,8 @@ function this.joinRoomOkNtf(playerId)
 			bottomList = this.bottomPokerList,
 			prevPlayerId = this.prevPlayerId,
 			prevPlayPokerList = this.prevPokerList,
-			currPlayTimes = this.currPlayTimes
+			currPlayTimes = this.currPlayTimes,
+			grabLevel = this.currGrabLevel
 		})
 	end
 
