@@ -34,6 +34,7 @@ this.isFirstOneGrab = false
 this.firstGrabPlayerId = 0
 -- all player's pokerList
 this.allPlayerPokerSet = {{},{},{}}
+this.dismissInfo = {}
 
 function this.sendAllPlayer(msgname, msg)
 	for k, v in pairs(this.playerInfoList) do
@@ -73,6 +74,8 @@ function this.startGameTimer()
 						cb(sec/10)
 					elseif t == 1 and sec == 0 then
 						cb()
+					elseif t == 3 and math.abs(sec) % 10 == 0 then
+						cb(sec/10)
 					end
 					v.sec = v.sec - 1
 				end
@@ -94,10 +97,16 @@ end
 function this.unsetSecondTimer(name)
 	this.gameTimers[name] = nil
 end
+function this.setTickTimer(name, seconds, callback)
+	this.gameTimers[name] = {sec = seconds*10, cb = callback, t = 3}
+end
+function this.unsetTickTimer(name)
+	this.gameTimers[name] = nil
+end
 
 -- send 17 poker to all player
 function this.startGame()
-	this.unsetSecondTimer("s"..999)
+	this.unsetTickTimer("s"..999)
 	this.currPlayTimes = this.currPlayTimes + 1
 	-- 1,2,3,4,means that heart-3,diamod-3,club-3,spade-3
 	local factor1 = 54
@@ -142,18 +151,18 @@ function this.startGame()
 end
 
 function this.getNextPlayer(playerId)
-	playerId = playerId - 1
-	if playerId == 0 then
-		playerId = this.maxPlayerNum
+	playerId = playerId + 1
+	if playerId > this.maxPlayerNum then
+		playerId = 1
 	end
 	return playerId
 end
 
 function this.grabLandlord()
 	this.sendAllPlayer("whoGrabLandlord_ntf", {playerId = this.currWhoGrab})
-	this.setSecondTimer("g"..this.currWhoGrab, 10, function(timerVal)
+	this.setTickTimer("g"..this.currWhoGrab, 10, function(timerVal)
 		if timerVal == 0 then
-			this.grabTimeout(this.currWhoGrab)
+			--this.grabTimeout(this.currWhoGrab)
 		else
 			this.alarmTimerNtf("g", this.currWhoGrab, timerVal)
 		end
@@ -172,8 +181,8 @@ function this.grabLandlordOver(playerId)
 	this.currLevel = this.currGrabLevel
 end
 
-function this.unsetSecondTimerNtf(timerType, playerId)
-	this.unsetSecondTimer(timerType..playerId)
+function this.unsetTickTimerNtf(timerType, playerId)
+	this.unsetTickTimer(timerType..playerId)
 	this.sendAllPlayer("stopAlarmTimer_ntf", {playerId = playerId, timerType = timerType})
 end
 
@@ -182,7 +191,7 @@ function this.grabTimeout(playerId)
 end
 
 function this.grabLandlordHandler(playerId, grabAction)
-	this.unsetSecondTimerNtf("g", playerId)
+	this.unsetTickTimerNtf("g", playerId)
 	this.grabTimes = this.grabTimes + 1
 	if this.grabLandlordMode == 1 then
 		if grabAction > 1 then
@@ -240,9 +249,10 @@ end
 
 function this.playPoker()
 	this.sendAllPlayer("whoPlay_ntf", {playerId = this.currWhoPlay, prevPlayerId = this.prevPlayerId})
-	this.setSecondTimer("p"..this.currWhoPlay, 15, function(timerVal)
+	this.setTickTimer("p"..this.currWhoPlay, 15, function(timerVal)
 		if timerVal == 0 then
-			this.playTimeout(this.currWhoPlay)
+			--this.playTimeout(this.currWhoPlay)
+
 		else
 			this.alarmTimerNtf("p", this.currWhoPlay, timerVal)
 		end
@@ -260,7 +270,7 @@ function this.playTimeout(playerId)
 end
 
 function this.playPokerHandler(playerId, playAction, pokerList)
-	this.unsetSecondTimerNtf("p", playerId)
+	this.unsetTickTimerNtf("p", playerId)
 
 	-- check client error
 	if playAction == 1 then
@@ -347,9 +357,9 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 			return
 		else
 			this.resetGame()
-			this.setSecondTimer("s"..999, 15, function(timerVal)
+			this.setTickTimer("s"..999, 15, function(timerVal)
 				if timerVal == 0 then
-					this.restartGame()
+					--this.restartGame()
 				else
 					this.alarmTimerNtf("s", 999, timerVal)
 				end
@@ -405,9 +415,11 @@ function this.calcRoomResult()
 	return roomResultList
 end
 
-function this.roomOver()
+function this.roomOver(t)
+	local delay = 300
+	if t then delay = t end
 	local roomResultList = this.calcRoomResult()
-	this.setTimer("roomResult", 300, function()
+	this.setTimer("roomResult", delay, function()
 		this.sendAllPlayer("roomResult_ntf", {roomResultList = roomResultList})
 		skynet.timeout(100, function()
 			skynet.call("roomManager_s", "lua", "destroyRoom", this.roomNo)
@@ -447,6 +459,7 @@ function this.resetGame()
 end
 
 function this.restartGame()
+	this.resetGame()
 	this.sendAllPlayer("restartGame_ntf", {errno = 1000})
 end
 
@@ -494,14 +507,14 @@ function this.joinRoomOkNtf(playerId)
 	end
 
 	if this.playerInfoList[playerId].userInfo.status < 2 then	
-		this.setSecondTimer("r"..playerId, 15, function(timerVal)
+		this.setTickTimer("r"..playerId, 15, function(timerVal)
 			if timerVal == 0 then
 				this.leaveRoom(playerId)
 			else
 				if this.playerInfoList[playerId] then
 					this.alarmTimerNtf("r", playerId, timerVal)
 				else
-					this.unsetSecondTimerNtf("r", playerId)
+					this.unsetTickTimerNtf("r", playerId)
 				end
 			end
 		end)
@@ -526,7 +539,7 @@ function this.leaveRoom(playerId)
 		skynet.call("roomManager_s", "lua", "destroyRoom", this.roomNo)
 	end)
 	]]
-	this.unsetSecondTimerNtf("r", playerId)
+	this.unsetTickTimerNtf("r", playerId)
 	this.currPlayerNum = this.currPlayerNum - 1
 	this.sendAllPlayer("leaveRoom_ntf", {playerId = playerId})
 	local playerInfo = this.playerInfoList[playerId]
@@ -640,7 +653,7 @@ function SAPI.joinRoomOk(msg)
 end
 
 function SAPI.getReady(playerId)
-	this.unsetSecondTimerNtf("r", playerId)
+	this.unsetTickTimerNtf("r", playerId)
 	local playerInfo = this.playerInfoList[playerId]
 	if playerInfo.userInfo.status >= 2 then return end
 
@@ -695,6 +708,61 @@ function SAPI.leave(playerId)
 		this.leaveRoom(playerId)
 	end
 	]]
+end
+
+function SAPI.dismissRoom(msg)
+	local playerId = msg.playerId
+	local result = msg.result
+	this.dismissInfo[playerId] = result
+	local dismissNum = 0
+	for k, v in pairs(this.dismissInfo) do
+		if v then
+			dismissNum = dismissNum + 1
+		end
+	end
+	print("---------"..dismissNum)
+	print("---------"..this.currPlayerNum)
+	print("---------"..this.maxPlayerNum)
+	if this.currPlayerNum < this.maxPlayerNum then
+		this.leaveRoom(playerId)
+		this.dismissInfo = {}
+		return
+	end
+
+	if dismissNum == 1 then
+		this.sendAllPlayer("dismissRoom_ntf", {playerId = playerId})
+		this.setSecondTimer("dis", 5*60, function(timerVal)
+			if timerVal == 0 then
+				this.sendAllPlayer("stopAlarmTimer_ntf", {playerId = playerId, timerType = timerType})
+				this.roomOver(30)
+				this.dismissInfo = {}
+			else
+				for k, v in pairs(this.playerInfoList) do
+					if v and v.sid and v.userInfo then
+						if this.dismissInfo[v.userInfo.playerId] == nil then
+							this.sendPlayer(v.sid, "alarmTimer_ntf", {playerId = v.userInfo.playerId, timerVal = timerVal, timerType = "dis"})
+						end
+					end
+				end
+			end
+		end)
+	end
+	
+	if dismissNum == this.maxPlayerNum then
+		this.sendAllPlayer("stopAlarmTimer_ntf", {playerId = playerId, timerType = "dis"})
+		this.unsetSecondTimer("dis")
+		local isAllAgree = true
+		for k, v in pairs(this.dismissInfo) do
+			if v ~= 2 then
+				isAllAgree = false
+				break
+			end
+		end
+		if isAllAgree then
+			this.roomOver(30)
+		end
+		this.dismissInfo = {}
+	end
 end
 
 function SAPI.chat(msg)

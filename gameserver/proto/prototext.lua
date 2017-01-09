@@ -225,6 +225,13 @@ message roomResult_ntf {
     }
     repeated RoomResultItem_t roomResultList = 1;
 }
+message dismissRoom_ntf {
+    optional int32 playerId = 1;
+}
+message dismissRoom {
+    optional int32 playerId = 1;
+    optional int32 result = 2; // 1 refuse, 2 agree
+}
 
 ]]
 
@@ -262,7 +269,9 @@ local type2name_json = [[
     "29": "alarmTimer_ntf",
     "30": "stopAlarmTimer_ntf",
     "31": "reJoinRoomOk_ack",
-    "32": "clientHandshake"
+    "32": "clientHandshake",
+    "33": "dismissRoom_ntf",
+    "34": "dismissRoom"
 }
 ]]
 

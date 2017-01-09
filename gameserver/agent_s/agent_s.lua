@@ -30,7 +30,9 @@ local http_server_addr = "127.0.0.1:80"
 
 ------------------------ helper function ------------------------
 local function send_client_msg(msgname, msg)
-	print(msgname..": "..cjson.encode(msg))
+	if msgname ~= "alarmTimer_ntf" and msgname ~= "clientHandshake" and msgname ~= "handshake"then
+		print(msgname..": "..cjson.encode(msg))
+	end
 	if 1 == PROTO_TYPE then
 		local buff, size = netutil.pbencode(msgname, msg)
 		socket.write(client_fd, buff, size)
@@ -42,7 +44,9 @@ end
 
 local function client_msg_handler(msgname, msg)
 	client_is_alive = true
-	print(msgname..": "..cjson.encode(msg))
+	if msgname ~= "alarmTimer_ntf" and msgname ~= "clientHandshake" and msgname ~= "handshake"then
+		print(msgname..": "..cjson.encode(msg))
+	end
 	local handler = CLIENT_REQ[msgname]
 	if handler then
 		handler(msg)
@@ -206,6 +210,10 @@ end
 function CLIENT_REQ.leaveRoom(msg)
 	skynet.call(my_room_sid, "lua", "leave", room_playerId)	
 	---on_client_disconnect()
+end
+
+function CLIENT_REQ.dismissRoom(msg)
+	skynet.call(my_room_sid, "lua", "dismissRoom", msg)
 end
 
 function CLIENT_REQ.rejoinRoom(msg)
