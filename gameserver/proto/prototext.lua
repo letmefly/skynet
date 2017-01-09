@@ -125,7 +125,7 @@ message alarmTimer_ntf {
     // player 1, 2, 3
     optional int32 playerId = 1;
     optional int32 timerVal = 2;
-    optional string timerType = 3; 
+    optional string timerType = 3;    
 }
 message stopAlarmTimer_ntf {
     // player 1, 2, 3
@@ -171,6 +171,7 @@ message playPoker_ntf {
     optional int32 playAction = 2;
     optional int32 pokerType = 3;
     repeated int32 pokerList = 4;
+    optional int32 grabLevel = 5;
 }
 message playTimeout_ntf {
     // player 1, 2, 3

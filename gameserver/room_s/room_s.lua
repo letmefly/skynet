@@ -25,6 +25,7 @@ this.currWhoGrab = 1
 this.grabTimes = 0
 this.currWhoPlay = 1
 this.currLandlord = 0
+this.currLevel = 1
 this.currGrabLevel = 0
 this.prevPlayerId = 0
 this.prevPokerList = {}
@@ -168,6 +169,7 @@ function this.grabLandlordOver(playerId)
 	this.allPlayerPokerSet[playerId] = table_insert(this.allPlayerPokerSet[playerId], this.bottomPokerList)
 	this.currWhoPlay = playerId
 	skynet.timeout(20, this.playPoker)
+	this.currLevel = this.currGrabLevel
 end
 
 function this.unsetSecondTimerNtf(timerType, playerId)
@@ -279,10 +281,11 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 			local playerInfo = this.playerInfoList[playerId]
 			playerInfo.boomNum = playerInfo.boomNum + 1
 			playerInfo.userInfo.boom = playerInfo.userInfo.boom + 1
+			this.currLevel = this.currLevel * 2
 		end
 	end
 
-	this.sendAllPlayer("playPoker_ntf", {playerId=playerId, playAction=playAction, pokerType=pokerType, pokerList=pokerList})
+	this.sendAllPlayer("playPoker_ntf", {playerId=playerId, playAction=playAction, pokerType=pokerType, pokerList=pokerList, grabLevel=this.currLevel})
 
 	-- update this player's pokers and previous pokers
 	--print(playerId..":"..cjson.encode(this.allPlayerPokerSet[playerId]))
@@ -421,6 +424,7 @@ function this.resetGame()
 	this.grabTimes = 0
 	this.currWhoPlay = 1
 	this.currLandlord = 0
+	this.currLevel = 1
 	this.currGrabLevel = 0
 	this.prevPlayerId = 0
 	this.prevPokerList = {}
@@ -438,11 +442,11 @@ function this.resetGame()
 		v.userInfo.isLandlord = 1 -- 1 is not landlord, 2 is landlord
 		v.userInfo.boom = 0
 		v.userInfo.leftPoker = 0
+		v.userInfo.spring = 1
 	end
 end
 
 function this.restartGame()
-	this.resetGame()
 	this.sendAllPlayer("restartGame_ntf", {errno = 1000})
 end
 
@@ -485,7 +489,7 @@ function this.joinRoomOkNtf(playerId)
 			prevPlayerId = this.prevPlayerId,
 			prevPlayPokerList = this.prevPokerList,
 			currPlayTimes = this.currPlayTimes,
-			grabLevel = this.currGrabLevel
+			grabLevel = this.currLevel
 		})
 	end
 
