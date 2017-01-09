@@ -638,7 +638,7 @@ end
 function SAPI.getReady(playerId)
 	this.unsetSecondTimerNtf("r", playerId)
 	local playerInfo = this.playerInfoList[playerId]
-	if playerInfo.userInfo.status > 2 then return end
+	if playerInfo.userInfo.status >= 2 then return end
 
 	playerInfo.userInfo.status = 2 -- now ready
 	local readyList = {}
@@ -650,11 +650,11 @@ function SAPI.getReady(playerId)
 	end
 
 	-- check if all players get ready
+	this.sendAllPlayer("getReady_ntf", {readyList = readyList})
 	this.readyPlayerNum = #readyList
 	if this.readyPlayerNum == this.maxPlayerNum then
-		skynet.timeout(50, this.startGame)
+		skynet.timeout(20, this.startGame)
 	end
-	this.sendAllPlayer("getReady_ntf", {readyList = readyList})
 end
 
 function SAPI.startGame(msg)
