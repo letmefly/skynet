@@ -222,6 +222,7 @@ message roomResult_ntf {
         optional int32 winTimes = 4;
         optional int32 totalScore = 5;
         optional string nickname = 6;
+        optional int32 loseTimes = 7;
     }
     repeated RoomResultItem_t roomResultList = 1;
 }

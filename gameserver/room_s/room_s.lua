@@ -395,6 +395,7 @@ function this.calcRoomResult()
 		item.totalBoom = 0
 		item.maxScore = 0
 		item.winTimes = 0
+
 		item.totalScore = 0
 		for kk, vv in pairs(this.playResultList) do
 			for kkk, vvv in pairs(vv) do
@@ -409,6 +410,11 @@ function this.calcRoomResult()
 					end
 				end
 			end
+		end
+		if this.currPlayTimes == this.maxPlayTimes then
+			item.loseTimes = this.currPlayTimes - item.winTimes
+		else
+			item.loseTimes = this.currPlayTimes - item.winTimes - 1
 		end
 		table.insert(roomResultList, item)
 	end
