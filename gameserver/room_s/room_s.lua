@@ -512,7 +512,7 @@ function this.joinRoomOkNtf(playerId)
 		})
 	end
 
-	if this.playerInfoList[playerId].userInfo.status < 2 then	
+	if this.playerInfoList[playerId].userInfo.status < 2 then
 		this.setTickTimer("r"..playerId, 15, function(timerVal)
 			if timerVal == 0 then
 				this.leaveRoom(playerId)
