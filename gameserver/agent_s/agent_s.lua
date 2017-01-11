@@ -95,6 +95,7 @@ function CLIENT_REQ.gameLogin(msg)
 	user_info.lose = userData['lose']
 	user_info.score = 0
 	user_info.ip = userData['ip']
+
 	
 	-- verify user auth
 	send_client_msg("gameLogin_ack", {errno = 1000, userInfo = user_info})
