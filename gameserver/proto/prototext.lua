@@ -113,6 +113,7 @@ message startGame_ntf {
     repeated int32 pokerList = 1;
     repeated int32 bottomList = 2;
     optional int32 status = 3;
+    optional int32 currPlayTimes = 4;
 }
 message restartGame_ntf {
     optional int32 errno = 1;
@@ -228,7 +229,12 @@ message roomResult_ntf {
     repeated RoomResultItem_t roomResultList = 1;
 }
 message dismissRoom_ntf {
-    optional int32 playerId = 1;
+    message DismissInfo_t {
+        optional int32 playerId = 1;
+        optional int32 result = 2;
+    }
+    repeated DismissInfo_t dismissInfoList = 1;
+    optional int32 whoDismiss = 2;
 }
 message dismissRoom {
     optional int32 playerId = 1;

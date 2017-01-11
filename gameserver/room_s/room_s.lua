@@ -143,7 +143,7 @@ function this.startGame()
 		pokerUtil.sortPoker(pokerList)
 		this.allPlayerPokerSet[playerId] = pokerList
 		--table.insert(allPokerList, pokerList)
-		this.sendPlayer(sid, "startGame_ntf", {pokerList=pokerList, bottomList=this.bottomPokerList, status=3})
+		this.sendPlayer(sid, "startGame_ntf", {pokerList=pokerList, bottomList=this.bottomPokerList, status=3, currPlayTimes=this.currPlayTimes})
 	end
 
 	-- notify who grab landlord after 2s
@@ -239,6 +239,7 @@ function this.grabLandlordHandler(playerId, grabAction)
 
 	-- now nobody want to grab landlord
 	if this.grabTimes > maxGrabTimes then
+		this.currPlayTimes = this.currPlayTimes - 1
 		this.restartGame()
 		return
 	end
@@ -286,9 +287,9 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 			skynet.error(cjson.encode(this.prevPokerList))
 			return
 		end
+		local playerInfo = this.playerInfoList[playerId]
 		local pokerType, level = pokerUtil.getPokerType(pokerList)
 		if pokerType == 11 or pokerType == 12 then
-			local playerInfo = this.playerInfoList[playerId]
 			playerInfo.boomNum = playerInfo.boomNum + 1
 			playerInfo.userInfo.boom = playerInfo.userInfo.boom + 1
 			this.currLevel = this.currLevel * 2
@@ -750,17 +751,22 @@ function SAPI.dismissRoom(msg)
 			dismissNum = dismissNum + 1
 		end
 	end
-	print("---------"..dismissNum)
-	print("---------"..this.currPlayerNum)
-	print("---------"..this.maxPlayerNum)
+	--print("---------"..dismissNum)
+	--print("---------"..this.currPlayerNum)
+	--print("---------"..this.maxPlayerNum)
 	if this.currPlayerNum < this.maxPlayerNum then
 		this.leaveRoom(playerId)
 		this.dismissInfo = {}
 		return
 	end
-
+	--local dismissInfoList = {}
+	--for k, v in pairs(this.dismissInfo) do
+	--	if v then
+	--		table.insert(dismissInfoList, {playerId=k, result=v})
+	--	end
+	--end
+	--this.sendAllPlayer("dismissRoom_ntf", {dismissInfoList = dismissInfoList})
 	if dismissNum == 1 then
-		this.sendAllPlayer("dismissRoom_ntf", {playerId = playerId})
 		this.setSecondTimer("dis", 5*60, function(timerVal)
 			if timerVal == 0 then
 				this.sendAllPlayer("stopAlarmTimer_ntf", {playerId = playerId, timerType = timerType})
@@ -770,28 +776,39 @@ function SAPI.dismissRoom(msg)
 				for k, v in pairs(this.playerInfoList) do
 					if v and v.sid and v.userInfo then
 						if this.dismissInfo[v.userInfo.playerId] == nil then
-							this.sendPlayer(v.sid, "alarmTimer_ntf", {playerId = v.userInfo.playerId, timerVal = timerVal, timerType = "dis"})
+							this.sendPlayer(v.sid, "alarmTimer_ntf", {playerId = playerId, timerVal = timerVal, timerType = "dis"})
 						end
+
 					end
 				end
+
+				local dismissInfoList = {}
+				for k, v in pairs(this.dismissInfo) do
+					if v then
+						table.insert(dismissInfoList, {playerId=k, result=v})
+					end
+				end
+				this.sendAllPlayer("dismissRoom_ntf", {whoDismiss=playerId, dismissInfoList = dismissInfoList})				
 			end
 		end)
 	end
 	
 	if dismissNum == this.maxPlayerNum then
-		this.sendAllPlayer("stopAlarmTimer_ntf", {playerId = playerId, timerType = "dis"})
-		this.unsetSecondTimer("dis")
-		local isAllAgree = true
-		for k, v in pairs(this.dismissInfo) do
-			if v ~= 2 then
-				isAllAgree = false
-				break
+		skynet.timeout(300, function()
+			this.sendAllPlayer("stopAlarmTimer_ntf", {playerId = playerId, timerType = "dis"})
+			this.unsetSecondTimer("dis")
+			local isAllAgree = true
+			for k, v in pairs(this.dismissInfo) do
+				if v ~= 2 then
+					isAllAgree = false
+					break
+				end
 			end
-		end
-		if isAllAgree then
-			this.roomOver(30)
-		end
-		this.dismissInfo = {}
+			if isAllAgree then
+				this.roomOver(30)
+			end
+			this.dismissInfo = {}
+		end)
 	end
 end
 
