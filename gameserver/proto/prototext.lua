@@ -206,6 +206,7 @@ message gameResult_ntf {
         optional int32 boomNum = 4;
         optional int32 score = 5;
         optional string nickname = 6;
+        optional int32 isSpring = 7;
     }
     message PokerList_t {
         optional int32 playerId = 1;

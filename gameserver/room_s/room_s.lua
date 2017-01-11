@@ -293,6 +293,7 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 			playerInfo.userInfo.boom = playerInfo.userInfo.boom + 1
 			this.currLevel = this.currLevel * 2
 		end
+		playerInfo.userInfo.playTimes = playerInfo.userInfo.playTimes + 1
 	end
 
 	this.sendAllPlayer("playPoker_ntf", {playerId=playerId, playAction=playAction, pokerType=pokerType, pokerList=pokerList, grabLevel=this.currLevel})
@@ -310,8 +311,23 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 			isLandlordWin = true
 		end
 		local totalBoom = 0
+		local isSpring = 2
 		for k, v in pairs(this.playerInfoList) do
-			totalBoom = totalBoom + this.playerInfoList[k].boomNum
+			totalBoom = totalBoom + v.userInfo.boom
+			if isLandlordWin then
+				if v.userInfo.playerId ~= this.currLandlord and v.userInfo.playTimes > 0 then
+					isSpring = 1
+				end
+			else
+				if v.userInfo.playerId == this.currLandlord and v.userInfo.playTimes > 1 then
+					isSpring = 1
+				end
+				if v.userInfo.playerId ~= playerId and 
+						v.userInfo.playerId ~= this.currLandlord and
+						v.userInfo.playTimes > 0 then
+					isSpring = 1
+				end
+			end
 		end
 		local resultList = {}
 		for i = 1, this.maxPlayerNum do
@@ -322,10 +338,10 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 			if i == this.currLandlord then
 				if isLandlordWin then
 					item.result = 2
-					item.score = 2*math_pow(2, totalBoom)
+					item.score = (this.maxPlayerNum-1)*math_pow(2, totalBoom)
 				else
 					item.result = 1
-					item.score = -2*math_pow(2, totalBoom)
+					item.score = -(this.maxPlayerNum-1)*math_pow(2, totalBoom)
 				end
 			else
 				if isLandlordWin then
@@ -336,7 +352,12 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 					item.score = 1*math_pow(2, totalBoom)
 				end
 			end
-			item.score = this.currGrabLevel*this.playerInfoList[i].spring *item.score
+			if i == playerId then
+				item.isSpring = isSpring
+			else
+				item.isSpring = 1
+			end
+			item.score = this.currGrabLevel*isSpring *item.score
 			this.playerInfoList[i].userInfo.score = item.score
 			table.insert(resultList, item)
 		end
@@ -346,7 +367,7 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 				table.insert(allPlayerLeftPokerSet, {playerId = k, pokerList = v})
 			end
 		end
-		this.setTimer("gameResult", 50, function()
+		this.setTimer("gameResult", 10, function()
 			this.sendAllPlayer("gameResult_ntf", {resultList = resultList, allPlayerPokerSet=allPlayerLeftPokerSet})
 		end)
 		this.playResultList[this.currPlayTimes] = resultList
@@ -461,6 +482,7 @@ function this.resetGame()
 		v.userInfo.boom = 0
 		v.userInfo.leftPoker = 0
 		v.userInfo.spring = 1
+		v.userInfo.playTimes = 0
 	end
 end
 
@@ -638,6 +660,8 @@ function SAPI.joinRoom(agent)
 		userInfo.leftPoker = 0
 		userInfo.playerId = playerId
 		userInfo.hasPlay = 0
+		userInfo.spring = 1
+		userInfo.playTimes = 0
 
 		this.playerInfoList[playerId] = {
 			sid = sid,
