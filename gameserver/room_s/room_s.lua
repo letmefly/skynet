@@ -353,8 +353,12 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 					item.score = 1*math_pow(2, totalBoom)
 				end
 			end
-			if i == playerId then
-				item.isSpring = isSpring
+			if i == playerId and isSpring == 2 then
+				if isLandlordWin then
+					item.isSpring = 2
+				else
+					item.isSpring = 3
+				end
 			else
 				item.isSpring = 1
 			end
