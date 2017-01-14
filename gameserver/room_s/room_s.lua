@@ -271,6 +271,10 @@ function this.playTimeout(playerId)
 end
 
 function this.playPokerHandler(playerId, playAction, pokerList)
+	if this.currWhoPlay ~= playerId then 
+		skynet.error("ERR: it's not your turning")
+		return 
+	end
 	this.unsetTickTimerNtf("p", playerId)
 
 	-- check client error
