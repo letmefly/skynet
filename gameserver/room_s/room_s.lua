@@ -191,6 +191,7 @@ function this.grabTimeout(playerId)
 end
 
 function this.grabLandlordHandler(playerId, grabAction)
+	if this.currWhoGrab ~= playerId then return end
 	this.unsetTickTimerNtf("g", playerId)
 	this.grabTimes = this.grabTimes + 1
 	if this.grabLandlordMode == 1 then
