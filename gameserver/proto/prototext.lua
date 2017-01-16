@@ -208,6 +208,7 @@ message gameResult_ntf {
         optional int32 score = 5;
         optional string nickname = 6;
         optional int32 isSpring = 7;
+        optional int32 totalScore = 8;
     }
     message PokerList_t {
         optional int32 playerId = 1;

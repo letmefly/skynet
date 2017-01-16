@@ -368,7 +368,8 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 				item.isSpring = 1
 			end
 			item.score = this.currGrabLevel*isSpring *item.score
-			this.playerInfoList[i].userInfo.score = item.score
+			this.playerInfoList[i].userInfo.score = item.score + this.playerInfoList[i].userInfo.score
+			item.totalScore = this.playerInfoList[i].userInfo.score
 			table.insert(resultList, item)
 		end
 		local allPlayerLeftPokerSet = {}
@@ -672,6 +673,7 @@ function SAPI.joinRoom(agent)
 		userInfo.hasPlay = 0
 		userInfo.spring = 1
 		userInfo.playTimes = 0
+		userInfo.score = 0
 
 		this.playerInfoList[playerId] = {
 			sid = sid,
