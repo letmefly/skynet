@@ -403,7 +403,7 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 	this.currWhoPlay = this.getNextPlayer(this.currWhoPlay)
 	-- nobody can pay aginest prev player, clear prev play info
 	if this.currWhoPlay == this.prevPlayerId then
-		this.prevPlayerId = 0
+		this.prevPlayerId = this.currWhoPlay
 		this.prevPokerList = {}
 	end
 
