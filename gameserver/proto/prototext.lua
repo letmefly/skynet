@@ -20,6 +20,7 @@ message userInfo_t {
     optional int32 boom = 14;
     optional int32 leftPoker = 15;
     optional int32 hasPlay = 16;
+    optional int32 userno = 17;
 }
 message handshake {
   optional int32 sn = 1;

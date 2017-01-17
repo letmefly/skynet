@@ -95,6 +95,7 @@ function CLIENT_REQ.gameLogin(msg)
 	user_info.lose = userData['lose']
 	user_info.score = 0
 	user_info.ip = userData['ip']
+	user_info.userno = userData['userno']
 
 	
 	-- verify user auth

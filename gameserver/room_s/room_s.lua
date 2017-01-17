@@ -524,6 +524,7 @@ function this.joinRoomOkNtf(playerId)
 			userInfo.isLandlord = v.userInfo.isLandlord
 			userInfo.boom = v.userInfo.boom
 			userInfo.leftPoker = v.userInfo.leftPoker
+			userInfo.userno = v.userInfo.userno
 			table.insert(userInfoList, userInfo)
 		end
 	end
