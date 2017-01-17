@@ -110,14 +110,14 @@ function CLIENT_REQ.createRoom(msg)
 	local maxBoom = msg.maxBoom
 	if playTimes == 6 or playTimes == 1 then
 		if user_info.roomCardNum > 2 then
-			user_info.roomCardNum = user_info.roomCardNum - 2
+			--user_info.roomCardNum = user_info.roomCardNum - 2
 		else
 			send_client_msg("createRoom_ack", {errno = 1007, roomNo = 0})
 			return
 		end
 	elseif playTimes == 12 or playTimes == 2 then
 		if user_info.roomCardNum > 3 then
-			user_info.roomCardNum = user_info.roomCardNum - 3
+			--user_info.roomCardNum = user_info.roomCardNum - 3
 		else
 			send_client_msg("createRoom_ack", {errno = 1007, roomNo = 0})
 			return
@@ -297,14 +297,19 @@ function SERVICE_API.saveGameResult(msg)
 			end
 			postData.userData.score = user_info.score + v.totalScore
 		end
-		table.insert(postData.roomResult.history, {n=user_info.nickname, s=v.totalScore})
-	end
-	if my_room_maxplaytimes == 6 then
-		postData.userData.roomCardNum = user_info.roomCardNum - 2
-	elseif my_room_maxplaytimes == 12 then
-		postData.userData.roomCardNum = user_info.roomCardNum - 3
+		table.insert(postData.roomResult.history, {n=v.nickname, s=v.totalScore})
 	end
 
+	local status, body = httpc.post2(http_server_addr, "/php_01/html/v0/service_updateUser.php", cjson.encode(postData))
+end
+
+function SERVICE_API.costRoomCard(msg)
+	local costRoomCardNum = msg.costRoomCardNum
+	local postData = {}
+	local userData = {}
+	userData.unionid = user_info.userId
+	userData.roomCardNum = user_info.roomCardNum - costRoomCardNum
+	postData.userData = userData
 	local status, body = httpc.post2(http_server_addr, "/php_01/html/v0/service_updateUser.php", cjson.encode(postData))
 end
 

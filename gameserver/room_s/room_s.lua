@@ -17,6 +17,7 @@ this.currPlayerNum = 0
 this.roomOwner = 0
 this.currPlayTimes = 0
 this.maxPlayTimes = 6
+this.isCostRoomCard = false
 this.playResultList = {}
 
 -- game state data
@@ -182,6 +183,18 @@ function this.grabLandlord()
 end
 
 function this.grabLandlordOver(playerId)
+	-- cost room owner's room card
+	if this.isCostRoomCard == false then
+		local costRoomCardNum = 2
+		if this.maxPlayTimes == 12 then
+			costRoomCardNum = 3
+		end
+		local sid = this.playerInfoList[1].sid
+		if sid then
+			skynet.call(sid, "lua", "costRoomCard", {costRoomCardNum = costRoomCardNum})
+			this.isCostRoomCard = true
+		end
+	end
 	if this.isGrabOver == true then return end
 	this.isGrabOver = true
 	local playerInfo = this.playerInfoList[playerId]
