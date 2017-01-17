@@ -25,6 +25,8 @@ this.TYPE_DOUBLE_BY_DOUBLE = 9 --连对
 this.TYPE_THREE_BY_THREE = 10  --飞机
 this.TYPE_BOOM = 11 --炸弹
 this.TYPE_KING_BOOM = 12 --王炸
+this.TYPE_THREE_BY_THREE_DOUBLE = 13
+
 function this.getLevel(pokerId)
     local v = pokerId
     if v > 54 then
@@ -301,6 +303,35 @@ function this.isThreeByThree(pokerList)
     end
     return this.TYPE_THREE_BY_THREE, level
 end
+function this.isThreeByThreeDouble(pokerList)
+    if #pokerList < 8 then
+        return -1,-1
+    end
+    table.sort(pokerList)
+    local sequence = {}
+    local exclude = {}
+    local idxList = {0}
+    while #idxList ~= 0 do
+        idxList = this.findEqualPoker(pokerList, 3, exclude)
+        if #idxList ~= 0 then
+            table.insert(sequence, math.ceil(pokerList[idxList[1]]/4))
+            table.insert(exclude, math.ceil(pokerList[idxList[1]]/4))
+        end
+    end
+    local isOneByOne, level = this.isOneByOne(sequence)
+    if isOneByOne == -1 then
+        return -1,-1
+    end
+    for i = 1, #sequence do
+        local level = sequence[i]
+        table.insert(exclude, level)
+        idxList = this.findEqualPoker(pokerList, 2, exclude)
+        if #idxList == 0 then
+            return -1,-1
+        end
+    end
+    return this.TYPE_THREE_BY_THREE_DOUBLE, level
+end
 function this.getPokerType(pokers)
     local pokerList = {}
     for k, v in pairs(pokers) do
@@ -362,6 +393,10 @@ function this.getPokerType(pokers)
     if pokerType ~= -1 then
         return pokerType, level
     end
+    pokerType, level = this.isThreeByThreeDouble(pokerList)
+    if pokerType ~= -1 then
+        return pokerType, level
+    end
     return -1,-1
 end
 function this.getTipSingle(pokerList, playPokerList)
@@ -398,7 +433,7 @@ function this.getTipThree(pokerList, level)
     end
     local idxList = this.findEqualPoker(pokerList, 3, exclude)
     local cjson = require "cjson"
-    print(cjson.encode(idxList))
+    --print(cjson.encode(idxList))
     if #idxList == 0 then
         return ret
     end
@@ -540,7 +575,7 @@ function this.getTipDoubleByDouble(pokerList, count, level)
     local ret = {}
     local currLevel = level
     while currLevel < 13 do
-        local seq01 = this.getTipSequence(pokerList, count, currLevel)
+        local seq01 = this.getTipSequence(pokerList, count/2, currLevel)
         local leftPokerList = {}
         local j = 1
         for i = 1, #pokerList do
@@ -549,8 +584,9 @@ function this.getTipDoubleByDouble(pokerList, count, level)
             end
         end
         --printJson(leftPokerList)
-        local seq02 = this.getTipSequence(leftPokerList, count, currLevel)
-        --[[print("seq01:")
+        local seq02 = this.getTipSequence(leftPokerList, count/2, currLevel)
+        --[[
+        print("seq01:")
         for kkk, vvv in pairs(seq01) do
             print(pokerList[vvv]..",")
         end
@@ -657,11 +693,10 @@ function this.getTipPoker(pokers, playPokers)
         tipPokerIdxs = this.getTipSequence(pokerList, #currPlayPoker, level) 
     elseif pokerType == this.TYPE_DOUBLE_BY_DOUBLE then
         tipPokers = this.getTipDoubleByDouble(pokerList, #currPlayPoker, level) 
-        return tipPokers
     elseif pokerType == this.TYPE_THREE_BY_THREE then
         tipPokerIdxs = this.getTipThreeByThree(pokerList, level) 
     end
-    if #tipPokerIdxs==0 and pokerType ~= this.TYPE_BOOM then
+    if #tipPokers == 0 and #tipPokerIdxs==0 and pokerType ~= this.TYPE_BOOM then
         tipPokerIdxs = this.getTipBoom(pokerList, 0)
     end
     for i = 1, #tipPokerIdxs do
@@ -813,6 +848,7 @@ function this.getLightPokerIdList(pokerList, playPokerList)
         end
         tmpPlayPokerList[k] = v
     end
+    table.sort(tmpPlayPokerList)
     local t, l = this.getPokerType(tmpPlayPokerList)
     if t == this.TYPE_SINGLE then
         local allBoomLevelList = this.getAllBoomLevel(tmpPokerList)
@@ -845,9 +881,14 @@ function this.getLightPokerIdList(pokerList, playPokerList)
     elseif t == this.TYPE_THREE_SINGLE then
         local allBoomLevelList = this.getAllBoomLevel(tmpPokerList)
         local allThreeLevel = this.getAllThreeLevel(tmpPokerList)
+        local hasBiggerThree = false
+        table.sort(allThreeLevel)
+        if allThreeLevel[1] and allThreeLevel[#allThreeLevel] > l then
+            hasBiggerThree = true
+        end
         for i = 1, #tmpPokerList do
             local level = this.getLevel(tmpPokerList[i])
-            if (this.isContains(allThreeLevel, level) == true and level > l) or 
+            if hasBiggerThree or (this.isContains(allThreeLevel, level) == true and level > l) or 
                 this.isContains(allBoomLevelList, level) == true then
                 table.insert(retLightPokerIdList, tmpPokerList[i])
             end
@@ -855,9 +896,16 @@ function this.getLightPokerIdList(pokerList, playPokerList)
     elseif t == this.TYPE_THREE_DOUBLE then
         local allBoomLevelList = this.getAllBoomLevel(tmpPokerList)
         local allThreeLevel = this.getAllThreeLevel(tmpPokerList)
+        local allDoubleLevel = this.getAllDoubleLevel(tmpPokerList)
+        local hasBiggerThree = false
+        table.sort(allThreeLevel)
+        if allThreeLevel[1] and allThreeLevel[#allThreeLevel] > l then
+            hasBiggerThree = true
+        end
         for i = 1, #tmpPokerList do
             local level = this.getLevel(tmpPokerList[i])
             if (this.isContains(allThreeLevel, level) == true and level > l) or
+                (this.isContains(allDoubleLevel, level) == true and hasBiggerThree) or
                 this.isContains(allBoomLevelList, level) == true then
                 table.insert(retLightPokerIdList, tmpPokerList[i])
             end

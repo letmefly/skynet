@@ -36,6 +36,13 @@ this.firstGrabPlayerId = 0
 this.allPlayerPokerSet = {{},{},{}}
 this.dismissInfo = {}
 
+this.testPokers = {
+	{1,5,9,13,17,49,50,51,2,3,4,45,46,47,48,16,24},
+	{42, 43, 44,30,31,32,	33,	34,	35,	36, 18,	19,	38,	39,	26,	27,	28,	41},
+	{21,	25,	29,	33,	37,	6,	7,	8,	10,	11,	12,	14,	15,	22,	23,	20,	40},
+	{52,53,	54}
+}
+
 function this.sendAllPlayer(msgname, msg)
 	for k, v in pairs(this.playerInfoList) do
 		if v and v.sid then
@@ -140,12 +147,17 @@ function this.startGame()
 			table.insert(pokerList, pokerSet[random])
 			table.remove(pokerSet, random)
 		end
+		-- just for testing
+		if this.testPokers and #this.testPokers > 0 then
+			pokerList = this.testPokers[k]
+			this.bottomPokerList = this.testPokers[4]
+		end
 		pokerUtil.sortPoker(pokerList)
 		this.allPlayerPokerSet[playerId] = pokerList
 		--table.insert(allPokerList, pokerList)
 		this.sendPlayer(sid, "startGame_ntf", {pokerList=pokerList, bottomList=this.bottomPokerList, status=3, currPlayTimes=this.currPlayTimes})
 	end
-
+	this.testPokers = nil
 	-- notify who grab landlord after 2s
 	skynet.timeout(200, this.grabLandlord)
 end
@@ -297,7 +309,10 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 		if pokerType == 11 or pokerType == 12 then
 			playerInfo.boomNum = playerInfo.boomNum + 1
 			playerInfo.userInfo.boom = playerInfo.userInfo.boom + 1
-			this.currLevel = this.currLevel * 2
+			if this.currTotalBoom < this.maxBoom then
+				this.currTotalBoom = this.currTotalBoom + 1
+				this.currLevel = this.currLevel * 2
+			end
 		end
 		playerInfo.userInfo.playTimes = playerInfo.userInfo.playTimes + 1
 	end
@@ -335,6 +350,7 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 				end
 			end
 		end
+		totalBoom = math.min(totalBoom, this.maxBoom)
 		local resultList = {}
 		for i = 1, this.maxPlayerNum do
 			local item = {}
@@ -480,6 +496,7 @@ function this.resetGame()
 	this.prevPokerList = {}
 	this.readyPlayerNum = 0
 	this.isGrabOver = false
+	this.currTotalBoom = 0
 	-- all player's pokerList
 	this.allPlayerPokerSet = {{},{},{}}
 	if 1 == this.grabLandlordMode or 2 == this.grabLandlordMode then
@@ -629,6 +646,7 @@ function SAPI.init(conf)
 	this.roomOwner = 1
 	this.readyPlayerNum = 0
 	this.playResultList = {}
+	this.currTotalBoom = 0
 	if 1 == this.grabLandlordMode or 2 == this.grabLandlordMode then
 		this.currWhoGrab = math.random(1, this.maxPlayerNum)
 	end
