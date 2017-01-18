@@ -818,10 +818,9 @@ function SAPI.dismissRoom(msg)
 			else
 				for k, v in pairs(this.playerInfoList) do
 					if v and v.sid and v.userInfo then
-						if this.dismissInfo[v.userInfo.playerId] == nil then
+						if this.dismissInfo[v.userInfo.playerId] == nil or true then
 							this.sendPlayer(v.sid, "alarmTimer_ntf", {playerId = playerId, timerVal = timerVal, timerType = "dis"})
 						end
-
 					end
 				end
 
