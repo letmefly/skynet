@@ -41,7 +41,7 @@ local function send_client_msg(msgname, msg)
 		socket.write(client_fd, buff, size)
 	end
 end
-
+ 
 local function client_msg_handler(msgname, msg)
 	client_is_alive = true
 	if msgname ~= "alarmTimer_ntf" and msgname ~= "clientHandshake" and msgname ~= "handshake"then
@@ -287,20 +287,25 @@ function SERVICE_API.saveGameResult(msg)
 	postData.roomResult.roomType = my_room_type
 	postData.roomResult.history = {}
 
+	local isAllZero = true
 	for k, v in pairs(roomResultList) do
+		if v.totalScore ~= 0 then
+			isAllZero = false
+		end
 		if v.playerId == room_playerId then
 			postData.userData.unionid = user_info.userId
-			if v.totalScore > 0 then
+			if v.totalScore >= 0 then
 				postData.userData.win = user_info.win + 1
-			else
+			else 
 				postData.userData.lose = user_info.lose + 1
 			end
 			postData.userData.score = user_info.score + v.totalScore
 		end
 		table.insert(postData.roomResult.history, {n=v.nickname, s=v.totalScore})
 	end
-
-	local status, body = httpc.post2(http_server_addr, "/php_01/html/v0/service_updateUser.php", cjson.encode(postData))
+	if isAllZero == false then
+		local status, body = httpc.post2(http_server_addr, "/php_01/html/v0/service_updateUser.php", cjson.encode(postData))
+	end
 end
 
 function SERVICE_API.costRoomCard(msg)
