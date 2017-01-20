@@ -228,6 +228,12 @@ function CLIENT_REQ.rejoinRoom(msg)
 	send_client_msg("rejoinRoom_ack", {errno = 1000})
 end
 
+function CLIENT_REQ.scoreRaceGetRoomNo(msg)
+	local maxPlayerNum = msg.maxPlayerNum
+	local roomNo = skynet.call("roomManager_s", "lua", "scoreRaceGetRoomNo", {maxPlayerNum=maxPlayerNum})
+	send_client_msg("scoreRaceGetRoomNo_ack", {roomNo = roomNo})
+end
+
 ------------------------ register client dispatch -----------------
 skynet.register_protocol {
 	name = "client",

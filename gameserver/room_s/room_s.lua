@@ -175,7 +175,9 @@ function this.grabLandlord()
 	this.sendAllPlayer("whoGrabLandlord_ntf", {playerId = this.currWhoGrab})
 	this.setTickTimer("g"..this.currWhoGrab, 10, function(timerVal)
 		if timerVal == 0 then
-			--this.grabTimeout(this.currWhoGrab)
+			if this.isScoreRace() then
+				this.grabTimeout(this.currWhoGrab)
+			end
 		else
 			this.alarmTimerNtf("g", this.currWhoGrab, timerVal)
 		end
@@ -278,8 +280,9 @@ function this.playPoker()
 	this.sendAllPlayer("whoPlay_ntf", {playerId = this.currWhoPlay, prevPlayerId = this.prevPlayerId})
 	this.setTickTimer("p"..this.currWhoPlay, 15, function(timerVal)
 		if timerVal == 0 then
-			--this.playTimeout(this.currWhoPlay)
-
+			if this.isScoreRace() then
+				this.playTimeout(this.currWhoPlay)
+			end
 		else
 			this.alarmTimerNtf("p", this.currWhoPlay, timerVal)
 		end
@@ -420,7 +423,9 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 			this.resetGame()
 			this.setTickTimer("s"..999, 15, function(timerVal)
 				if timerVal == 0 then
-					--this.restartGame()
+					if this.isScoreRace() then
+						this.restartGame()
+					end
 				else
 					this.alarmTimerNtf("s", 999, timerVal)
 				end
@@ -579,7 +584,9 @@ function this.joinRoomOkNtf(playerId)
 	if this.playerInfoList[playerId].userInfo.status < 2 then
 		this.setTickTimer("r"..playerId, 15, function(timerVal)
 			if timerVal == 0 then
-				--this.leaveRoom(playerId)
+				if this.isScoreRace() then
+					this.leaveRoom(playerId)
+				end
 			else
 				if this.playerInfoList[playerId] then
 					this.alarmTimerNtf("r", playerId, timerVal)
@@ -645,6 +652,10 @@ function this.assignPlayerId()
 		end
 	end
 	return -1
+end
+
+function this.isScoreRace()
+	return this.maxPlayTimes > 12 
 end
 
 ----------------------------- sevevice api -------------------------------
@@ -869,6 +880,10 @@ function SAPI.disconnect(playerId)
 	if this.playerInfoList[playerId] then 
 		this.playerInfoList[playerId].sid = nil
 	end
+end
+
+function SAPI.getCurrPlayerNum(msg)
+	return this.currPlayerNum
 end
 
 skynet.start(function()

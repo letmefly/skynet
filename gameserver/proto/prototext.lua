@@ -242,6 +242,12 @@ message dismissRoom {
     optional int32 playerId = 1;
     optional int32 result = 2; // 1 refuse, 2 agree
 }
+message scoreRaceGetRoomNo {
+    optional int32 maxPlayerNum = 1;
+}
+message scoreRaceGetRoomNo_ack {
+    optional string roomNo = 1;
+}
 
 ]]
 
@@ -281,7 +287,9 @@ local type2name_json = [[
     "31": "reJoinRoomOk_ack",
     "32": "clientHandshake",
     "33": "dismissRoom_ntf",
-    "34": "dismissRoom"
+    "34": "dismissRoom",
+    "35": "scoreRaceGetRoomNo",
+    "36": "scoreRaceGetRoomNo_ack"
 }
 ]]
 
