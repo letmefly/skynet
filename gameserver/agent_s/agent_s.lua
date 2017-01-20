@@ -93,7 +93,7 @@ function CLIENT_REQ.gameLogin(msg)
 	user_info.playerId = 0
 	user_info.win = userData['win']
 	user_info.lose = userData['lose']
-	user_info.score = 0
+	user_info.score = userData['score']
 	user_info.ip = userData['ip']
 	user_info.userno = userData['userno']
 
@@ -230,7 +230,8 @@ end
 
 function CLIENT_REQ.scoreRaceGetRoomNo(msg)
 	local maxPlayerNum = msg.maxPlayerNum
-	local roomNo = skynet.call("roomManager_s", "lua", "scoreRaceGetRoomNo", {maxPlayerNum=maxPlayerNum})
+	local ret = skynet.call("roomManager_s", "lua", "scoreRaceGetRoomNo", {maxPlayerNum=maxPlayerNum})
+	local roomNo = ret.roomNo
 	send_client_msg("scoreRaceGetRoomNo_ack", {roomNo = roomNo})
 end
 

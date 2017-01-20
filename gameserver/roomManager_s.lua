@@ -44,7 +44,7 @@ function this.scoreRace_createRoom(roomType)
 		maxBoom = maxBoom
 	})
 	this.scoreRace_rooms[roomNo] = sid
-	return sid, roomNo
+	return roomNo, sid 
 end
 
 function SERVICE_API.createRoom(msg)

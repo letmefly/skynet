@@ -424,8 +424,10 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 			this.setTickTimer("s"..999, 15, function(timerVal)
 				if timerVal == 0 then
 					if this.isScoreRace() then
-						this.restartGame()
+						--this.restartGame()
+						this.dealUnreadyUser()
 					end
+					this.unsetTickTimer("s"..999)
 				else
 					this.alarmTimerNtf("s", 999, timerVal)
 				end
@@ -535,6 +537,16 @@ end
 function this.restartGame()
 	this.resetGame()
 	this.sendAllPlayer("restartGame_ntf", {errno = 1000})
+end
+
+function this.dealUnreadyUser()
+	for k, v in ipairs(this.playerInfoList) do
+		if v then
+			if v.userInfo.status == 1 then
+				this.leaveRoom(v.userInfo.playerId)
+			end
+		end
+	end	
 end
 
 function this.joinRoomOkNtf(playerId)
@@ -716,7 +728,9 @@ function SAPI.joinRoom(agent)
 		userInfo.hasPlay = 0
 		userInfo.spring = 1
 		userInfo.playTimes = 0
-		userInfo.score = 0
+		if this.isScoreRace() then
+			userInfo.score = 0
+		end
 
 		this.playerInfoList[playerId] = {
 			sid = sid,
