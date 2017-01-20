@@ -400,6 +400,9 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 				item.isSpring = 1
 			end
 			item.score = this.currGrabLevel*isSpring *item.score
+			if this.isScoreRace() then
+				item.score = item.score * 5
+			end
 			this.playerInfoList[i].userInfo.score = item.score + this.playerInfoList[i].userInfo.score
 			item.totalScore = this.playerInfoList[i].userInfo.score
 			table.insert(resultList, item)
@@ -432,6 +435,11 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 					this.alarmTimerNtf("s", 999, timerVal)
 				end
 			end)
+			if this.isScoreRace() then
+				local roomResultList = this.calcRoomResult()
+				-- save user game data
+				this.sendAllAgent("saveGameResult", roomResultList)
+			end
 		end
 		return
 	end
