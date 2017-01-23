@@ -2,6 +2,8 @@ local skynet = require "skynet"
 require "skynet.manager"	-- import skynet.register
 local cjson = require "cjson"
 local pokerUtil = require "room_s.pokerUtil"
+local httpc = require "http.httpc"
+local http_server_addr = "127.0.0.1:80"
 
 local SAPI = {}
 
@@ -401,7 +403,7 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 			end
 			item.score = this.currGrabLevel*isSpring *item.score
 			if this.isScoreRace() then
-				item.score = item.score * 5
+				item.score = item.score * 1
 			end
 			this.playerInfoList[i].userInfo.score = item.score + this.playerInfoList[i].userInfo.score
 			item.totalScore = this.playerInfoList[i].userInfo.score
@@ -436,9 +438,41 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 				end
 			end)
 			if this.isScoreRace() then
+				-- check if some player have readPack
+				local status, body = httpc.post2(http_server_addr, "/php_01/html/v0/service_getActInfo.php", cjson.encode({tag="tag"}))
+				local actInfo = cjson.decode(body)
+				this.isRedPackActOpen = actInfo.isOpen
+
 				local roomResultList = this.calcRoomResult()
+				this.playResultList = {}
 				-- save user game data
 				this.sendAllAgent("saveGameResult", roomResultList)
+
+				if this.isRedPackActOpen == 1 then
+					for k, v in pairs(this.playerInfoList) do
+						if v and v.sid then
+							local userInfo = v.userInfo
+							local sid = v.sid
+							if userInfo.gameOverTimes % 3 == 0 then
+								local randomNum = math.random(1,3)
+								local redPackVal = 0
+								if randomNum == 1 then
+									redPackVal = 40
+								elseif randomNum == 2 then
+									redPackVal = 80
+								elseif randomNum == 3 then
+									redPackVal = 120
+								end
+								userInfo.redPackVal = redPackVal
+								this.sendPlayer(sid, "redPackStart_ack", {playerId = userInfo.playerId, redPackVal = redPackVal})
+								skynet.timeout(30*100, function() 
+									userInfo.redPackVal = nil 
+									this.sendPlayer(sid, "redPackOver_ack", {playerId = userInfo.playerId})
+								end)
+							end
+						end
+					end
+				end
 			end
 		end
 		return
@@ -465,6 +499,9 @@ function this.calcRoomResult()
 	--print(cjson.encode(this.playResultList))
 	local roomResultList = {}
 	for k, v in pairs(this.playerInfoList) do
+		if this.isRedPackActOpen == 1 then
+			v.userInfo.gameOverTimes = v.userInfo.gameOverTimes + 1
+		end
 		local item = {}
 		item.playerId = v.playerId
 		item.nickname = v.userInfo.nickname
@@ -474,15 +511,17 @@ function this.calcRoomResult()
 
 		item.totalScore = 0
 		for kk, vv in pairs(this.playResultList) do
-			for kkk, vvv in pairs(vv) do
-				if vvv.playerId == item.playerId then
-					item.totalBoom = item.totalBoom + vvv.boomNum
-					if vvv.score > item.maxScore then
-						item.maxScore = vvv.score
-					end
-					item.totalScore = item.totalScore + vvv.score
-					if vvv.result == 2 then
-						item.winTimes = item.winTimes + 1
+			if vv then
+				for kkk, vvv in pairs(vv) do
+					if vvv.playerId == item.playerId then
+						item.totalBoom = item.totalBoom + vvv.boomNum
+						if vvv.score > item.maxScore then
+							item.maxScore = vvv.score
+						end
+						item.totalScore = item.totalScore + vvv.score
+						if vvv.result == 2 then
+							item.winTimes = item.winTimes + 1
+						end
 					end
 				end
 			end
@@ -736,6 +775,7 @@ function SAPI.joinRoom(agent)
 		userInfo.hasPlay = 0
 		userInfo.spring = 1
 		userInfo.playTimes = 0
+		userInfo.gameOverTimes = 0
 		if this.isScoreRace() then
 			userInfo.score = 0
 		end
@@ -906,6 +946,20 @@ end
 
 function SAPI.getCurrPlayerNum(msg)
 	return this.currPlayerNum
+end
+
+function SAPI.getRedPack(msg)
+	local playerId = msg.playerId
+	if this.playerInfoList[playerId] then
+		local result = 1
+		local redPackVal = 0
+		if this.playerInfoList[playerId].userInfo.redPackVal then
+			result = 2
+			redPackVal = this.playerInfoList[playerId].userInfo.redPackVal
+			this.playerInfoList[playerId].userInfo.redPackVal = nil
+		end
+		skynet.call(this.playerInfoList[playerId].sid, "lua", "getRedPack_ack", {result = result, redPackVal = redPackVal})
+	end
 end
 
 skynet.start(function()

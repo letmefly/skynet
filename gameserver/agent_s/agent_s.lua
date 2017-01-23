@@ -96,6 +96,7 @@ function CLIENT_REQ.gameLogin(msg)
 	user_info.score = userData['score']
 	user_info.ip = userData['ip']
 	user_info.userno = userData['userno']
+	user_info.redPackVal = userData['redPackVal']
 
 	
 	-- verify user auth
@@ -230,9 +231,21 @@ end
 
 function CLIENT_REQ.scoreRaceGetRoomNo(msg)
 	local maxPlayerNum = msg.maxPlayerNum
+	local errno = 1000
+	if user_info.score < 24 then
+		send_client_msg("scoreRaceGetRoomNo_ack", {errno = 1001, roomNo = -1})
+		return
+	end
 	local ret = skynet.call("roomManager_s", "lua", "scoreRaceGetRoomNo", {maxPlayerNum=maxPlayerNum})
 	local roomNo = ret.roomNo
-	send_client_msg("scoreRaceGetRoomNo_ack", {roomNo = roomNo})
+	send_client_msg("scoreRaceGetRoomNo_ack", {errno = errno, roomNo = roomNo})
+end
+
+function CLIENT_REQ.getRedPack(msg)
+	local playerId = msg.playerId
+	if my_room_sid ~= nil then
+		skynet.call(my_room_sid, "lua", "getRedPack", {playerId = playerId})
+	end
 end
 
 ------------------------ register client dispatch -----------------
@@ -323,6 +336,20 @@ function SERVICE_API.costRoomCard(msg)
 	userData.roomCardNum = user_info.roomCardNum - costRoomCardNum
 	postData.userData = userData
 	local status, body = httpc.post2(http_server_addr, "/php_01/html/v0/service_updateUser.php", cjson.encode(postData))
+end
+
+function SERVICE_API.getRedPack_ack(msg)
+	local result = msg.result
+	local redPackVal = msg.redPackVal
+	if result == 2 then
+		local postData = {}
+		local userData = {}
+		userData.unionid = user_info.userId
+		userData.redPackVal = user_info.redPackVal + redPackVal
+		postData.userData = userData
+		local status, body = httpc.post2(http_server_addr, "/php_01/html/v0/service_updateUser.php", cjson.encode(postData))
+	end
+	send_client_msg("getRedPack_ack", {result = result, redPackVal = redPackVal})
 end
 
 ------------------------ service start! -----------------------------

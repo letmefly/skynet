@@ -28,7 +28,7 @@ function this.scoreRace_createRoom(roomType)
 	local roomType = roomType
 	local playTimes = 9999
 	local grabMode = 1
-	local maxBoom = 99
+	local maxBoom = 2
 
 	this.scoreRace_roomseq = this.scoreRace_roomseq + 1
 	if (this.scoreRace_roomseq > 799998) then

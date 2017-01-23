@@ -21,6 +21,7 @@ message userInfo_t {
     optional int32 leftPoker = 15;
     optional int32 hasPlay = 16;
     optional int32 userno = 17;
+    optional int32 redPackVal = 18;
 }
 message handshake {
   optional int32 sn = 1;
@@ -247,6 +248,21 @@ message scoreRaceGetRoomNo {
 }
 message scoreRaceGetRoomNo_ack {
     optional string roomNo = 1;
+    optional int32 errno = 2;
+}
+message redPackStart_ack {
+    optional int32 playerId = 1;
+    optional int32 redPackVal = 2;
+}
+message redPackOver_ack {
+    optional int32 playerId = 1;
+}
+message getRedPack {
+    optional int32 playerId = 1;
+}
+message getRedPack_ack {
+    optional int32 result = 1;
+    optional int32 redPackVal = 2;
 }
 
 ]]
@@ -289,7 +305,11 @@ local type2name_json = [[
     "33": "dismissRoom_ntf",
     "34": "dismissRoom",
     "35": "scoreRaceGetRoomNo",
-    "36": "scoreRaceGetRoomNo_ack"
+    "36": "scoreRaceGetRoomNo_ack",
+    "37": "redPackStart_ack",
+    "38": "redPackOver_ack",
+    "39": "getRedPack",
+    "40": "getRedPack_ack"
 }
 ]]
 
