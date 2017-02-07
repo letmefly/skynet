@@ -236,7 +236,7 @@ function CLIENT_REQ.scoreRaceGetRoomNo(msg)
 		send_client_msg("scoreRaceGetRoomNo_ack", {errno = 1001, roomNo = -1})
 		return
 	end
-	local ret = skynet.call("roomManager_s", "lua", "scoreRaceGetRoomNo", {maxPlayerNum=maxPlayerNum})
+	local ret = skynet.call("roomManager_s", "lua", "scoreRaceGetRoomNo", {maxPlayerNum=maxPlayerNum, excludeRoomNo=my_room_no})
 	local roomNo = ret.roomNo
 	send_client_msg("scoreRaceGetRoomNo_ack", {errno = errno, roomNo = roomNo})
 end
@@ -246,6 +246,20 @@ function CLIENT_REQ.getRedPack(msg)
 	if my_room_sid ~= nil then
 		skynet.call(my_room_sid, "lua", "getRedPack", {playerId = playerId})
 	end
+end
+
+function CLIENT_REQ.changeRoom(msg)
+	local playerId = msg.playerId
+	local maxPlayerNum = msg.maxPlayerNum
+	if user_info.score < 24 then
+		send_client_msg("changeRoom_ack", {errno = 1001, roomNo = -1})
+		return
+	end
+	local ret = skynet.call("roomManager_s", "lua", "scoreRaceGetRoomNo", {maxPlayerNum=maxPlayerNum, excludeRoomNo=my_room_no})
+	local roomNo = ret.roomNo
+	send_client_msg("changeRoom_ack", {errno = 1000, roomNo = roomNo})	
+
+	skynet.call(my_room_sid, "lua", "leave", room_playerId)	
 end
 
 ------------------------ register client dispatch -----------------

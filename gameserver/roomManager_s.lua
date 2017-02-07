@@ -10,13 +10,13 @@ local total_room = 0
 this.scoreRace_rooms = {}
 this.scoreRace_roomseq = 600000
 
-function this.scoreRace_findRoom(maxPlayerNum)
+function this.scoreRace_findRoom(maxPlayerNum, excludeRoomNo)
 	for k, v in pairs(this.scoreRace_rooms) do
 		if v then
 			local roomNo = k
 			local sid = v 
 			local playerNum = skynet.call(sid, "lua", "getCurrPlayerNum", {})
-			if playerNum < maxPlayerNum then
+			if playerNum < maxPlayerNum and excludeRoomNo ~= roomNo then
 				return roomNo, sid
 			end
 		end
@@ -97,7 +97,9 @@ end
 
 function SERVICE_API.scoreRaceGetRoomNo(msg)
 	local maxPlayerNum = msg.maxPlayerNum
-	local roomNo, sid = this.scoreRace_findRoom(maxPlayerNum)
+	local excludeRoomNo = msg.excludeRoomNo
+	print("------flll-excludeRoomNo--"..excludeRoomNo)
+	local roomNo, sid = this.scoreRace_findRoom(maxPlayerNum, excludeRoomNo)
 	if roomNo == -1 or sid == -1 then
 		roomNo, sid =  this.scoreRace_createRoom(maxPlayerNum)
 	end

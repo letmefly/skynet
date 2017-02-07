@@ -264,6 +264,14 @@ message getRedPack_ack {
     optional int32 result = 1;
     optional int32 redPackVal = 2;
 }
+message changeRoom {
+    optional int32 playerId = 1;
+    optional int32 maxPlayerNum = 2;
+}
+message changeRoom_ack {
+    optional string roomNo = 1;
+    optional int32 errno = 2;
+}
 
 ]]
 
@@ -309,7 +317,9 @@ local type2name_json = [[
     "37": "redPackStart_ack",
     "38": "redPackOver_ack",
     "39": "getRedPack",
-    "40": "getRedPack_ack"
+    "40": "getRedPack_ack",
+    "41": "changeRoom",
+    "42": "changeRoom_ack"
 }
 ]]
 

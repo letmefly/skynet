@@ -426,6 +426,7 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 			return
 		else
 			this.resetGame()
+			--[[
 			this.setTickTimer("s"..999, 15, function(timerVal)
 				if timerVal == 0 then
 					if this.isScoreRace() then
@@ -437,6 +438,25 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 					this.alarmTimerNtf("s", 999, timerVal)
 				end
 			end)
+			]]
+			--[[
+			for i = 1, this.maxPlayerNum do
+				this.setTickTimer("r"..i, 15, function(timerVal)
+				if timerVal == 0 then
+						if this.isScoreRace() then
+							this.leaveRoom(i)
+						end
+					else
+						if this.playerInfoList[i] then
+							this.alarmTimerNtf("r", i, timerVal)
+						else
+							this.unsetTickTimerNtf("r", i)
+						end
+					end
+				end)
+			end
+			]]
+
 			if this.isScoreRace() then
 				-- check if some player have readPack
 				local status, body = httpc.post2(http_server_addr, "/php_01/html/v0/service_getActInfo.php", cjson.encode({tag="tag"}))
@@ -680,7 +700,7 @@ function this.leaveRoom(playerId)
 	this.sendAllPlayer("leaveRoom_ntf", {playerId = playerId})
 	local playerInfo = this.playerInfoList[playerId]
 	if playerInfo.sid then
-		skynet.kill(playerInfo.sid)
+		--skynet.kill(playerInfo.sid)
 	end
 	if playerInfo.userInfo.hasPlay == 0 then
 		playerInfo.userInfo.status = -1
