@@ -707,6 +707,7 @@ function this.leaveRoom(playerId)
 		this.playerInfoList[playerId] = nil
 	else
 		playerInfo.sid = nil
+		this.playerInfoList[playerId] = nil
 	end
 	
 	local playerNum = 0
