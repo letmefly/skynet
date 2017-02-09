@@ -97,6 +97,7 @@ message leaveRoom {
 message leaveRoom_ntf {
     // player 1, 2, 3
     optional int32 playerId = 1;
+    optional int32 t = 2;
 }
 // when client load res ok and switch to game screen, 
 // notify server that client is ready

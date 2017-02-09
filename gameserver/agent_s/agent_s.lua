@@ -211,7 +211,7 @@ function CLIENT_REQ.chat(msg)
 end
 
 function CLIENT_REQ.leaveRoom(msg)
-	skynet.call(my_room_sid, "lua", "leave", room_playerId)	
+	skynet.call(my_room_sid, "lua", "leave", room_playerId, 3)	
 	---on_client_disconnect()
 end
 
@@ -259,7 +259,7 @@ function CLIENT_REQ.changeRoom(msg)
 	local roomNo = ret.roomNo
 	send_client_msg("changeRoom_ack", {errno = 1000, roomNo = roomNo})	
 
-	skynet.call(my_room_sid, "lua", "leave", room_playerId)	
+	skynet.call(my_room_sid, "lua", "leave", room_playerId, 2)	
 end
 
 ------------------------ register client dispatch -----------------

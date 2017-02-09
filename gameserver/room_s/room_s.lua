@@ -181,7 +181,12 @@ function this.grabLandlord()
 				this.grabTimeout(this.currWhoGrab)
 			end
 		else
-			this.alarmTimerNtf("g", this.currWhoGrab, timerVal)
+			local playerInfo = this.playerInfoList[this.currWhoGrab]
+			if playerInfo.sid then
+				this.alarmTimerNtf("g", this.currWhoGrab, timerVal)
+			else
+				this.grabTimeout(this.currWhoGrab)
+			end
 		end
 	end)
 end
@@ -286,7 +291,12 @@ function this.playPoker()
 				this.playTimeout(this.currWhoPlay)
 			end
 		else
-			this.alarmTimerNtf("p", this.currWhoPlay, timerVal)
+			local playerInfo = this.playerInfoList[this.currWhoPlay]
+			if playerInfo.sid then
+				this.alarmTimerNtf("p", this.currWhoPlay, timerVal)
+			else
+				this.playTimeout(this.currWhoPlay)
+			end
 		end
 	end)
 end
@@ -426,6 +436,30 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 			return
 		else
 			this.resetGame()
+			if this.isScoreRace() then
+				for i = 1, this.maxPlayerNum do
+					local playerInfo = this.playerInfoList[i]
+					if playerInfo.sid == nil then
+						skynet.timeout(5*100, function() this.leaveRoom(i, 1) end)
+					end
+					skynet.timeout(5*100, function()
+						this.setTickTimer("r"..i, 15, function(timerVal)
+							if timerVal == 0 then
+								if this.isScoreRace() then
+									this.leaveRoom(i, 1)
+								end
+							else
+								if this.playerInfoList[i] then
+									this.alarmTimerNtf("r", i, timerVal)
+								else
+									this.unsetTickTimerNtf("r", i)
+								end
+							end
+						end)
+					end)
+				end
+			end
+
 			--[[
 			this.setTickTimer("s"..999, 15, function(timerVal)
 				if timerVal == 0 then
@@ -439,6 +473,7 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 				end
 			end)
 			]]
+			
 			--[[
 			for i = 1, this.maxPlayerNum do
 				this.setTickTimer("r"..i, 15, function(timerVal)
@@ -598,6 +633,9 @@ function this.resetGame()
 		v.userInfo.leftPoker = 0
 		v.userInfo.spring = 1
 		v.userInfo.playTimes = 0
+		if this.isScoreRace() then
+			v.userInfo.hasPlay = 0
+		end
 	end
 end
 
@@ -610,7 +648,7 @@ function this.dealUnreadyUser()
 	for k, v in ipairs(this.playerInfoList) do
 		if v then
 			if v.userInfo.status == 1 then
-				this.leaveRoom(v.userInfo.playerId)
+				this.leaveRoom(v.userInfo.playerId, 1)
 			end
 		end
 	end	
@@ -664,7 +702,7 @@ function this.joinRoomOkNtf(playerId)
 		this.setTickTimer("r"..playerId, 15, function(timerVal)
 			if timerVal == 0 then
 				if this.isScoreRace() then
-					this.leaveRoom(playerId)
+					this.leaveRoom(playerId, 1)
 				end
 			else
 				if this.playerInfoList[playerId] then
@@ -681,7 +719,7 @@ function this.alarmTimerNtf(timerType, playerId, timerVal)
 	this.sendAllPlayer("alarmTimer_ntf", {playerId = playerId, timerVal = timerVal, timerType = timerType})
 end
 
-function this.leaveRoom(playerId)
+function this.leaveRoom(playerId, t)
 	--[[
 	this.sendAllPlayer("leaveRoom_ntf", {playerId = playerId})	
 	for k, v in pairs(this.playerInfoList) do
@@ -696,18 +734,21 @@ function this.leaveRoom(playerId)
 	end)
 	]]
 	this.unsetTickTimerNtf("r", playerId)
-	this.currPlayerNum = this.currPlayerNum - 1
-	this.sendAllPlayer("leaveRoom_ntf", {playerId = playerId})
 	local playerInfo = this.playerInfoList[playerId]
+	
 	if playerInfo.sid then
 		--skynet.kill(playerInfo.sid)
 	end
+	if playerInfo.userInfo.hasPlay == 0 and t ~= 2 then
+		t = 1
+	end
+	this.sendAllPlayer("leaveRoom_ntf", {playerId = playerId, t = t})
 	if playerInfo.userInfo.hasPlay == 0 then
 		playerInfo.userInfo.status = -1
+		this.currPlayerNum = this.currPlayerNum - 1
 		this.playerInfoList[playerId] = nil
 	else
 		playerInfo.sid = nil
-		this.playerInfoList[playerId] = nil
 	end
 	
 	local playerNum = 0
@@ -861,9 +902,9 @@ function SAPI.playPoker(msg)
 	this.playPokerHandler(playerId, playAction, pokerList)
 end
 
-function SAPI.leave(playerId)
+function SAPI.leave(playerId, t)
 	print ("player "..playerId.." leave room")
-	this.leaveRoom(playerId)
+	this.leaveRoom(playerId, t)
 	--[[
 	if playerId == 1 then
 		for k, v in pairs(this.playerInfoList) do
@@ -892,7 +933,7 @@ function SAPI.dismissRoom(msg)
 	--print("---------"..this.currPlayerNum)
 	--print("---------"..this.maxPlayerNum)
 	if this.currPlayerNum < this.maxPlayerNum then
-		this.leaveRoom(playerId)
+		this.leaveRoom(playerId, 1)
 		this.dismissInfo = {}
 		return
 	end
