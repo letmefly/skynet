@@ -316,8 +316,7 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 		skynet.error("ERR: it's not your turning")
 		return 
 	end
-	this.unsetTickTimerNtf("p", playerId)
-
+	
 	-- check client error
 	if playAction == 1 then
 		if #this.prevPokerList == 0 then
@@ -344,6 +343,8 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 		end
 		playerInfo.userInfo.playTimes = playerInfo.userInfo.playTimes + 1
 	end
+
+	this.unsetTickTimerNtf("p", playerId)
 
 	this.sendAllPlayer("playPoker_ntf", {playerId=playerId, playAction=playAction, pokerType=pokerType, pokerList=pokerList, grabLevel=this.currLevel})
 
