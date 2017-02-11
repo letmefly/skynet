@@ -443,19 +443,23 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 						skynet.timeout(5*100, function() this.leaveRoom(i, 1) end)
 					end
 					skynet.timeout(5*100, function()
-						this.setTickTimer("r"..i, 15, function(timerVal)
-							if timerVal == 0 then
-								if this.isScoreRace() then
-									this.leaveRoom(i, 1)
+						if this.playerInfoList[i].userInfo.status < 2 then
+							this.setTickTimer("r"..i, 15, function(timerVal)
+								if this.playerInfoList[i].userInfo.status < 2 then
+									if timerVal == 0 then
+										if this.isScoreRace() then
+											this.leaveRoom(i, 1)
+										end
+									else
+										if this.playerInfoList[i] then
+											this.alarmTimerNtf("r", i, timerVal)
+										else
+											this.unsetTickTimerNtf("r", i)
+										end
+									end
 								end
-							else
-								if this.playerInfoList[i] then
-									this.alarmTimerNtf("r", i, timerVal)
-								else
-									this.unsetTickTimerNtf("r", i)
-								end
-							end
-						end)
+							end)
+						end
 					end)
 				end
 			end
