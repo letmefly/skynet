@@ -12,6 +12,7 @@ skynet.start(function()
 	--skynet.newservice("ram_s")
 	--skynet.newservice("db_s")
 	skynet.newservice("roomManager_s")
+	skynet.newservice("aiManager_s")
 	local watchdog_s = skynet.newservice("watchdog_s")
 	
 	skynet.call(watchdog_s, "lua", "start", {

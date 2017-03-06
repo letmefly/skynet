@@ -41,7 +41,7 @@ this.dismissInfo = {}
 
 this.testPokers = {
 	{1,5,9,13,17,49,50,51,2,3,4,45,46,47,48,16,24},
-	{42, 43, 44,30,31,32,	33,	34,	35,	36, 18,	19,	38,	39,	26,	27,	28,	41},
+	{42, 43, 44,30,31,32,34,	35,	36, 18,	19,	38,	39,	26,	27,	28,	41},
 	{21,	25,	29,	33,	37,	6,	7,	8,	10,	11,	12,	14,	15,	22,	23,	20,	40},
 	{52,53,	54}
 }
@@ -437,13 +437,14 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 		else
 			this.resetGame()
 			if this.isScoreRace() then
+				this.setGetAITimer()
 				for i = 1, this.maxPlayerNum do
 					local playerInfo = this.playerInfoList[i]
 					if playerInfo.sid == nil then
 						skynet.timeout(5*100, function() this.leaveRoom(i, 1) end)
 					end
 					skynet.timeout(5*100, function()
-						if this.playerInfoList[i].userInfo.status < 2 then
+						if this.playerInfoList[i] and this.playerInfoList[i].userInfo.status < 2 then
 							this.setTickTimer("r"..i, 15, function(timerVal)
 								if this.playerInfoList[i].userInfo.status < 2 then
 									if timerVal == 0 then
@@ -783,6 +784,34 @@ function this.isScoreRace()
 	return this.maxPlayTimes > 12 
 end
 
+-- Get AI player number
+function this.setGetAITimer()
+	print("setGetAITimer..\n")
+	this.unsetTimer("get_ai_timer")
+	this.setTimer("get_ai_timer", 8*100, function()
+		this.aquireAIPlayer()
+	end)
+end
+
+function this.unsetGetAITimer()
+	print("unsetGetAITimer..\n")
+	this.unsetTimer("get_ai_timer")
+end
+
+function this.aquireAIPlayer()
+	local num = this.maxPlayerNum - this.currPlayerNum
+	local human = 0
+	for k, v in pairs(this.playerInfoList) do
+		if v and v.userInfo.userType == 1 then
+			human = human + 1
+		end
+	end
+	if num > 0 and num <= this.maxPlayerNum-1 and human > 0 then
+		print("aquireAIPlayer..\n")
+		local ret = skynet.call("aiManager_s", "lua", "aquireAIPlayer", num)
+	end
+end
+
 ----------------------------- sevevice api -------------------------------
 function SAPI.init(conf)
 	this.roomNo = conf.roomNo
@@ -811,11 +840,15 @@ function SAPI.init(conf)
 end
 
 function SAPI.joinRoom(agent)
+	-- AI
+	this.setGetAITimer()
 	local sid = agent.sid
+	local userType = agent.userType
 	local playerId = 0
 	local boomNum = 0
 	local spring = 1
 	local userInfo = {}
+	userInfo.userType = userType
 	for k, v in pairs(agent.userInfo) do
 		userInfo[k] = v
 	end
@@ -889,6 +922,7 @@ end
 
 function SAPI.startGame(msg)
 	if this.readyPlayerNum == this.maxPlayerNum then
+		this.unsetGetAITimer()
 		this.startGame()
 	end
 end

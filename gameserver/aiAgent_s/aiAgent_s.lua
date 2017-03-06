@@ -13,6 +13,8 @@ local send_request
 
 local SERVICE_API = {}
 local CLIENT_REQ = {}
+local AI = {}
+AI.maxPlayerNum = 3
 local client_fd
 
 -- 1 is protobuf, 2 is json
@@ -26,6 +28,7 @@ local my_room_maxplaytimes = 0
 local room_playerId = -1
 local user_info = {}
 local http_server_addr = "127.0.0.1:80"
+local doc_root_dir = "/php_01/html/v0/"
 
 
 ------------------------ helper function ------------------------
@@ -33,15 +36,12 @@ local function send_client_msg(msgname, msg)
 	if msgname ~= "alarmTimer_ntf" and msgname ~= "clientHandshake" and msgname ~= "handshake"then
 		print(msgname..": "..cjson.encode(msg))
 	end
-	if 1 == PROTO_TYPE then
-		local buff, size = netutil.pbencode(msgname, msg)
-		socket.write(client_fd, buff, size)
-	else
-		local buff, size = netutil.jsonencode(msgname, msg)
-		socket.write(client_fd, buff, size)
+	local cb = AI[msgname]
+	if cb then
+		cb(msg)
 	end
 end
- 
+
 local function client_msg_handler(msgname, msg)
 	client_is_alive = true
 	if msgname ~= "alarmTimer_ntf" and msgname ~= "clientHandshake" and msgname ~= "handshake"then
@@ -63,6 +63,252 @@ local function on_client_disconnect()
 	skynet.exit()
 end
 
+---------------------------- AI Functions ---------------------------
+function AI.isMe(playerId)
+	return playerId == AI.playerId
+end
+
+function AI.calcIsGrabLandlord()
+	return false
+end
+
+function AI.calcPlayPoker()
+	local ret = {}
+	return ret
+end
+
+function AI.getWaitTime()
+	return math.random(1, 2)*100
+end
+
+function AI.getPrevPlayerId(playerId)
+    local prevPlayerId = playerId - 1
+    if prevPlayerId == 0 then
+        prevPlayerId = AI.maxPlayerNum
+    end
+    return prevPlayerId
+end
+
+function AI.killMyself()
+	AI.leaveRoom({})
+	local ret = skynet.call("aiManager_s", "lua", "releaseAIUser", user_info.userId)
+	skynet.exit()
+end
+
+---------------------------- AI STUB API 2 Server ---------------------------
+function AI.gameLogin(msg)
+	client_msg_handler("gameLogin", msg)
+end
+
+function AI.joinRoom(msg)
+	client_msg_handler("joinRoom", msg)
+end
+
+function AI.rejoinRoom(msg)
+	client_msg_handler("rejoinRoom", msg)
+end
+
+function AI.joinRoomOk(msg)
+	client_msg_handler("joinRoomOk", msg)
+end
+
+function AI.leaveRoom(msg)
+	client_msg_handler("leaveRoom", msg)
+end
+
+function AI.getReady(msg)
+	AI.gameData = {}
+	client_msg_handler("getReady", msg)
+	skynet.timeout(20*100, function()
+		if AI.gameData.pokerList == nil then
+			AI.killMyself()
+		end
+	end)
+end
+
+function AI.getReadystartGame(msg)
+	client_msg_handler("getReadystartGame", msg)
+end
+
+function AI.grabLandlord(msg)
+	client_msg_handler("grabLandlord", msg)
+end
+
+function AI.grabLandlord(msg)
+	client_msg_handler("grabLandlord", msg)
+end
+
+function AI.playPoker(msg)
+	client_msg_handler("playPoker", msg)
+end
+
+function AI.chat(msg)
+	client_msg_handler("chat", msg)
+end
+
+function AI.dismissRoom(msg)
+	client_msg_handler("dismissRoom", msg)
+end
+
+function AI.scoreRaceGetRoomNo(msg)
+	client_msg_handler("scoreRaceGetRoomNo", msg)
+end
+
+function AI.getRedPack(msg)
+	client_msg_handler("getRedPack", msg)
+end
+
+function AI.changeRoom(msg)
+	client_msg_handler("changeRoom", msg)
+end
+
+function AI.handshake(msg)
+end
+
+function AI.gameLogin_ack(msg)
+	if msg.errno == 1000 then
+		AI.userInfo = msg.userInfo
+		-- 2. get room number
+		AI.scoreRaceGetRoomNo({maxPlayerNum=AI.maxPlayerNum})
+	end
+end
+
+function AI.scoreRaceGetRoomNo_ack(msg)
+	if msg.errno == 1000 then
+		local roomNo = msg.roomNo
+		-- 3. join room
+		AI.joinRoom({roomNo = roomNo})
+	else
+		AI.killMyself()
+	end
+end
+
+function AI.joinRoom_ack(msg)
+	if msg.errno == 1000 then
+		local waitTime = 2*AI.getWaitTime()
+		skynet.timeout(0, function()
+			AI.playerId = msg.playerId
+			AI.joinRoomOk({playerId = AI.playerId})
+		end)
+	else
+		AI.killMyself()
+	end
+end
+
+function AI.joinRoomOk_ntf(msg)
+	AI.userInfoList = msg.userInfoList
+	skynet.timeout(100, function()
+		AI.getReady({playerId = AI.playerId, status = 1})
+	end)
+end
+
+function AI.startGame_ntf(msg)
+	--print("[AI]"..cjson.encode(msg))
+	AI.gameData.pokerList = msg.pokerList
+	AI.gameData.bottomList = msg.bottomList
+end
+
+function AI.whoGrabLandlord_ntf(msg)
+	if AI.isMe(msg.playerId) then
+		skynet.timeout(AI.getWaitTime(), function()
+			local actionType = 1
+			if AI.calcIsGrabLandlord() then
+				actionType = 2
+			end
+			AI.grabLandlord({playerId = AI.playerId, grabAction = actionType})
+		end)
+	end
+end
+
+function AI.alarmTimer_ntf(msg)
+	local timerType = msg.timerType
+	local playerId = msg.playerId
+	if timerType == "r" then
+		if AI.isMe(playerId) then
+			--AI.getReady({playerId = AI.playerId, status = 1})
+		end
+	end
+end
+
+function AI.grabLandlord_ntf(msg)
+	AI.gameData.grabLevel = msg.grabLevel
+end
+
+function AI.stopAlarmTimer_ntf(msg)
+end
+
+function AI.landlord_ntf(msg)
+	AI.gameData.landlord = msg.playerId
+	if AI.isMe(AI.gameData.landlord) then
+		for i = 1, #AI.bottomList do
+			table.insert(AI.pokerList, AI.bottomList[i])
+		end
+		table.sort(AI.pokerList)
+	end
+end
+
+function AI.whoPlay_ntf(msg)
+	if AI.isMe(msg.playerId) then
+		skynet.timeout(AI.getWaitTime(), function()
+			local pokerList = AI.calcPlayPoker()
+			local playAction = 2
+		    if pokerList == nil or #pokerList == 0 then
+		        playAction = 1
+		    end
+			AI.playPoker({playerId = AI.playerId, playAction = playAction, pokerList = pokerList})
+		end)
+	end
+end
+
+function AI.playPoker_ntf(msg)
+	local playerId = msg.playerId
+    local playAction = msg.playAction
+    local pokerList = msg.pokerList
+    if AI.gameData.prevPokerListRecord == nil then
+    	AI.gameData.prevPokerListRecord = {}
+    end
+    AI.gameData.prevPokerListRecord[playerId] = pokerList
+end
+
+function AI.gameResult_ntf(msg)
+	local time = math.random(1, 3)*100
+	skynet.timeout(time, function()
+		AI.killMyself()
+	end)
+end
+
+function AI.restartGame_ntf(msg)
+	AI.getReady({playerId = AI.playerId, status = 1})
+end
+
+function AI.roomResult_ntf(msg)
+end
+
+function AI.chat_ntf(msg)
+end
+
+function AI.leaveRoom_ntf(msg)
+end
+
+function AI.reJoinRoomOk_ack(msg)
+end
+
+function AI.dismissRoom_ntf(msg)
+end
+
+function AI.redPackStart_ack(msg)
+end
+
+function AI.redPackOver_ack(msg)
+end
+
+function AI.getRedPack_ack(msg)
+end
+
+function AI.changeRoom_ack(msg)
+end
+
+
 ------------------------ client request -------------------------
 function CLIENT_REQ.handshake(msg)
 	--skynet.error("handshake-"..msg.sn)
@@ -74,7 +320,7 @@ function CLIENT_REQ.clientHandshake(msg)
 end
 
 function CLIENT_REQ.quit()
-	skynet.call(WATCHDOG, "lua", "close", client_fd)
+	--skynet.call(WATCHDOG, "lua", "close", client_fd)
 end
 
 function CLIENT_REQ.gameLogin(msg)
@@ -82,7 +328,7 @@ function CLIENT_REQ.gameLogin(msg)
 	local authCode = msg.authCode
 	local version = msg.version
 
-	local status, body = httpc.post2(http_server_addr, "/php_01/html/v0/service_getUser.php", cjson.encode({unionid=userId}))
+	local status, body = httpc.post2(http_server_addr, doc_root_dir.."service_getUser.php", cjson.encode({unionid=userId}))
 	local userData = cjson.decode(body)
 	user_info.userId = userData['unionid']
 	user_info.nickname = userData['nickname']
@@ -148,7 +394,7 @@ function CLIENT_REQ.joinRoom(msg)
 	my_room_sid = skynet.call("roomManager_s", "lua", "queryRoom", roomNo)
 	if my_room_sid ~= nil then
 		errno = 1000
-		local ret = skynet.call(my_room_sid, "lua", "joinRoom", {sid = skynet.self(), userInfo = user_info, userType = 1})
+		local ret = skynet.call(my_room_sid, "lua", "joinRoom", {sid = skynet.self(), userInfo = user_info, userType = 2})
 		if ret.errno == -1 then
 			errno = 1009
 		else
@@ -261,46 +507,13 @@ function CLIENT_REQ.changeRoom(msg)
 	skynet.call(my_room_sid, "lua", "leave", room_playerId, 2)	
 end
 
------------------------- register client dispatch -----------------
-skynet.register_protocol {
-	name = "client",
-	id = skynet.PTYPE_CLIENT,
-	unpack = function (data, sz)
-		if sz == 0 then return end
-		if 1 == PROTO_TYPE then
-			local msgname, msg = netutil.pbdecode(data, sz)
-			return msgname, msg
-		else
-			local msgname, msg = netutil.jsondecode(data, sz)
-			return msgname, msg			
-		end
-	end,
-	dispatch = function (_, _, msgname, ...)
-		client_msg_handler(msgname, ...)
-	end
-}
-
-
 ------------------------ service API -------------------------------
 function SERVICE_API.start(conf)
-	local fd = conf.client
-	local gate = conf.gate
-	WATCHDOG = conf.watchdog
-	client_fd = fd
-	skynet.call(gate, "lua", "forward", fd)
-	skynet.fork(function()
-		local sn = 0
-		while true do
-			skynet.sleep(10*100)
-			if client_is_alive == false then
-				print("clinet handshake timeout, now disconnect")
-				on_client_disconnect()
-			end
-			sn = sn + 1
-			client_is_alive = false
-			send_client_msg("handshake",{sn=sn})
-		end
-	end)
+	local version = conf.version
+	local userId =  conf.userId
+	local authCode = conf.authCode
+	print("Now create AI for "..userId)
+	AI.gameLogin({version = version, userId = userId, authCode = authCode})
 end
 
 function SERVICE_API.disconnect()
@@ -337,7 +550,7 @@ function SERVICE_API.saveGameResult(msg)
 		table.insert(postData.roomResult.history, {n=v.nickname, s=v.totalScore})
 	end
 	if isAllZero == false then
-		local status, body = httpc.post2(http_server_addr, "/php_01/html/v0/service_updateUser.php", cjson.encode(postData))
+		local status, body = httpc.post2(http_server_addr, doc_root_dir.."service_updateUser.php", cjson.encode(postData))
 	end
 end
 
@@ -348,7 +561,7 @@ function SERVICE_API.costRoomCard(msg)
 	userData.unionid = user_info.userId
 	userData.roomCardNum = user_info.roomCardNum - costRoomCardNum
 	postData.userData = userData
-	local status, body = httpc.post2(http_server_addr, "/php_01/html/v0/service_updateUser.php", cjson.encode(postData))
+	local status, body = httpc.post2(http_server_addr, doc_root_dir.."service_updateUser.php", cjson.encode(postData))
 end
 
 function SERVICE_API.getRedPack_ack(msg)
@@ -360,7 +573,7 @@ function SERVICE_API.getRedPack_ack(msg)
 		userData.unionid = user_info.userId
 		userData.redPackVal = user_info.redPackVal + redPackVal
 		postData.userData = userData
-		local status, body = httpc.post2(http_server_addr, "/php_01/html/v0/service_updateUser.php", cjson.encode(postData))
+		local status, body = httpc.post2(http_server_addr, doc_root_dir.."service_updateUser.php", cjson.encode(postData))
 	end
 	send_client_msg("getRedPack_ack", {result = result, redPackVal = redPackVal})
 end
@@ -372,3 +585,5 @@ skynet.start(function()
 		skynet.ret(skynet.pack(f(...)))
 	end)
 end)
+
+
