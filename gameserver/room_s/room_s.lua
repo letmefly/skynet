@@ -446,7 +446,7 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 					skynet.timeout(5*100, function()
 						if this.playerInfoList[i] and this.playerInfoList[i].userInfo.status < 2 then
 							this.setTickTimer("r"..i, 15, function(timerVal)
-								if this.playerInfoList[i].userInfo.status < 2 then
+								if this.playerInfoList[i] and this.playerInfoList[i].userInfo.status < 2 then
 									if timerVal == 0 then
 										if this.isScoreRace() then
 											this.leaveRoom(i, 1)
@@ -788,7 +788,7 @@ end
 function this.setGetAITimer()
 	print("setGetAITimer..\n")
 	this.unsetTimer("get_ai_timer")
-	this.setTimer("get_ai_timer", 8*100, function()
+	this.setTimer("get_ai_timer", 80*100, function()
 		this.aquireAIPlayer()
 	end)
 end

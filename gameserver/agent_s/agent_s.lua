@@ -26,7 +26,7 @@ local my_room_maxplaytimes = 0
 local room_playerId = -1
 local user_info = {}
 local http_server_addr = "127.0.0.1:80"
-
+local doc_root_dir = "/php_01/html/v0/"
 
 ------------------------ helper function ------------------------
 local function send_client_msg(msgname, msg)
@@ -82,7 +82,7 @@ function CLIENT_REQ.gameLogin(msg)
 	local authCode = msg.authCode
 	local version = msg.version
 
-	local status, body = httpc.post2(http_server_addr, "/php_01/html/v0/service_getUser.php", cjson.encode({unionid=userId}))
+	local status, body = httpc.post2(http_server_addr, doc_root_dir.."service_getUser.php", cjson.encode({unionid=userId}))
 	local userData = cjson.decode(body)
 	user_info.userId = userData['unionid']
 	user_info.nickname = userData['nickname']
@@ -337,7 +337,7 @@ function SERVICE_API.saveGameResult(msg)
 		table.insert(postData.roomResult.history, {n=v.nickname, s=v.totalScore})
 	end
 	if isAllZero == false then
-		local status, body = httpc.post2(http_server_addr, "/php_01/html/v0/service_updateUser.php", cjson.encode(postData))
+		local status, body = httpc.post2(http_server_addr, doc_root_dir.."service_updateUser.php", cjson.encode(postData))
 	end
 end
 
@@ -348,7 +348,7 @@ function SERVICE_API.costRoomCard(msg)
 	userData.unionid = user_info.userId
 	userData.roomCardNum = user_info.roomCardNum - costRoomCardNum
 	postData.userData = userData
-	local status, body = httpc.post2(http_server_addr, "/php_01/html/v0/service_updateUser.php", cjson.encode(postData))
+	local status, body = httpc.post2(http_server_addr, doc_root_dir.."service_updateUser.php", cjson.encode(postData))
 end
 
 function SERVICE_API.getRedPack_ack(msg)
@@ -360,7 +360,7 @@ function SERVICE_API.getRedPack_ack(msg)
 		userData.unionid = user_info.userId
 		userData.redPackVal = user_info.redPackVal + redPackVal
 		postData.userData = userData
-		local status, body = httpc.post2(http_server_addr, "/php_01/html/v0/service_updateUser.php", cjson.encode(postData))
+		local status, body = httpc.post2(http_server_addr, doc_root_dir.."service_updateUser.php", cjson.encode(postData))
 	end
 	send_client_msg("getRedPack_ack", {result = result, redPackVal = redPackVal})
 end
