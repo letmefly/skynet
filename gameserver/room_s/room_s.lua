@@ -875,7 +875,7 @@ function SAPI.joinRoom(agent)
 		userInfo.spring = 1
 		userInfo.playTimes = 0
 		userInfo.gameOverTimes = 0
-		if this.isScoreRace() then
+		if this.isScoreRace() == false then
 			userInfo.score = 0
 		end
 
@@ -1060,6 +1060,17 @@ function SAPI.getRedPack(msg)
 		end
 		skynet.call(this.playerInfoList[playerId].sid, "lua", "getRedPack_ack", {result = result, redPackVal = redPackVal})
 	end
+end
+
+function SAPI.findByUserId(userId)
+	local ret = 0
+	for k, v in pairs(this.playerInfoList) do
+		if v and userId == v.userInfo.userId then
+			ret = 1
+			break
+		end
+	end
+	return ret
 end
 
 skynet.start(function()

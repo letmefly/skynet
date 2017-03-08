@@ -235,7 +235,7 @@ function CLIENT_REQ.scoreRaceGetRoomNo(msg)
 		send_client_msg("scoreRaceGetRoomNo_ack", {errno = 1001, roomNo = -1})
 		return
 	end
-	local ret = skynet.call("roomManager_s", "lua", "scoreRaceGetRoomNo", {maxPlayerNum=maxPlayerNum, excludeRoomNo=my_room_no})
+	local ret = skynet.call("roomManager_s", "lua", "scoreRaceGetRoomNo", {userId = user_info.userId, maxPlayerNum=maxPlayerNum, excludeRoomNo=my_room_no})
 	local roomNo = ret.roomNo
 	send_client_msg("scoreRaceGetRoomNo_ack", {errno = errno, roomNo = roomNo})
 end
