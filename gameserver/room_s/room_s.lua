@@ -415,7 +415,19 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 			if this.isScoreRace() then
 				item.score = item.score * 1
 			end
-			this.playerInfoList[i].userInfo.score = item.score + this.playerInfoList[i].userInfo.score
+			if this.isScoreRace() then
+				local costCoin = 0
+				if item.result == 2 then
+					if isLandlordWin then
+						costCoin = -4
+					else
+						costCoin = -2
+					end
+				end
+				this.playerInfoList[i].userInfo.score = item.score + this.playerInfoList[i].userInfo.score + costCoin
+			else
+				this.playerInfoList[i].userInfo.score = item.score + this.playerInfoList[i].userInfo.score
+			end
 			item.totalScore = this.playerInfoList[i].userInfo.score
 			table.insert(resultList, item)
 		end
@@ -899,10 +911,12 @@ function SAPI.joinRoomOk(msg)
 end
 
 function SAPI.getReady(playerId)
-	this.unsetTickTimerNtf("r", playerId)
 	local playerInfo = this.playerInfoList[playerId]
+	if this.isScoreRace() then
+		if playerInfo.userInfo.score < 24 then return end
+	end
 	if playerInfo.userInfo.status >= 2 then return end
-
+	this.unsetTickTimerNtf("r", playerId)
 	playerInfo.userInfo.status = 2 -- now ready
 	local readyList = {}
 	for k, v in pairs(this.playerInfoList) do

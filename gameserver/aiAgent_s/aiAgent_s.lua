@@ -6,6 +6,7 @@ local netutil = require "agent_s.netutil"
 local httpc = require "http.httpc"
 local dns = require "dns"
 local cjson = require "cjson"
+local pokerUtil = require "room_s.pokerUtil"
 
 local WATCHDOG
 local host
@@ -74,6 +75,15 @@ end
 
 function AI.calcPlayPoker()
 	local ret = {}
+
+	local prevPlayerId, prevPokerList = AI.getPrevPokerList()
+	if #prevPokerList == 0 then
+		-- you play first
+	else
+		-- play against prev player
+		
+	end
+
 	return ret
 end
 
@@ -87,6 +97,20 @@ function AI.getPrevPlayerId(playerId)
         prevPlayerId = AI.maxPlayerNum
     end
     return prevPlayerId
+end
+
+function AI.getPrevPokerList()
+	if AI.gameData.prevPokerListRecord == nil then 
+		return -1, {} 
+	end
+	local playerId = AI.getPrevPlayerId(AI.playerId)
+	while AI.playerId ~= playerId do
+		if AI.gameData.prevPokerListRecord[playerId] and #AI.gameData.prevPokerListRecord[playerId] > 0 then
+			return playerId, AI.gameData.prevPokerListRecord[playerId]
+		end
+		playerId = AI.getPrevPlayerId(playerId)
+	end
+	return -1, {}
 end
 
 function AI.killMyself()
@@ -240,10 +264,10 @@ end
 function AI.landlord_ntf(msg)
 	AI.gameData.landlord = msg.playerId
 	if AI.isMe(AI.gameData.landlord) then
-		for i = 1, #AI.bottomList do
-			table.insert(AI.pokerList, AI.bottomList[i])
+		for i = 1, #AI.gameData.bottomList do
+			table.insert(AI.gameData.pokerList, AI.gameData.bottomList[i])
 		end
-		table.sort(AI.pokerList)
+		table.sort(AI.gameData.pokerList)
 	end
 end
 
