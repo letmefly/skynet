@@ -226,6 +226,8 @@ end
 
 function this.grabLandlordHandler(playerId, grabAction)
 	if this.currWhoGrab ~= playerId then return end
+	local userInfo = this.playerInfoList[playerId].userInfo
+	userInfo.grabRecord = grabAction
 	this.unsetTickTimerNtf("g", playerId)
 	this.grabTimes = this.grabTimes + 1
 	if this.grabLandlordMode == 1 then
@@ -244,13 +246,16 @@ function this.grabLandlordHandler(playerId, grabAction)
 		end
 	end
 	this.sendAllPlayer("grabLandlord_ntf", {playerId=playerId, grabAction=grabAction, grabLevel=this.currGrabLevel})
-
+	
+	if this.firstGrabPlayerId == 0 and grabAction > 1 then
+		this.firstGrabPlayerId = playerId
+	end
 	if this.firstGrabPlayerId == playerId and grabAction > 1 then
 		this.isFirstOneGrab = true
 	end
 
 	local maxGrabTimes = this.maxPlayerNum
-	if this.isFirstOneGrab and this.currLandlord ~= this.firstGrabPlayerId then
+	if this.isFirstOneGrab and this.currLandlord ~= this.firstGrabPlayerId and this.grabLandlordMode == 1 then
 		maxGrabTimes = this.maxPlayerNum + 1
 	end
 	-- check if grab is over
@@ -265,7 +270,7 @@ function this.grabLandlordHandler(playerId, grabAction)
 	elseif this.grabLandlordMode == 2 then
 		-- the one who give level 3 first get landlord
 		if this.currGrabLevel == 3 or 
-			(this.currGrabLevel>0 and this.grabTimes==maxGrabTimes) then
+			(this.currGrabLevel>0 and this.grabTimes>=maxGrabTimes) then
 			-- now landlord is known
 			this.grabLandlordOver(this.currLandlord)
 			return
@@ -279,7 +284,14 @@ function this.grabLandlordHandler(playerId, grabAction)
 		return
 	end
 
-	this.currWhoGrab = this.getNextPlayer(this.currWhoGrab)
+	while true do
+		this.currWhoGrab = this.getNextPlayer(this.currWhoGrab)
+		local userInfo = this.playerInfoList[this.currWhoGrab].userInfo
+		if userInfo.grabRecord == -1 or userInfo.grabRecord > 1 then
+			break
+		end
+	end
+
 	skynet.timeout(10, this.grabLandlord)
 end
 
@@ -641,7 +653,7 @@ function this.resetGame()
 	if 1 == this.grabLandlordMode or 2 == this.grabLandlordMode then
 		this.currWhoGrab = math.random(1, this.maxPlayerNum)
 	end
-	this.firstGrabPlayerId = this.currWhoGrab
+	this.firstGrabPlayerId = 0
 	this.isFirstOneGrab = false
 	for k, v in pairs(this.playerInfoList) do
 		v.userInfo.status = 1
@@ -650,6 +662,7 @@ function this.resetGame()
 		v.userInfo.leftPoker = 0
 		v.userInfo.spring = 1
 		v.userInfo.playTimes = 0
+		v.userInfo.grabRecord = -1
 		if this.isScoreRace() then
 			v.userInfo.hasPlay = 0
 		end
@@ -840,7 +853,7 @@ function SAPI.init(conf)
 	if 1 == this.grabLandlordMode or 2 == this.grabLandlordMode then
 		this.currWhoGrab = math.random(1, this.maxPlayerNum)
 	end
-	this.firstGrabPlayerId = this.currWhoGrab
+	this.firstGrabPlayerId = 0
 	this.isFirstOneGrab = false
 
 	this.startGameTimer()
@@ -887,6 +900,7 @@ function SAPI.joinRoom(agent)
 		userInfo.spring = 1
 		userInfo.playTimes = 0
 		userInfo.gameOverTimes = 0
+		userInfo.grabRecord = -1
 		if this.isScoreRace() == false then
 			userInfo.score = 0
 		end

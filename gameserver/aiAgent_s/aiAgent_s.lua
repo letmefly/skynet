@@ -77,6 +77,9 @@ function AI.calcPlayPoker()
 	local ret = {}
 
 	local prevPlayerId, prevPokerList = AI.getPrevPokerList()
+
+	--ret = pokerUtil.getTipPoker(AI.gameData.pokerList, prevPokerList)
+
 	if #prevPokerList == 0 then
 		-- you play first
 	else
@@ -292,6 +295,9 @@ function AI.playPoker_ntf(msg)
     	AI.gameData.prevPokerListRecord = {}
     end
     AI.gameData.prevPokerListRecord[playerId] = pokerList
+    if AI.isMe(playerId) then
+    	table_remove(AI.gameData.pokerList, pokerList)
+    end
 end
 
 function AI.gameResult_ntf(msg)

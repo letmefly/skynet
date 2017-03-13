@@ -987,4 +987,315 @@ function math_pow(a, b)
     end
     return a * math_pow(a, b-1)
 end
+
+----------------------------- AI FUNCTIONS ---------------------------
+function ai_is_in_sequence(pokerLevelList, level)
+    for start=level-4, level do
+        local tmpNum = 0
+        if start > 0 and start + 4 < 13 then
+            for i=start, start+4 do
+                if pokerLevelList[i] > 0 then
+                    tmpNum = tmpNum + 1
+                end
+            end
+        end
+        if tmpNum == 5 then
+            return true
+        end
+    end
+    return false
+end
+function ai_get_sequence(pokerLevelList)
+    local ret_sequence_list = {}
+    -- 1. find all single poker
+    local singleList = {}
+    local doubleList = {}
+    local threeList = {}
+    local fourList = {}
+    for i = 1, 12 do
+        if pokerLevelList[i] == 1 then
+            table.insert(singleList, i)
+        elseif pokerLevelList[i] == 2 then
+            table.insert(doubleList, i)
+        elseif pokerLevelList[i] == 3 then
+            table.insert(threeList, i)
+        elseif pokerLevelList[i] == 4 then
+            table.insert(fourList, i)
+        end
+    end
+    -- 2. find all left
+    local leftSingleList = {}
+
+    for i = 1, #singleList do
+        if ai_is_in_sequence(singleList, singleList[i]) == false then
+            table.insert(leftSingleList, singleList[i])
+        end
+    end
+
+    -- 3. try to link all single poker to sequence
+end
+
+--[[
+local ai = {}
+this.temp_rocket = {}
+this.temp_bosb = {}
+this.temp_three = {}
+this.temp_plane = {}
+this.temp_link = {}
+this.temp_doubleLink = {}
+this.temp_double = {}
+this.temp_single = {}
+this.m_handNum = {}
+this.m_intArray = {}
+
+this.tempStyle = {}
+
+function this.SplitCards()
+    this.temp_rocket = {}
+    this.temp_bosb = {}
+    this.temp_three = {}
+    this.temp_plane = {}
+    this.temp_link = {}
+    this.temp_doubleLink = {}
+    this.temp_double = {}
+    this.temp_single = {}
+    this.m_handNum = {}
+    this.m_intArray = {}
+
+    if this.m_intArray[13]==1 and m_intArray[14]==1 then
+        local tempStyle = {}
+        tempStyle.max = 15
+        tempStyle.min = 15
+        tempStyle.m_value = 8
+        tempStyle.m_ISprimary = true
+        this.m_intArray[13] = 0
+        this.m_intArray[14] = 0
+        table.insert(this.temp_rocket, tempStyle)
+    end
+    for i = 1, 13 do
+        if this.m_intArray[i] == 4 then
+            local tempStyle = {}
+            tempStyle.max = i
+            tempStyle.min = i
+            tempStyle.m_value = 7
+            tempStyle.m_ISprimary = true
+            this.m_intArray[i] = 0
+            table.insert(this.temp_bosb, tempStyle)
+        elseif this.m_intArray[i] == 3 then
+            local tempStyle = {}
+            tempStyle.max = i
+            tempStyle.min = i
+            tempStyle.m_value = 3
+            tempStyle.m_ISprimary = true
+            this.m_intArray[i] = 0
+            table.insert(this.temp_three, tempStyle)
+        elseif this.m_intArray[i] == 2 then
+            local tempStyle = {}
+            tempStyle.max = i
+            tempStyle.min = i
+            tempStyle.m_value = 2
+            tempStyle.m_ISprimary = true
+            this.m_intArray[i] = 0
+            table.insert(this.temp_double, tempStyle)
+        end
+    end
+
+    this.JudeFly(this.temp_three, this.temp_plane, true)
+    this.JudeDoubleLink(this.temp_double, this.temp_doubleLink, true)
+    this.DeleteElement(this.temp_double, this.temp_doubleLink)
+    this.DeleteElement(this.temp_three, this.temp_plane)
+
+    local tempbosb, tempplane, tempLinkdouble, tempthree, tempdouble
+    if #this.temp_bosb == 0 then
+        tempbosb = 0
+    else 
+        tempbosb = 1
+    end
+
+    if #this.temp_plane == 0 then
+        tempplane = 0
+    else 
+        tempplane = 1
+    end
+    if #this.temp_doubleLink == 0 then
+        tempLinkdouble = 0
+    else 
+        tempLinkdouble = 1
+    end
+    if #this.temp_three==0 then
+        tempthree = 0
+    else 
+        tempthree = 1
+    end
+    if #this.temp_double==0 then
+        tempdouble = 0
+    else 
+        tempdouble = 1
+    end    
+    for i = 0, tempbosb do
+        for j = 0, tempplane do
+            for k = 0, tempLinkdouble do
+                for m = 0, tempthree do
+                    for n = 0, tempdouble do
+                        this.ErgodicCard(i, j, k, m, n)
+                    end
+                end
+            end
+        end
+    end
+
+    local tempQuanzhi = 0
+    local tempShoushu = 0
+    local tempShoushu1 = 0
+    local tempQuanzhi1 = 0
+    for i = 1, #this.m_handNum - 1 do
+        tempShoushu = m_handNum[i].s_bosb.size() + m_handNum[i].s_double.size() + m_handNum[i].s_doubleLink.size() +
+                  m_handNum[i].s_link.size() + m_handNum[i].s_plane.size() + m_handNum[i].s_rocket.size() +
+                  m_handNum[i].s_single.size() + m_handNum[i].s_three.size();
+        if ( m_handNum[i].s_three.size() == m_handNum[i].s_single.size() ||
+             m_handNum[i].s_three.size() == m_handNum[i].s_double.size() )
+            tempShoushu -= m_handNum[i].s_three.size();
+
+        tempShoushu1 = m_handNum[i + 1].s_bosb.size() + m_handNum[i + 1].s_double.size() + m_handNum[i + 1].s_doubleLink.size() +
+                   m_handNum[i + 1].s_link.size() + m_handNum[i + 1].s_plane.size() + m_handNum[i + 1].s_rocket.size() +
+                   m_handNum[i + 1].s_single.size() + m_handNum[i + 1].s_three.size();
+        if ( m_handNum[i + 1].s_three.size() == m_handNum[i + 1].s_single.size() ||
+             m_handNum[i + 1].s_three.size() == m_handNum[i + 1].s_double.size() )
+            tempShoushu1 -= m_handNum[i + 1].s_three.size();
+
+
+        tempQuanzhi = returnValue( m_handNum[i].s_bosb ) + returnValue( m_handNum[i].s_double ) + returnValue( m_handNum[i].s_doubleLink )
+                  + returnValue( m_handNum[i].s_link ) + returnValue( m_handNum[i].s_plane )
+                  + returnValue( m_handNum[i].s_rocket ) + returnValue( m_handNum[i].s_single ) + returnValue( m_handNum[i].s_three );
+
+        tempQuanzhi1 = returnValue( m_handNum[i + 1].s_bosb ) + returnValue( m_handNum[i + 1].s_double ) + returnValue( m_handNum[i + 1].s_doubleLink )
+                   + returnValue( m_handNum[i + 1].s_link ) + returnValue( m_handNum[i + 1].s_plane )
+                   + returnValue( m_handNum[i + 1].s_rocket ) + returnValue( m_handNum[i + 1].s_single ) + returnValue( m_handNum[i + 1].s_three );
+        vector<ZONGCARDS>::iterator iterTemp;
+        if ( tempShoushu > tempShoushu1 )
+        {
+            iterTemp    = m_handNum.begin() + i;
+            i       = 0;
+        }else if ( tempShoushu < tempShoushu1 )
+        {
+            iterTemp    = m_handNum.begin() + i + 1;
+            i       = 0;
+        }else{
+            if ( tempQuanzhi > tempQuanzhi1 )
+            {
+                iterTemp    = m_handNum.begin() + i + 1;
+                i       = 0;
+            }else{
+                iterTemp    = m_handNum.begin() + i;
+                i       = 0;
+            }
+        }
+        m_handNum.erase( iterTemp );
+    end
+
+
+    insert( m_rocket, m_handNum[0].s_rocket );
+    insert( m_bomb, m_handNum[0].s_bosb );
+    insert( m_three, m_handNum[0].s_three );
+    insert( m_plane, m_handNum[0].s_plane );
+    insert( m_link, m_handNum[0].s_link );
+    insert( m_doubleLink, m_handNum[0].s_doubleLink );
+    insert( m_double, m_handNum[0].s_double );
+    insert( m_single, m_handNum[0].s_single );    
+end
+]]
+
+--[[
+function ai_is_seq(pokerLevelList, level)
+    for start=level-4, level do
+        local tmpNum = 0
+        if start > 0 and start + 4 < 13 then
+            for i=start, start+4 do
+                if pokerLevelList[i] > 0 then
+                    tmpNum = tmpNum + 1
+                end
+            end
+        end
+        if tmpNum == 5 then
+            return true
+        end
+    end
+    return false
+end
+function ai_find_noseq_element(pokerLevelList)
+    local noseq1 = {}
+    local noseq2 = {}
+    local noseq3 = {}
+    for i = 1, 12 do
+        if pokerLevelList[i] > 0 then
+            if ai_is_seq(pokerLevelList, pokerLevelList[i]) == false then
+                if pokerLevelList[i] == 1 then
+                    table.insert(noseq1, i)
+                elseif pokerLevelList[i] == 2 then
+                    table.insert(noseq2, i)
+                elseif pokerLevelList[i] == 3 then
+                    table.insert(noseq3, i)
+                end
+            end
+        end
+    end
+    return noseq1, noseq2, noseq3
+end
+function ai_find_max_seq(pokerLevelList)
+    local maxLen = 0
+    local num = 0
+    local startVar = 0
+    local endVar = 0
+    local maxStartVar = 0
+    local maxEndVar = 0
+    for i = 1, 12 do
+        if pokerLevelList[i] > 0 then
+            num = num + 1
+            endVar = i
+            if num >= 5 and num > maxLen then
+                maxLen = num
+                maxStartVar = startVar
+                maxEndVar = endVar
+            end
+        else
+            num = 0
+            endVar = 0
+            startVar = i
+        end
+    end
+    return maxStartVar+1, maxEndVar
+end
+function ai_split_poker(pokerLevelList)
+    local noseq1, noseq2, noseq3 = ai_find_noseq_element(pokerLevelList)
+    local leftPokerLevelList = {}
+    for k, v in pairs(pokerLevelList) do
+        leftPokerLevelList[k] = v
+    end
+    for k, v in pairs(noseq1) do
+        leftPokerLevelList[k] = 0
+    end
+    for k, v in pairs(noseq2) do
+        leftPokerLevelList[k] = 0
+    end
+    for k, v in pairs(noseq3) do
+        leftPokerLevelList[k] = 0
+    end
+    local startVar, endVar = ai_find_max_seq(leftPokerLevelList)
+    if endVar ~= 0 then
+        for startLevel = startVar, endVar-4 do
+            for i = startLevel, startLevel+4 do
+                local nowPokerLevelList = {}
+                for k, v in pairs(leftPokerLevelList) do
+                    nowPokerLevelList[k] = v
+                    if k >= startLevel and k <= startLevel+4 then
+                        nowPokerLevelList[k] = 0
+                    end
+                end
+                local ret = ai_split_poker(nowPokerLevelList)
+            end
+        end
+    end
+end
+]]
+
 return this
