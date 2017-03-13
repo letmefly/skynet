@@ -116,6 +116,9 @@ end
 
 -- send 17 poker to all player
 function this.startGame()
+	if this.isStartCheckRedPack == nil then
+		this.checkRedPack()
+	end
 	this.unsetTickTimer("s"..999)
 	this.currPlayTimes = this.currPlayTimes + 1
 	-- 1,2,3,4,means that heart-3,diamod-3,club-3,spade-3
@@ -531,7 +534,7 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 				this.playResultList = {}
 				-- save user game data
 				this.sendAllAgent("saveGameResult", roomResultList)
-
+				--[[
 				if this.isRedPackActOpen == 1 then
 					for k, v in pairs(this.playerInfoList) do
 						if v and v.sid then
@@ -557,6 +560,7 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 						end
 					end
 				end
+				]]
 			end
 		end
 		return
@@ -835,6 +839,39 @@ function this.aquireAIPlayer()
 		print("aquireAIPlayer..\n")
 		local ret = skynet.call("aiManager_s", "lua", "aquireAIPlayer", num)
 	end
+end
+
+function this.checkRedPack()
+	this.isStartCheckRedPack = true
+	if this.isScoreRace() and this.isRedPackActOpen == 1 then
+		for k, v in pairs(this.playerInfoList) do
+			if v and v.sid then
+				local userInfo = v.userInfo
+				local sid = v.sid
+				if userInfo.gameOverTimes >= 3 then
+					userInfo.gameOverTimes = 0
+					local randomNum = math.random(1,3)
+					local redPackVal = 0
+					if randomNum == 1 then
+						redPackVal = 40
+					elseif randomNum == 2 then
+						redPackVal = 80
+					elseif randomNum == 3 then
+						redPackVal = 120
+					end
+					userInfo.redPackVal = redPackVal
+					this.sendPlayer(sid, "redPackStart_ack", {playerId = userInfo.playerId, redPackVal = redPackVal})
+					skynet.timeout(30*100, function() 
+						userInfo.redPackVal = nil 
+						this.sendPlayer(sid, "redPackOver_ack", {playerId = userInfo.playerId})
+					end)
+				end
+			end
+		end
+	end
+	skynet.timeout(100*60*5, function()
+		this.checkRedPack()
+	end)
 end
 
 ----------------------------- sevevice api -------------------------------
