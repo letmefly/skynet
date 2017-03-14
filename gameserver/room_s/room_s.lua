@@ -161,7 +161,7 @@ function this.startGame()
 		pokerUtil.sortPoker(pokerList)
 		this.allPlayerPokerSet[playerId] = pokerList
 		--table.insert(allPokerList, pokerList)
-		this.sendPlayer(sid, "startGame_ntf", {pokerList=pokerList, bottomList=this.bottomPokerList, status=3, currPlayTimes=this.currPlayTimes})
+		this.sendPlayer(sid, "startGame_ntf", {pokerList=pokerList, bottomList=this.bottomPokerList, status=3, currPlayTimes=v.userInfo.gameOverTimes})
 	end
 	this.testPokers = nil
 	-- notify who grab landlord after 2s
@@ -415,6 +415,7 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 		totalBoom = math.min(totalBoom, this.maxBoom)
 		local resultList = {}
 		for i = 1, this.maxPlayerNum do
+			this.playerInfoList[i].userInfo.gameOverTimes = this.playerInfoList[i].userInfo.gameOverTimes + 1
 			local item = {}
 			item.playerId = i
 			item.leftPokerNum = #this.allPlayerPokerSet[i]
@@ -606,9 +607,6 @@ function this.calcRoomResult()
 	--print(cjson.encode(this.playResultList))
 	local roomResultList = {}
 	for k, v in pairs(this.playerInfoList) do
-		if this.isRedPackActOpen == 1 then
-			v.userInfo.gameOverTimes = v.userInfo.gameOverTimes + 1
-		end
 		local item = {}
 		item.playerId = v.playerId
 		item.nickname = v.userInfo.nickname
@@ -747,7 +745,7 @@ function this.joinRoomOkNtf(playerId)
 			bottomList = this.bottomPokerList,
 			prevPlayerId = this.prevPlayerId,
 			prevPlayPokerList = this.prevPokerList,
-			currPlayTimes = this.currPlayTimes,
+			currPlayTimes = this.playerInfoList[playerId].userInfo.gameOverTimes,
 			grabLevel = this.currLevel
 		})
 	end

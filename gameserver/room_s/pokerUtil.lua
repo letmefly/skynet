@@ -329,6 +329,7 @@ function this.isThreeByThreeDouble(pokerList)
         if #idxList == 0 then
             return -1,-1
         end
+        table.insert(exclude, this.getLevel(pokerList[idxList[1]]))
     end
     return this.TYPE_THREE_BY_THREE_DOUBLE, level
 end
