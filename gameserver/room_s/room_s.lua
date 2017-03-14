@@ -298,7 +298,11 @@ function this.grabLandlordHandler(playerId, grabAction)
 	-- now nobody want to grab landlord
 	if this.grabTimes > maxGrabTimes or isFind == false then
 		this.currPlayTimes = this.currPlayTimes - 1
-		this.restartGame()
+		if this.isScoreRace() then
+			this.grabLandlordOver(this.firstGrabPlayerId)
+		else
+			this.restartGame()
+		end
 		return
 	end
 
@@ -664,7 +668,7 @@ function this.resetGame()
 	if 1 == this.grabLandlordMode or 2 == this.grabLandlordMode then
 		this.currWhoGrab = math.random(1, this.maxPlayerNum)
 	end
-	this.firstGrabPlayerId = 0
+	this.firstGrabPlayerId = this.currWhoGrab
 	this.isFirstOneGrab = false
 	for k, v in pairs(this.playerInfoList) do
 		v.userInfo.status = 1
@@ -897,7 +901,7 @@ function SAPI.init(conf)
 	if 1 == this.grabLandlordMode or 2 == this.grabLandlordMode then
 		this.currWhoGrab = math.random(1, this.maxPlayerNum)
 	end
-	this.firstGrabPlayerId = 0
+	this.firstGrabPlayerId = this.currWhoGrab
 	this.isFirstOneGrab = false
 
 	this.startGameTimer()
