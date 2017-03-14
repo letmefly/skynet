@@ -298,7 +298,9 @@ function this.grabLandlordHandler(playerId, grabAction)
 	-- now nobody want to grab landlord
 	if this.grabTimes > maxGrabTimes or isFind == false then
 		if this.isScoreRace() then
-			this.grabLandlordOver(this.firstStartPlayerId)
+			this.currGrabLevel = 1
+			this.currLandlord = this.firstStartPlayerId
+			this.grabLandlordOver(this.currLandlord)
 		else
 			this.currPlayTimes = this.currPlayTimes - 1
 			this.restartGame()
