@@ -281,7 +281,7 @@ function this.grabLandlordHandler(playerId, grabAction)
 	end
 
 	local isFind = false
-	local loopTimes = maxGrabTimes + 1
+	local loopTimes = maxGrabTimes + 10
 	while true do
 		this.currWhoGrab = this.getNextPlayer(this.currWhoGrab)
 		local userInfo = this.playerInfoList[this.currWhoGrab].userInfo
@@ -299,7 +299,7 @@ function this.grabLandlordHandler(playerId, grabAction)
 	if this.grabTimes > maxGrabTimes or isFind == false then
 		this.currPlayTimes = this.currPlayTimes - 1
 		if this.isScoreRace() then
-			this.grabLandlordOver(this.firstGrabPlayerId)
+			this.grabLandlordOver(this.firstStartPlayerId)
 		else
 			this.restartGame()
 		end
@@ -364,7 +364,13 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 			playerInfo.userInfo.boom = playerInfo.userInfo.boom + 1
 			if this.currTotalBoom < this.maxBoom then
 				this.currTotalBoom = this.currTotalBoom + 1
-				this.currLevel = this.currLevel * 2
+				if this.isScoreRace() then
+					if this.currTotalBoom <= 2 then
+						this.currLevel = this.currLevel * 2
+					end
+				else
+					this.currLevel = this.currLevel * 2
+				end
 			end
 		end
 		playerInfo.userInfo.playTimes = playerInfo.userInfo.playTimes + 1
@@ -668,7 +674,8 @@ function this.resetGame()
 	if 1 == this.grabLandlordMode or 2 == this.grabLandlordMode then
 		this.currWhoGrab = math.random(1, this.maxPlayerNum)
 	end
-	this.firstGrabPlayerId = this.currWhoGrab
+	this.firstGrabPlayerId = 0
+	this.firstStartPlayerId = this.currWhoGrab
 	this.isFirstOneGrab = false
 	for k, v in pairs(this.playerInfoList) do
 		v.userInfo.status = 1
@@ -901,7 +908,8 @@ function SAPI.init(conf)
 	if 1 == this.grabLandlordMode or 2 == this.grabLandlordMode then
 		this.currWhoGrab = math.random(1, this.maxPlayerNum)
 	end
-	this.firstGrabPlayerId = this.currWhoGrab
+	this.firstGrabPlayerId = 0
+	this.firstStartPlayerId = this.currWhoGrab
 	this.isFirstOneGrab = false
 
 	this.startGameTimer()
