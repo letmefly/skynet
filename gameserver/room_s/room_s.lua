@@ -280,19 +280,26 @@ function this.grabLandlordHandler(playerId, grabAction)
 		end
 	end
 
-	-- now nobody want to grab landlord
-	if this.grabTimes > maxGrabTimes then
-		this.currPlayTimes = this.currPlayTimes - 1
-		this.restartGame()
-		return
-	end
-
+	local isFind = false
+	local loopTimes = maxGrabTimes + 1
 	while true do
 		this.currWhoGrab = this.getNextPlayer(this.currWhoGrab)
 		local userInfo = this.playerInfoList[this.currWhoGrab].userInfo
 		if userInfo.grabRecord == -1 or userInfo.grabRecord > 1 then
+			isFind = true
 			break
 		end
+		loopTimes = loopTimes - 1
+		if loopTimes <= 0 then
+			break
+		end
+	end
+
+	-- now nobody want to grab landlord
+	if this.grabTimes > maxGrabTimes or isFind == false then
+		this.currPlayTimes = this.currPlayTimes - 1
+		this.restartGame()
+		return
 	end
 
 	skynet.timeout(10, this.grabLandlord)

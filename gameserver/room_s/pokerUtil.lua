@@ -802,6 +802,26 @@ function this.getAllSequence(pokerList, count, level)
     end
     return ret
 end
+function this.getBestTipSequence(pokerList, count, level)
+    local ret = {}
+    if count > #pokerList then
+        return ret
+    end
+    local tipList = {}
+    for i = level, 8 do
+        local tmpLevel = i
+        local tipPokers = this.getTipSequence(pokerList, count, tmpLevel)
+        table.insert(tipList, tipPokers)
+    end
+    -- find the best tip sequence
+    local bestIdx = 0
+    local pokerScore = 0
+    for i = 1, #tipList do
+        local tip = tipList[i]
+        local score = this.calcPokerScore(pokerList, tip)
+    end
+    return ret
+end
 function this.getAllDoubleSequenceList(pokerList, count, level)
     local ret = {}
     if count > #pokerList then
@@ -962,6 +982,17 @@ function this.getLightPokerIdList(pokerList, playPokerList)
         end        
     end
     return retLightPokerIdList
+end
+function table_clone(t)
+    local ret = {}
+    for k, v in pairs(t) do
+        if type(v) == 'table' then
+            ret[k] = table_clone(v)
+        else
+            ret[k] = v
+        end
+    end
+    return ret
 end
 function table_remove(srcTable, removeItems)
     table.sort(srcTable)
