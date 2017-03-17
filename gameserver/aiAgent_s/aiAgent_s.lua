@@ -68,25 +68,34 @@ end
 function AI.isMe(playerId)
 	return playerId == AI.playerId
 end
+function AI.isFriend(playerId)
+	if AI.gameData.landlord == AI.playerId then
+		if AI.isMe(playerId) == false then
+			return false
+		else
+			return true
+		end
+	else
+		if playerId == AI.gameData.landlord then
+			return false
+		else
+			return true
+		end
+	end
+end
 
 function AI.calcIsGrabLandlord()
-	return false
+	return pokerUtil.ai_isGrabLandlord(AI.gameData.pokerList, AI.gameData.bottomList)
 end
 
 function AI.calcPlayPoker()
 	local ret = {}
-
 	local prevPlayerId, prevPokerList = AI.getPrevPokerList()
-
-	--ret = pokerUtil.getTipPoker(AI.gameData.pokerList, prevPokerList)
-
-	if #prevPokerList == 0 then
-		-- you play first
-	else
-		-- play against prev player
-		
-	end
-
+	local isFriendPlay = AI.isFriend(prevPlayerId)
+	ret = pokerUtil.ai_getPlayPoker(AI.gameData.pokerList, prevPokerList, isFriendPlay)
+	print("1. "..cjson.encode(AI.gameData.pokerList))
+	print("2. "..cjson.encode(prevPokerList))
+	print("3. "..cjson.encode(ret))
 	return ret
 end
 
@@ -296,7 +305,7 @@ function AI.playPoker_ntf(msg)
     end
     AI.gameData.prevPokerListRecord[playerId] = pokerList
     if AI.isMe(playerId) then
-    	table_remove(AI.gameData.pokerList, pokerList)
+    	AI.gameData.pokerList = table_remove(AI.gameData.pokerList, pokerList)
     end
 end
 

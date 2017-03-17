@@ -835,7 +835,7 @@ end
 function this.setGetAITimer()
 	print("setGetAITimer..\n")
 	this.unsetTimer("get_ai_timer")
-	this.setTimer("get_ai_timer", 80*100, function()
+	this.setTimer("get_ai_timer", 8*100, function()
 		this.aquireAIPlayer()
 	end)
 end

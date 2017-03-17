@@ -2,6 +2,63 @@ local pokerUtil = require "room_s.pokerUtil"
 local cjson = require "cjson"
 local M = {}
 
+function M.id2poker(pokerList)
+	local p = {}
+	for i = 1, #pokerList do
+		if pokerList[i] >= 1 and pokerList[i] <= 32 then
+			p[i] = pokerUtil.getLevel(pokerList[i]) + 2
+		end
+		if pokerList[i] >= 33 and pokerList[i] <= 36 then
+			p[i] = 'J'
+		end
+		if pokerList[i] >= 37 and pokerList[i] <= 40 then
+			p[i] = 'Q'
+		end		
+		if pokerList[i] >= 41 and pokerList[i] <= 44 then
+			p[i] = 'K'
+		end	
+		if pokerList[i] >= 45 and pokerList[i] <= 48 then
+			p[i] = 'A'
+		end	
+		if pokerList[i] >= 49 and pokerList[i] <= 52 then
+			p[i] = '2'
+		end	
+		if pokerList[i] >= 53 and pokerList[i] <= 53 then
+			p[i] = 'g'
+		end	
+		if pokerList[i] >= 54 and pokerList[i] <= 54 then
+			p[i] = 'G'
+		end	
+	end
+	return p
+end
+function M.level2poker(levelList)
+	local p = {}
+	for i = 1, #levelList do
+		if levelList[i] >= 1 and levelList[i] <= 8 then
+			p[i] = i + 2
+		end
+		if levelList[i] >= 9 and levelList[i] <= 9 then
+			p[i] = 'J'
+		end
+		if levelList[i] >= 10 and levelList[i] <= 10 then
+			p[i] = 'Q'
+		end		
+		if levelList[i] >= 11 and levelList[i] <= 11 then
+			p[i] = 'K'
+		end	
+		if levelList[i] >= 12 and levelList[i] <= 12 then
+			p[i] = 'A'
+		end	
+		if levelList[i] >= 13 and levelList[i] <= 13 then
+			p[i] = '2'
+		end	
+		if levelList[i] >= 14 and levelList[i] <= 14 then
+			p[i] = 'G'
+		end	
+	end
+	return p
+end
 -- test pokerUtil api
 function M.test()
 	local pokerList = {5}
@@ -86,12 +143,17 @@ function M.test()
 	local tip = {}
 	t,l = pokerUtil.getPokerType(playPoker)
 	print("{1,5,9,13,17} "..t..","..l)
-	pokerList = {1,2,3,5,5,9,11,13,17,18,21,22}
+	pokerList = {6,7,10,14,18,22,26}
 	local tipIdx = pokerUtil.getTipSequence(pokerList, #playPoker, l)
 	for i = 1, #tipIdx do
 		table.insert(tip, pokerList[tipIdx[i]])
 	end
-	print(cjson.encode(pokerList).."--"..cjson.encode(playPoker).."--tip-->"..cjson.encode(tip))	
+	print(cjson.encode(pokerList).."--"..cjson.encode(playPoker).."--tip sequecnt-->"..cjson.encode(tip))	
+
+	pokerList = {6,7,10,14,18,22,26}
+	playPoker = {1,5,9,13,17}
+	tip = pokerUtil.getTipPoker(pokerList, playPoker)
+	print(cjson.encode(pokerList).."--"..cjson.encode(playPoker).."--tip sequece-->"..cjson.encode(tip))
 
 	print("{5,6,7,20} > {1,2,3,19} -- "..pokerUtil.pokerCmp({5,6,7,20}, {1,2,3,19}))
 	print("{5} > {1} -- "..pokerUtil.pokerCmp({5}, {1}))
@@ -123,6 +185,37 @@ function M.test()
 	print(cjson.encode(t2))	
 	print(cjson.encode(table_remove(t1, t2)))	
 	print(#table_remove(t1, t2))
+
+	print("-------------splitPoker---------------")
+	pokerList = {1,5,9,13,17,18,21,25,26}
+	local ret = pokerUtil.ai_splitPoker(pokerList)
+	print(cjson.encode(pokerList))
+	print(cjson.encode(ret))
+
+	print("-------------test ai first play poker---------------")
+	pokerList = {1,5,9,13,17,20,21,23,24,31,35,36,44,46,49,50,52}
+	local playPokerList = {}
+	local isFriendPlay = false
+	local ret = pokerUtil.ai_getPlayPoker(pokerList, playPokerList, isFriendPlay)
+	print(cjson.encode(pokerList))
+	print(cjson.encode(ret))
+
+	print("-------------test ai not first play poker---------------")
+	pokerList = {2,6,10,14,18,22}
+	local playPokerList = {1,5,9,13,17}
+	local isFriendPlay = false
+	local ret = pokerUtil.ai_getPlayPoker(pokerList, playPokerList, isFriendPlay)
+	print("my poker: "..cjson.encode(pokerList))
+	print("other play: "..cjson.encode(playPokerList))
+	print("my choose: "..cjson.encode(ret))
+
+	pokerList = {2,3,4,10,18}
+	local playPokerList = {}
+	local isFriendPlay = false
+	local ret = pokerUtil.ai_getPlayPoker(pokerList, playPokerList, isFriendPlay)
+	print("my poker: "..cjson.encode(pokerList))
+	print("other play: "..cjson.encode(playPokerList))
+	print("my choose: "..cjson.encode(ret))
 end
 
 return M
