@@ -216,6 +216,11 @@ function M.test()
 	print("my poker: "..cjson.encode(pokerList))
 	print("other play: "..cjson.encode(playPokerList))
 	print("my choose: "..cjson.encode(ret))
+
+	print("-------------get play turn----------------")
+	pokerList = {1,2,3,5,6,7,25,29,33,37,41}
+	local playTurn = pokerUtil.ai_getPlayTurn(pokerList)
+	print(cjson.encode(pokerList)..", play_turn=="..playTurn)
 end
 
 return M
