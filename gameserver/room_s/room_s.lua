@@ -108,10 +108,14 @@ function this.unsetSecondTimer(name)
 	this.gameTimers[name] = nil
 end
 function this.setTickTimer(name, seconds, callback)
-	this.gameTimers[name] = {sec = seconds*10, cb = callback, t = 3}
+	if this.gameTimers then
+		this.gameTimers[name] = {sec = seconds*10, cb = callback, t = 3}
+	end
 end
 function this.unsetTickTimer(name)
-	this.gameTimers[name] = nil
+	if this.gameTimers then
+		this.gameTimers[name] = nil
+	end
 end
 
 -- send 17 poker to all player
@@ -835,7 +839,7 @@ end
 function this.setGetAITimer()
 	print("setGetAITimer..\n")
 	this.unsetTimer("get_ai_timer")
-	this.setTimer("get_ai_timer", 8*100, function()
+	this.setTimer("get_ai_timer", 10*100, function()
 		this.aquireAIPlayer()
 	end)
 end

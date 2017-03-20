@@ -1561,7 +1561,7 @@ function this.ai_getNotFirstPlayPoker(pokerList, playPokerList, isFriendPlay)
             if #splitList.twoList > 0 then
                 local two = splitList.twoList[1]
                 if two < 12 then
-                    local ret1 = this.ai_level2Poker(pokerList, {biggerLevel, biggerLevel, biggerLevel, two})
+                    local ret1 = this.ai_level2Poker(pokerList, {biggerLevel, biggerLevel, biggerLevel, two, two})
                     return ret1
                 end
             end

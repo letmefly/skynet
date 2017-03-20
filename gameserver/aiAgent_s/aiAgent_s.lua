@@ -68,6 +68,9 @@ end
 function AI.isMe(playerId)
 	return playerId == AI.playerId
 end
+function AI.isMeLandlord()
+	return AI.gameData.landlord == AI.playerId
+end
 function AI.isFriend(playerId)
 	if AI.gameData.landlord == AI.playerId then
 		if AI.isMe(playerId) == false then
@@ -92,15 +95,17 @@ function AI.calcPlayPoker()
 	local ret = {}
 	local prevPlayerId, prevPokerList = AI.getPrevPokerList()
 	local isFriendPlay = AI.isFriend(prevPlayerId)
-	ret = pokerUtil.ai_getPlayPoker(AI.gameData.pokerList, prevPokerList, isFriendPlay)
-	print("1. "..cjson.encode(AI.gameData.pokerList))
-	print("2. "..cjson.encode(prevPokerList))
-	print("3. "..cjson.encode(ret))
+	if AI.gameData and AI.gameData.pokerList then
+		ret = pokerUtil.ai_getPlayPoker(AI.gameData.pokerList, prevPokerList, isFriendPlay)
+		print("1. "..cjson.encode(AI.gameData.pokerList))
+		print("2. "..cjson.encode(prevPokerList))
+		print("3. "..cjson.encode(ret))
+	end
 	return ret
 end
 
 function AI.getWaitTime()
-	return math.random(1, 2)*100
+	return math.random(5, 20)*10
 end
 
 function AI.getPrevPlayerId(playerId)
@@ -126,6 +131,7 @@ function AI.getPrevPokerList()
 end
 
 function AI.killMyself()
+	print("-----killMyself----")
 	AI.leaveRoom({})
 	local ret = skynet.call("aiManager_s", "lua", "releaseAIUser", user_info.userId)
 	skynet.exit()
@@ -285,12 +291,17 @@ end
 
 function AI.whoPlay_ntf(msg)
 	if AI.isMe(msg.playerId) then
-		skynet.timeout(AI.getWaitTime(), function()
+		local extWaitTime = 0
+		if AI.gameData.isPlay == nil and AI.isMeLandlord() then
+			extWaitTime = 150
+		end
+		skynet.timeout(AI.getWaitTime()+extWaitTime, function()
 			local pokerList = AI.calcPlayPoker()
 			local playAction = 2
 		    if pokerList == nil or #pokerList == 0 then
 		        playAction = 1
 		    end
+		    AI.gameData.isPlay = 1
 			AI.playPoker({playerId = AI.playerId, playAction = playAction, pokerList = pokerList})
 		end)
 	end
@@ -310,7 +321,7 @@ function AI.playPoker_ntf(msg)
 end
 
 function AI.gameResult_ntf(msg)
-	local time = math.random(1, 3)*100
+	local time = math.random(4, 8)*100
 	skynet.timeout(time, function()
 		AI.killMyself()
 	end)
