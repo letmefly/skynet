@@ -839,7 +839,7 @@ end
 function this.setGetAITimer()
 	print("setGetAITimer..\n")
 	this.unsetTimer("get_ai_timer")
-	this.setTimer("get_ai_timer", 10*100, function()
+	this.setTimer("get_ai_timer", 100*100, function()
 		this.aquireAIPlayer()
 	end)
 end
@@ -942,6 +942,7 @@ function SAPI.joinRoom(agent)
 		if v and userInfo.userId == v.userInfo.userId then
 			playerId = v.playerId
 			v.sid = sid
+			v.userInfo.redPackVal = 0
 		end
 	end
 	-- If not join room before, create a new game player
@@ -961,6 +962,7 @@ function SAPI.joinRoom(agent)
 		userInfo.playTimes = 0
 		userInfo.gameOverTimes = 0
 		userInfo.grabRecord = -1
+		userInfo.redPackVal = 0
 		if this.isScoreRace() == false then
 			userInfo.score = 0
 		end
@@ -1141,10 +1143,10 @@ function SAPI.getRedPack(msg)
 	if this.playerInfoList[playerId] then
 		local result = 1
 		local redPackVal = 0
-		if this.playerInfoList[playerId].userInfo.redPackVal then
+		if this.playerInfoList[playerId].userInfo.redPackVal > 0 then
 			result = 2
 			redPackVal = this.playerInfoList[playerId].userInfo.redPackVal
-			this.playerInfoList[playerId].userInfo.redPackVal = nil
+			this.playerInfoList[playerId].userInfo.redPackVal = 0
 		end
 		skynet.call(this.playerInfoList[playerId].sid, "lua", "getRedPack_ack", {result = result, redPackVal = redPackVal})
 	end
