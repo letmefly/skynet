@@ -5,8 +5,6 @@ local this = {}
 local SAPI = {}
 local aiAgentList = {}
 local aiUserList = {}
-aiUserList[1] = "13343421653"
-aiUserList[2] = "13343425808"
 
 function this.aquireAiUserId()
 	local tmpKey = nil
@@ -57,6 +55,9 @@ skynet.start(function()
 		end
 	end)
 	skynet.register("aiManager_s")
+	for i = 1, 103 do
+		aiUserList[i] = "score_race_ai_"..i
+	end
 end)
 
 

@@ -926,7 +926,9 @@ end
 
 function SAPI.joinRoom(agent)
 	-- AI
-	this.setGetAITimer()
+	if this.isScoreRace() then
+		this.setGetAITimer()
+	end
 	local sid = agent.sid
 	local userType = agent.userType
 	local playerId = 0

@@ -39,6 +39,7 @@ function this.scoreRace_findRoom(maxPlayerNum, excludeRoomNo)
 end
 
 function this.scoreRace_createRoom(roomType)
+	print("---------------------total_room "..total_room.."----------------------")
 	local roomType = roomType
 	local playTimes = 9999
 	local grabMode = 1
@@ -58,10 +59,12 @@ function this.scoreRace_createRoom(roomType)
 		maxBoom = maxBoom
 	})
 	this.scoreRace_rooms[roomNo] = sid
+	total_room = total_room + 1
 	return roomNo, sid 
 end
 
 function SERVICE_API.createRoom(msg)
+	print("---------------------total_room "..total_room.."----------------------")
 	local roomType = msg.roomType
 	local playTimes = msg.playTimes
 	local grabMode = msg.grabMode
@@ -104,6 +107,7 @@ function SERVICE_API.destroyRoom(roomNo)
 		skynet.kill(rooms[roomNo])
 		rooms[roomNo] = nil
 	elseif nil ~= this.scoreRace_rooms[roomNo] then
+		total_room = total_room - 1
 		skynet.kill(this.scoreRace_rooms[roomNo])
 		this.scoreRace_rooms[roomNo] = nil
 	end
