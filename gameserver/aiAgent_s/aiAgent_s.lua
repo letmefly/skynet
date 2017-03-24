@@ -159,6 +159,7 @@ function AI.leaveRoom(msg)
 end
 
 function AI.getReady(msg)
+	AI.isReady = true
 	AI.gameData = {}
 	client_msg_handler("getReady", msg)
 	skynet.timeout(20*100, function()
@@ -239,13 +240,14 @@ end
 
 function AI.joinRoomOk_ntf(msg)
 	AI.userInfoList = msg.userInfoList
-	skynet.timeout(100, function()
-		AI.getReady({playerId = AI.playerId, status = 1})
-	end)
+	if AI.isReady == nil or AI.isReady == false then
+		skynet.timeout(100, function()
+			AI.getReady({playerId = AI.playerId, status = 1})
+		end)
+	end
 end
 
 function AI.startGame_ntf(msg)
-	--print("[AI]"..cjson.encode(msg))
 	AI.gameData.pokerList = msg.pokerList
 	AI.gameData.bottomList = msg.bottomList
 end
@@ -315,12 +317,13 @@ function AI.playPoker_ntf(msg)
     	AI.gameData.prevPokerListRecord = {}
     end
     AI.gameData.prevPokerListRecord[playerId] = pokerList
-    if AI.isMe(playerId) then
+    if AI.isMe(playerId) and #pokerList > 0 then
     	AI.gameData.pokerList = table_remove(AI.gameData.pokerList, pokerList)
     end
 end
 
 function AI.gameResult_ntf(msg)
+	AI.isGamePlaying = false
 	local time = math.random(4, 8)*100
 	skynet.timeout(time, function()
 		AI.killMyself()
