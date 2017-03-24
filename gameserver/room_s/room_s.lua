@@ -320,22 +320,22 @@ function this.playPoker()
 	this.setTickTimer("p"..this.currWhoPlay, 15, function(timerVal)
 		if timerVal == 0 then
 			if this.isScoreRace() then
-				this.playTimeout(this.currWhoPlay)
+				this.playTimeout(this.currWhoPlay, 1)
 			end
 		else
 			local playerInfo = this.playerInfoList[this.currWhoPlay]
 			if playerInfo.sid then
 				this.alarmTimerNtf("p", this.currWhoPlay, timerVal)
 			else
-				this.playTimeout(this.currWhoPlay)
+				this.playTimeout(this.currWhoPlay, 3)
 			end
 		end
 	end)
 end
-
-function this.playTimeout(playerId)
+-- playAction: 1 - oneline timeout, 2 - normal, 3 - offline timeout
+function this.playTimeout(playerId, playAction)
 	local playPokerList = {}
-	local playAction = 1
+	local playAction = playAction
 	if #this.prevPokerList == 0 then
 		playAction = 2
 		table.insert(playPokerList, this.allPlayerPokerSet[playerId][1])
@@ -494,7 +494,7 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 					if playerInfo.sid == nil then
 						skynet.timeout(5*100, function() this.leaveRoom(i, 1) end)
 					end
-					skynet.timeout(5*100, function()
+					skynet.timeout(7*100, function()
 						if this.playerInfoList[i] and this.playerInfoList[i].userInfo.status < 2 then
 							this.setTickTimer("r"..i, 15, function(timerVal)
 								if this.playerInfoList[i] and this.playerInfoList[i].userInfo.status < 2 then
@@ -839,7 +839,7 @@ end
 function this.setGetAITimer()
 	print("setGetAITimer..\n")
 	this.unsetTimer("get_ai_timer")
-	this.setTimer("get_ai_timer", 100*100, function()
+	this.setTimer("get_ai_timer", 10*100, function()
 		this.aquireAIPlayer()
 	end)
 end
@@ -884,7 +884,7 @@ function this.checkRedPack()
 					userInfo.redPackVal = redPackVal
 					this.sendPlayer(sid, "redPackStart_ack", {playerId = userInfo.playerId, redPackVal = redPackVal})
 					skynet.timeout(30*100, function() 
-						userInfo.redPackVal = nil 
+						userInfo.redPackVal = 0 
 						this.sendPlayer(sid, "redPackOver_ack", {playerId = userInfo.playerId})
 					end)
 				end

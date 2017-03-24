@@ -395,14 +395,15 @@ function this.getPokerType(pokers)
     if pokerType ~= -1 then
         return pokerType, level
     end
-    pokerType, level = this.isThreeByThree(pokerList)
-    if pokerType ~= -1 then
-        return pokerType, level
-    end
     pokerType, level = this.isThreeByThreeDouble(pokerList)
     if pokerType ~= -1 then
         return pokerType, level
     end
+    pokerType, level = this.isThreeByThree(pokerList)
+    if pokerType ~= -1 then
+        return pokerType, level
+    end
+
     return -1,-1
 end
 function this.getTipSingle(pokerList, playPokerList)
@@ -508,8 +509,8 @@ function this.getTipFourTwo(pokerList, level)
         return ret
     end
     local idxList3 = this.findEqualPoker(pokerList, 1, {
-            math.ceil(pokerList[idxList1[1]]/4), 
-            math.ceil(pokerList[idxList2[1]]/4)
+        math.ceil(pokerList[idxList1[1]]/4), 
+        math.ceil(pokerList[idxList2[1]]/4)
     })
     if #idxList3 == 0 then
         return ret
@@ -536,8 +537,8 @@ function this.getTipFourFour(pokerList, level)
         return ret
     end
     local idxList3 = this.findEqualPoker(pokerList, 2, {
-            math.ceil(pokerList[idxList1[1]]/4), 
-            math.ceil(pokerList[idxList2[1]]/4)
+        math.ceil(pokerList[idxList1[1]]/4), 
+        math.ceil(pokerList[idxList2[1]]/4)
     })
     if #idxList3 == 0 then
         return ret
@@ -594,11 +595,11 @@ function this.getTipDoubleByDouble(pokerList, count, level)
         --[[
         print("seq01:")
         for kkk, vvv in pairs(seq01) do
-            print(pokerList[vvv]..",")
+        print(pokerList[vvv]..",")
         end
         print("seq02:")
         for kkk, vvv in pairs(seq02) do
-            print(leftPokerList[vvv]..",")
+        print(leftPokerList[vvv]..",")
         end
         ]]
         if pokerList[seq01[1]] and leftPokerList[seq02[1]] and this.getLevel(pokerList[seq01[1]]) == this.getLevel(leftPokerList[seq02[1]]) then
@@ -655,6 +656,15 @@ function this.getTipThreeByThree(pokerList, count, level)
     end
     return {}
 end
+
+function this.getTipPoker2(pokers, playPokers, isFriend)
+    local ret = this.ai_getPlayPoker(pokers, playPokers, isFriend)
+    if #ret == 0 then
+        ret = this.getTipPoker(pokers, playPokers)
+    end
+    return ret
+end
+
 function this.getTipPoker(pokers, playPokers)
     local pokerList = {}
     local currPlayPoker = {}
@@ -702,7 +712,7 @@ function this.getTipPoker(pokers, playPokers)
     elseif pokerType == this.TYPE_DOUBLE_BY_DOUBLE then
         tipPokers = this.getTipDoubleByDouble(pokerList, #currPlayPoker, level) 
     elseif pokerType == this.TYPE_THREE_BY_THREE then
-        tipPokerIdxs = this.getTipThreeByThree(pokerList, level) 
+        tipPokerIdxs = this.getTipThreeByThree(pokerList, #currPlayPoker/4, level) 
     end
     if #tipPokers == 0 and #tipPokerIdxs==0 and pokerType ~= this.TYPE_BOOM then
         tipPokerIdxs = this.getTipBoom(pokerList, 0)
@@ -750,13 +760,13 @@ function this.pokerCmp(srcPokerList, destPokerList)
 end
 function this.sortPoker(pokers)
     table.sort(pokers, function(a, b)
-            if a > 54 then
-                a = a - 54
-            end
-            if b > 54 then
-                b = b - 54
-            end
-            return a < b
+        if a > 54 then
+            a = a - 54
+        end
+        if b > 54 then
+            b = b - 54
+        end
+        return a < b
     end)
 end
 function this.getAllSameLevelList(pokerList, sameNum)
@@ -928,9 +938,14 @@ function this.getLightPokerIdList(pokerList, playPokerList)
         end
     elseif t == this.TYPE_FOUR_TWO then
         local allBoomLevelList = this.getAllBoomLevel(tmpPokerList)
+        local hasBiggerFour = false
+        table.sort(allBoomLevelList)
+        if allBoomLevelList[1] and allBoomLevelList[#allBoomLevelList] > l then
+            hasBiggerFour = true
+        end
         for i = 1, #tmpPokerList do
             local level = this.getLevel(tmpPokerList[i])
-            if (this.isContains(allBoomLevelList, level) == true and level > l) then
+            if (this.isContains(allBoomLevelList, level) == true) or hasBiggerFour then
                 table.insert(retLightPokerIdList, tmpPokerList[i])
             end
         end
@@ -961,13 +976,36 @@ function this.getLightPokerIdList(pokerList, playPokerList)
             end
         end
     elseif t == this.TYPE_THREE_BY_THREE then
+        local count = #playPokerList/4
+        local splitList = this.ai_splitPoker(tmpPokerList)
+        local retAir = this.ai_findAirPlane(splitList.threeList, count, l)
+        local hasBig = false
+        if #retAir == count then
+            hasBig = true
+        end
+        
         local allBoomLevelList = this.getAllBoomLevel(tmpPokerList)
         for i = 1, #tmpPokerList do
             local level = this.getLevel(tmpPokerList[i])
-            if this.isContains(allBoomLevelList, level) == true then
+            if this.isContains(allBoomLevelList, level) == true or hasBig then
                 table.insert(retLightPokerIdList, tmpPokerList[i])
             end
         end
+    elseif t == this.TYPE_THREE_BY_THREE_DOUBLE then
+        local count = #playPokerList/5
+        local splitList = this.ai_splitPoker(tmpPokerList)
+        local retAir = this.ai_findAirPlane(splitList.threeList, count, l)
+        local hasBig = false
+        if #retAir == count then
+            hasBig = true
+        end
+        local allBoomLevelList = this.getAllBoomLevel(tmpPokerList)
+        for i = 1, #tmpPokerList do
+            local level = this.getLevel(tmpPokerList[i])
+            if this.isContains(allBoomLevelList, level) == true or hasBig then
+                table.insert(retLightPokerIdList, tmpPokerList[i])
+            end
+        end        
     end
     return retLightPokerIdList
 end
@@ -976,14 +1014,14 @@ function this.getBestTipSingle(pokerList, playPokerList)
     local playLevel = this.getLevel(playPokerList[1])
     --[[
     for i = 1, #pokerList do
-        if math.ceil(pokerList[i]/4) > math.ceil(playPokerList[1]/4) then
-            table.insert(ret, i)
-            return ret
-        end
-        if playPokerList[1] == 53 and pokerList[i] == 54 then
-            table.insert(ret, i)
-            return ret
-        end        
+    if math.ceil(pokerList[i]/4) > math.ceil(playPokerList[1]/4) then
+    table.insert(ret, i)
+    return ret
+    end
+    if playPokerList[1] == 53 and pokerList[i] == 54 then
+    table.insert(ret, i)
+    return ret
+    end        
     end
     ]]
     local levelList = {}
@@ -1087,19 +1125,19 @@ function table_clone(t)
 end
 --[[
 function table_remove(srcTable, removeItems)
-    if #srcTable > 0 then
-        table.sort(srcTable)
-    end
-    if #removeItems > 0 then
-        table.sort(removeItems)
-    end
-    local newTable = {}
-    for i = 1, #srcTable do
-        if this.isContains(removeItems, srcTable[i])==false then
-            table.insert(newTable, srcTable[i])
-        end
-    end
-    return newTable
+if #srcTable > 0 then
+table.sort(srcTable)
+end
+if #removeItems > 0 then
+table.sort(removeItems)
+end
+local newTable = {}
+for i = 1, #srcTable do
+if this.isContains(removeItems, srcTable[i])==false then
+table.insert(newTable, srcTable[i])
+end
+end
+return newTable
 end
 ]]
 function table_remove_item(srcTable, item)
@@ -1256,7 +1294,7 @@ function this.ai_splitPoker(pokerList)
                         ret.twoList, ret.oneList = this.ai_level_remove(ret.twoList, ret.oneList, ret2)
                         ret.threeList, ret.twoList = this.ai_level_remove(ret.threeList, ret.twoList, ret3)
                         ret.fourList, ret.threeList = this.ai_level_remove(ret.fourList, ret.threeList, ret4)
-                        
+
                         ret.oneList = table_remove(ret.oneList, {one, two, three})
                         table.insert(ret.oneSeqList, table_insert({one, two, three}, miss))
                         isFind = true
@@ -1320,7 +1358,7 @@ function this.ai_splitPoker(pokerList)
     else
         ret.kingBoomList = {}
     end
-    
+
     table.sort(ret.oneList)
     table.sort(ret.twoList)
     table.sort(ret.threeList)
@@ -1353,10 +1391,54 @@ function this.ai_getPlayTurn(pokerList)
     local splitList = this.ai_splitPoker(pokerList)
     return this.ai_calcPlayTurn(splitList)
 end
+function this.ai_getAirplane(levelList)
+    local ret = {}
+    table.insert(ret, levelList[1])
+    for i = 2, #levelList do
+        if levelList[i] == ret[#ret] + 1 then
+            table.insert(ret, levelList[i])
+            if #ret == 3 then
+                return ret
+            end
+        else
+            if #ret < 2 then
+                ret = {}
+                table.insert(ret, levelList[i])
+            else
+                return ret
+            end
+        end
+    end
+    return ret
+end
+function this.ai_findAirPlane(levelList, count, level)
+    local ret = {}
+    table.insert(ret, levelList[1])
+    for i = 2, #levelList do
+        if levelList[i] == ret[#ret] + 1 and levelList[i-1] > level then
+            table.insert(ret, levelList[i])
+            if #ret == count then
+                return ret
+            end
+        else
+            if #ret < 2 then
+                ret = {}
+                table.insert(ret, levelList[i])
+            end
+        end
+    end
+    return ret
+end
 function this.ai_getFirstPlayPoker(pokerList)
     local splitList = this.ai_splitPoker(pokerList)
     local playTurn = this.ai_calcPlayTurn(splitList)
     local minLevel = 8
+    local isOneFirst = true
+    if #splitList.oneList > 0 and #splitList.twoList > 0 then
+        if splitList.twoList[1] < splitList.oneList[1] then
+            isOneFirst = false
+        end
+    end
     while minLevel <= 16 do
         -- first choose level < 6
         if #splitList.oneSeqList > 0 then
@@ -1376,45 +1458,117 @@ function this.ai_getFirstPlayPoker(pokerList)
                 return ret
             end
         end
+        -- air plane
+        if #splitList.threeList >= 2 then
+            local retAir = this.ai_getAirplane(splitList.threeList)
+            if #retAir >= 2 and #splitList.oneList >= #retAir and retAir[1] <= 10 and splitList.oneList[#retAir] <= 13 then
+                local airLevelList = {}
+                if #retAir == 2 then
+                    table_insert(airLevelList, {retAir[1], retAir[1], retAir[1], retAir[2],retAir[2],retAir[2],splitList.oneList[1], splitList.oneList[2]})
+                elseif #retAir == 3 then
+                    table_insert(airLevelList, {retAir[1], retAir[1], retAir[1], retAir[2],retAir[2],retAir[2],retAir[3],retAir[3],retAir[3],splitList.oneList[1], splitList.oneList[2],splitList.oneList[3]})
+                end
+                local ret1 = this.ai_level2Poker(pokerList, airLevelList)
+                return ret1
+            end
+            if #retAir >= 2 and #splitList.twoList >= #retAir and retAir[1] <= 10 and splitList.twoList[#retAir] <= 12 then
+                local airLevelList = {}
+                if #retAir == 2 then
+                    table_insert(airLevelList, {retAir[1], retAir[1], retAir[1], retAir[2],retAir[2],retAir[2],splitList.twoList[1], splitList.twoList[2],splitList.twoList[1], splitList.twoList[2]})
+                elseif #retAir == 3 then
+                    table_insert(airLevelList, {retAir[1], retAir[1], retAir[1], retAir[2],retAir[2],retAir[2],retAir[3],retAir[3],retAir[3],
+                        splitList.twoList[1], splitList.twoList[2],splitList.twoList[3],splitList.twoList[1], splitList.twoList[2],splitList.twoList[3]})
+                end
+                local ret1 = this.ai_level2Poker(pokerList, airLevelList)
+                return ret1
+            end
+        end
         if #splitList.threeList > 0 then
             local threeLevel = splitList.threeList[1]
-            if threeLevel <= minLevel then
-                -- 3w1
-                if #splitList.oneList > 0 then
-                    local single = splitList.oneList[1]
-                    if single < 13 or playTurn <= 3 then
-                        local ret1 = this.ai_level2Poker(pokerList, {threeLevel, threeLevel, threeLevel, single})
-                        return ret1
+            if threeLevel <= minLevel or #splitList.oneList + #splitList.twoList <= #splitList.threeList then
+                if isOneFirst then
+                    -- 3w1
+                    if #splitList.oneList > 0 then
+                        local single = splitList.oneList[1]
+                        if single < 13 or playTurn <= 2 then
+                            local ret1 = this.ai_level2Poker(pokerList, {threeLevel, threeLevel, threeLevel, single})
+                            return ret1
+                        end
+                    end
+                    -- 3w2
+                    if #splitList.twoList > 0 then
+                        local two = splitList.twoList[1]
+                        if two < 9 or playTurn <= 2 then
+                            local ret1 = this.ai_level2Poker(pokerList, {threeLevel, threeLevel, threeLevel, two, two})
+                            return ret1
+                        end
+                    end
+                else
+                    -- 3w2
+                    if #splitList.twoList > 0 then
+                        local two = splitList.twoList[1]
+                        if two < 9 or playTurn <= 2 then
+                            local ret1 = this.ai_level2Poker(pokerList, {threeLevel, threeLevel, threeLevel, two, two})
+                            return ret1
+                        end
+                    end
+                    -- 3w1
+                    if #splitList.oneList > 0 then
+                        local single = splitList.oneList[1]
+                        if single < 13 or playTurn <= 2 then
+                            local ret1 = this.ai_level2Poker(pokerList, {threeLevel, threeLevel, threeLevel, single})
+                            return ret1
+                        end
                     end
                 end
-                -- 3w2
-                if #splitList.twoList > 0 then
-                    local two = splitList.twoList[1]
-                    if two < 9 or playTurn <= 3 then
-                        local ret1 = this.ai_level2Poker(pokerList, {threeLevel, threeLevel, threeLevel, two})
-                        return ret1
-                    end
-                end
+
                 -- 3w0
                 local ret1 = this.ai_level2Poker(pokerList, {threeLevel, threeLevel, threeLevel})
                 return ret1
             end
         end
-        if #splitList.oneList > 0 then
-            local one = splitList.oneList[1]
-            if one <= minLevel then
-                local ret1 = this.ai_level2Poker(pokerList, {one})
-                return ret1
+        -- 4w2
+        if #splitList.fourList > 0 then
+            local singleNum = #splitList.oneList - #splitList.threeList
+            if singleNum >= 4 and splitList.fourList[1] < 11 then
+                if splitList.oneList[1] < 10 and splitList.oneList[2] < 10 then
+                    local ret1 = this.ai_level2Poker(pokerList, {splitList.fourList[1], splitList.fourList[1], splitList.fourList[1], splitList.fourList[1], splitList.oneList[1], splitList.oneList[2]})
+                    return ret1
+                end
             end
         end
-        if #splitList.twoList > 0 then
-            local two = splitList.twoList[1]
-            if two <= minLevel then
-                local ret1 = this.ai_level2Poker(pokerList, {two,two})
-                return ret1
+        if isOneFirst then
+            if #splitList.oneList > 0 then
+                local one = splitList.oneList[1]
+                if one <= minLevel then
+                    local ret1 = this.ai_level2Poker(pokerList, {one})
+                    return ret1
+                end
+            end
+            if #splitList.twoList > 0 then
+                local two = splitList.twoList[1]
+                if two <= minLevel then
+                    local ret1 = this.ai_level2Poker(pokerList, {two,two})
+                    return ret1
+                end
+            end
+        else
+            if #splitList.twoList > 0 then
+                local two = splitList.twoList[1]
+                if two <= minLevel then
+                    local ret1 = this.ai_level2Poker(pokerList, {two,two})
+                    return ret1
+                end
+            end
+            if #splitList.oneList > 0 then
+                local one = splitList.oneList[1]
+                if one <= minLevel then
+                    local ret1 = this.ai_level2Poker(pokerList, {one})
+                    return ret1
+                end
             end
         end
-        minLevel = minLevel + 6
+        minLevel = minLevel + 8
     end
     -- choose boom
     if #splitList.fourList > 0 then
@@ -1574,7 +1728,7 @@ function this.ai_getNotFirstPlayPoker(pokerList, playPokerList, isFriendPlay)
         if biggerLevel ~= -1 then
             if #splitList.oneList > 0 then
                 local single = splitList.oneList[1]
-                if single < 13 then
+                if single < 13 or playTurn <= 2 then
                     local ret1 = this.ai_level2Poker(pokerList, {biggerLevel, biggerLevel, biggerLevel, single})
                     return ret1
                 end
@@ -1600,7 +1754,7 @@ function this.ai_getNotFirstPlayPoker(pokerList, playPokerList, isFriendPlay)
         if biggerLevel ~= -1 then
             if #splitList.twoList > 0 then
                 local two = splitList.twoList[1]
-                if two < 12 then
+                if two < 12 or playTurn <= 2 then
                     local ret1 = this.ai_level2Poker(pokerList, {biggerLevel, biggerLevel, biggerLevel, two, two})
                     return ret1
                 end
@@ -1625,6 +1779,13 @@ function this.ai_getNotFirstPlayPoker(pokerList, playPokerList, isFriendPlay)
         -- you can play out all your pokers this time, you win
         if biggerLevel ~= -1 and this.pokerCmp(pokerList, playPokerList) == 1 then
             return pokerList
+        end
+        local singleNum = #splitList.oneList - #splitList.threeList
+        if biggerLevel ~= -1 and isFriendPlay == false and splitList.fourList[1] <= 13 and singleNum >= 3 then
+            if splitList.oneList[1] < 10 and splitList.oneList[2] < 10 then
+                local ret1 = this.ai_level2Poker(pokerList, {biggerLevel, biggerLevel, biggerLevel, biggerLevel, splitList.oneList[1], splitList.oneList[2]})
+                return ret1
+            end
         end
     elseif pokerType == this.TYPE_FOUR_FOUR then
     elseif pokerType == this.TYPE_SEQUENCE then
@@ -1685,6 +1846,35 @@ function this.ai_getNotFirstPlayPoker(pokerList, playPokerList, isFriendPlay)
         end
     elseif pokerType == this.TYPE_THREE_BY_THREE then
         if isFriendPlay then return {} end
+        local count = #playPokerList/4
+        local retAir = this.ai_findAirPlane(splitList.threeList, count, level)
+        if #retAir == count and count <= 3 then
+            if #retAir >= 2 and #splitList.oneList >= #retAir and retAir[1] <= 10 and splitList.oneList[#retAir] <= 13 then
+                local airLevelList = {}
+                if #retAir == 2 then
+                    table_insert(airLevelList, {retAir[1], retAir[1], retAir[1], retAir[2],retAir[2],retAir[2],splitList.oneList[1], splitList.oneList[2]})
+                elseif #retAir == 3 then
+                    table_insert(airLevelList, {retAir[1], retAir[1], retAir[1], retAir[2],retAir[2],retAir[2],retAir[3],retAir[3],retAir[3],splitList.oneList[1], splitList.oneList[2],splitList.oneList[3]})
+                end
+                local ret1 = this.ai_level2Poker(pokerList, airLevelList)
+                return ret1
+            end
+        end
+    elseif pokerType == this.TYPE_THREE_BY_THREE_DOUBLE then
+        if isFriendPlay then return {} end
+        local count = #playPokerList/5
+        local retAir = this.ai_findAirPlane(splitList.threeList, count, level)
+        if #retAir >= 2 and #splitList.twoList >= #retAir and retAir[1] <= 10 and splitList.twoList[#retAir] <= 12 then
+            local airLevelList = {}
+            if #retAir == 2 then
+                table_insert(airLevelList, {retAir[1], retAir[1], retAir[1], retAir[2],retAir[2],retAir[2],splitList.twoList[1], splitList.twoList[2],splitList.twoList[1], splitList.twoList[2]})
+            elseif #retAir == 3 then
+                table_insert(airLevelList, {retAir[1], retAir[1], retAir[1], retAir[2],retAir[2],retAir[2],retAir[3],retAir[3],retAir[3],
+                    splitList.twoList[1], splitList.twoList[2],splitList.twoList[3],splitList.twoList[1], splitList.twoList[2],splitList.twoList[3]})
+            end
+            local ret1 = this.ai_level2Poker(pokerList, airLevelList)
+            return ret1
+        end
     end
     -- check it is worth play boom
     if this.ai_isPlayBoom(splitList) then

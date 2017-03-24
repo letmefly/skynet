@@ -201,8 +201,8 @@ function M.test()
 	print(cjson.encode(ret))
 
 	print("-------------test ai not first play poker---------------")
-	pokerList = {2,6,10,14,18,22}
-	local playPokerList = {1,5,9,13,17}
+	pokerList = {49,50}
+	local playPokerList = {29,30}
 	local isFriendPlay = false
 	local ret = pokerUtil.ai_getPlayPoker(pokerList, playPokerList, isFriendPlay)
 	print("my poker: "..cjson.encode(pokerList))
