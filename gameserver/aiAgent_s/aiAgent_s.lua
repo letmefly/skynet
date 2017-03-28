@@ -65,6 +65,9 @@ local function on_client_disconnect()
 end
 
 ---------------------------- AI Functions ---------------------------
+function AI.getAllPlayerPokerList()
+	return skynet.call(my_room_sid, "lua", "ai_getAllPokerList", {})
+end
 function AI.isMe(playerId)
 	return playerId == AI.playerId
 end
@@ -96,16 +99,48 @@ function AI.calcPlayPoker()
 	local prevPlayerId, prevPokerList = AI.getPrevPokerList()
 	local isFriendPlay = AI.isFriend(prevPlayerId)
 	if AI.gameData and AI.gameData.pokerList then
-		ret = pokerUtil.ai_getPlayPoker(AI.gameData.pokerList, prevPokerList, isFriendPlay)
-		print("1. "..cjson.encode(AI.gameData.pokerList))
-		print("2. "..cjson.encode(prevPokerList))
-		print("3. "..cjson.encode(ret))
+		local next1Info = {}
+		local next2Info = {}
+		local next1PlayerId = AI.getNextPlayer(AI.playerId)
+		local next2PlayerId = AI.getNextPlayer(next1PlayerId)
+		next1Info.isFriend = AI.isFriend(next1PlayerId)
+		next2Info.isFriend = AI.isFriend(next2PlayerId)
+		next1Info.pokerList = AI.gameData.allPlayerPokerList[next1PlayerId].pokerList
+		next2Info.pokerList = AI.gameData.allPlayerPokerList[next2PlayerId].pokerList
+		if next1Info.isFriend == true and next2Info.isFriend == false then
+			if AI.gameData.allPlayerPokerList[next1PlayerId].userType == 1 and
+				AI.gameData.allPlayerPokerList[next2PlayerId].userType == 2 then
+				next1Info = nil
+				next2Info = nil
+				--isFriendPlay = false
+			end
+		elseif next1Info.isFriend == false and next2Info.isFriend == true then
+			if AI.gameData.allPlayerPokerList[next1PlayerId].userType == 2 and
+				AI.gameData.allPlayerPokerList[next2PlayerId].userType == 1 then
+				next1Info = nil
+				next2Info = nil
+				--isFriendPlay = false
+			end
+		end
+
+		ret = pokerUtil.ai_getPlayPoker(AI.gameData.pokerList, prevPokerList, isFriendPlay, next1Info, next2Info)
+		--print("1. "..cjson.encode(next1Info))
+		--print("2. "..cjson.encode(next2Info))
+		--print("3. "..cjson.encode(ret))
 	end
 	return ret
 end
 
 function AI.getWaitTime()
 	return math.random(5, 20)*10
+end
+
+function AI.getNextPlayer(playerId)
+	playerId = playerId + 1
+	if playerId > AI.maxPlayerNum then
+		playerId = 1
+	end
+	return playerId
 end
 
 function AI.getPrevPlayerId(playerId)
@@ -250,6 +285,7 @@ end
 function AI.startGame_ntf(msg)
 	AI.gameData.pokerList = msg.pokerList
 	AI.gameData.bottomList = msg.bottomList
+	AI.gameData.allPlayerPokerList = AI.getAllPlayerPokerList()
 end
 
 function AI.whoGrabLandlord_ntf(msg)
@@ -297,8 +333,14 @@ function AI.whoPlay_ntf(msg)
 		if AI.gameData.isPlay == nil and AI.isMeLandlord() then
 			extWaitTime = 150
 		end
-		skynet.timeout(AI.getWaitTime()+extWaitTime, function()
-			local pokerList = AI.calcPlayPoker()
+
+		local pokerList = AI.calcPlayPoker()
+		extWaitTime = #pokerList * 40 + extWaitTime
+		local randomVal = math.random(50, 100)
+		if extWaitTime < randomVal then
+			extWaitTime = randomVal
+		end
+		skynet.timeout(extWaitTime, function()
 			local playAction = 2
 		    if pokerList == nil or #pokerList == 0 then
 		        playAction = 1
@@ -320,6 +362,9 @@ function AI.playPoker_ntf(msg)
     if AI.isMe(playerId) and #pokerList > 0 then
     	AI.gameData.pokerList = table_remove(AI.gameData.pokerList, pokerList)
     end
+    if #pokerList > 0 then
+    	AI.gameData.allPlayerPokerList[playerId].pokerList = table_remove(AI.gameData.allPlayerPokerList[playerId].pokerList, pokerList)
+	end
 end
 
 function AI.gameResult_ntf(msg)

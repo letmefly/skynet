@@ -46,6 +46,8 @@ this.testPokers = {
 	{52,53,	54}
 }
 
+this.testPokers = nil
+
 function this.sendAllPlayer(msgname, msg)
 	for k, v in pairs(this.playerInfoList) do
 		if v and v.sid then
@@ -860,6 +862,9 @@ function this.aquireAIPlayer()
 	if num > 0 and num <= this.maxPlayerNum-1 and human > 0 then
 		print("aquireAIPlayer..\n")
 		local ret = skynet.call("aiManager_s", "lua", "aquireAIPlayer", num)
+		if ret.isFind == false then
+			this.setGetAITimer()
+		end
 	end
 end
 
@@ -1160,6 +1165,16 @@ function SAPI.findByUserId(userId)
 		if v and userId == v.userInfo.userId then
 			ret = 1
 			break
+		end
+	end
+	return ret
+end
+
+function SAPI.ai_getAllPokerList(msg)
+	local ret = {}
+	for k, v in pairs(this.playerInfoList) do
+		if v then
+			ret[k] = {userType=v.userInfo.userType, pokerList=this.allPlayerPokerSet[k]}
 		end
 	end
 	return ret

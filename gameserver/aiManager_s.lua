@@ -6,6 +6,8 @@ local SAPI = {}
 local aiAgentList = {}
 local aiUserList = {}
 
+this.aiUseNum = 0
+
 function this.aquireAiUserId()
 	local tmpKey = nil
 	local ret = nil
@@ -19,11 +21,14 @@ function this.aquireAiUserId()
 		ret = aiUserList[tmpKey]
 		table.remove(aiUserList, tmpKey)
 	end
+	this.aiUseNum = this.aiUseNum + 1
 	return ret
 end
 
 function SAPI.aquireAIPlayer(num)
+	print("----------------aiUseNum:"..this.aiUseNum.."-------------------")
 	local ret = {}
+	ret.isFind = false
 	-- create ai agent
 	for i = 1, num do
 		skynet.timeout((i-1)*300, function()
@@ -34,6 +39,7 @@ function SAPI.aquireAIPlayer(num)
 				local authCode = "123456"
 				skynet.call(sid, "lua", "start", {version = version, userId = userId, authCode = authCode})
 				aiAgentList[userId] = sid
+				ret.isFind = true
 			end
 		end)
 	end
@@ -43,6 +49,7 @@ end
 function SAPI.releaseAIUser(userId)
 	table.insert(aiUserList, userId)
 	aiAgentList[userId] = nil
+	this.aiUseNum = this.aiUseNum - 1
 end
 
 skynet.start(function()
