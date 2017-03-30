@@ -46,6 +46,7 @@ message createRoom {
     // 1 - roll mode, 2 - score mode
     optional int32 grabMode = 3;
     optional int32 maxBoom = 4;
+    optional int32 isFree = 5;
 }
 message createRoom_ack {
     // 0 success, -1 room card not enough

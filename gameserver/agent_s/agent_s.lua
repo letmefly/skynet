@@ -108,14 +108,15 @@ function CLIENT_REQ.createRoom(msg)
 	local playTimes = msg.playTimes
 	local grabMode = msg.grabMode
 	local maxBoom = msg.maxBoom
+	local isFree = msg.isFree
 	if playTimes == 6 or playTimes == 1 then
-		if user_info.roomCardNum > 2 then
+		if user_info.roomCardNum > 2 or isFree == 1 then
 			--user_info.roomCardNum = user_info.roomCardNum - 2
 		else
 			send_client_msg("createRoom_ack", {errno = 1007, roomNo = 0})
 			return
 		end
-	elseif playTimes == 12 or playTimes == 2 then
+	elseif playTimes == 12 or playTimes == 2 or isFree == 1 then
 		if user_info.roomCardNum > 3 then
 			--user_info.roomCardNum = user_info.roomCardNum - 3
 		else
