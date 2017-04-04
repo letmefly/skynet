@@ -506,7 +506,7 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 						costCoin = -2
 					end
 				end
-				item.score = item.score + costCoin
+				--item.score = item.score + costCoin
 				this.playerInfoList[i].userInfo.score = item.score + this.playerInfoList[i].userInfo.score + costCoin
 			else
 				this.playerInfoList[i].userInfo.score = item.score + this.playerInfoList[i].userInfo.score
