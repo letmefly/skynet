@@ -4,6 +4,7 @@ local cjson = require "cjson"
 local pokerUtil = require "room_s.pokerUtil"
 local httpc = require "http.httpc"
 local http_server_addr = "127.0.0.1:80"
+local doc_root_dir = "/php_01/html/v0/"
 
 local SAPI = {}
 
@@ -63,6 +64,44 @@ function this.sendPlayer(sid, msgname, msg)
 	end
 end
 
+function this.saveGameResult(userInfo, playerId, roomNo, roomType, roomResultList)
+	local postData = {}
+	postData.userData = {}
+	postData.roomResult = {}
+	postData.roomResult.roomNo = roomNo
+	postData.roomResult.roomType = roomType
+	postData.roomResult.history = {}
+
+	local isAllZero = true
+	for k, v in pairs(roomResultList) do
+		if v.totalScore ~= 0 then
+			isAllZero = false
+		end
+		if v.playerId == playerId then
+			postData.userData.unionid = userInfo.userId
+			if v.totalScore >= 0 then
+				postData.userData.win = userInfo.win + 1
+			else 
+				postData.userData.lose = userInfo.lose + 1
+			end
+			postData.userData.score = userInfo.score
+		end
+		table.insert(postData.roomResult.history, {n=v.nickname, s=v.totalScore})
+	end
+	if isAllZero == false then
+		print(cjson.encode(postData))
+		local status, body = httpc.post2(http_server_addr, doc_root_dir.."service_updateUser.php", cjson.encode(postData))
+	end
+end
+function this.costRoomCard(userInfo, msg)
+	local costRoomCardNum = msg.costRoomCardNum
+	local postData = {}
+	local userData = {}
+	userData.unionid = userInfo.userId
+	userData.roomCardNum = userInfo.roomCardNum - costRoomCardNum
+	postData.userData = userData
+	local status, body = httpc.post2(http_server_addr, doc_root_dir.."service_updateUser.php", cjson.encode(postData))
+end
 function this.sendAllAgent(cmd, msg)
 	for k, v in pairs(this.playerInfoList) do
 		if v and v.sid then
@@ -202,14 +241,16 @@ end
 
 function this.grabLandlordOver(playerId)
 	-- cost room owner's room card
-	if this.isCostRoomCard == false then
+	if this.isCostRoomCard == false and this.isScoreRace() == false then
 		local costRoomCardNum = 2
 		if this.maxPlayTimes == 12 then
 			costRoomCardNum = 3
 		end
 		local sid = this.playerInfoList[1].sid
+		local userInfo = this.playerInfoList[1].userInfo
 		if sid then
-			skynet.call(sid, "lua", "costRoomCard", {costRoomCardNum = costRoomCardNum})
+			--skynet.call(sid, "lua", "costRoomCard", {costRoomCardNum = costRoomCardNum})
+			this.costRoomCard(userInfo, {costRoomCardNum = costRoomCardNum})
 			this.isCostRoomCard = true
 		end
 	end
@@ -465,6 +506,7 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 						costCoin = -2
 					end
 				end
+				item.score = item.score + costCoin
 				this.playerInfoList[i].userInfo.score = item.score + this.playerInfoList[i].userInfo.score + costCoin
 			else
 				this.playerInfoList[i].userInfo.score = item.score + this.playerInfoList[i].userInfo.score
@@ -559,34 +601,11 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 				local roomResultList = this.calcRoomResult()
 				this.playResultList = {}
 				-- save user game data
-				this.sendAllAgent("saveGameResult", roomResultList)
-				--[[
-				if this.isRedPackActOpen == 1 then
-					for k, v in pairs(this.playerInfoList) do
-						if v and v.sid then
-							local userInfo = v.userInfo
-							local sid = v.sid
-							if userInfo.gameOverTimes % 3 == 0 then
-								local randomNum = math.random(1,3)
-								local redPackVal = 0
-								if randomNum == 1 then
-									redPackVal = 40
-								elseif randomNum == 2 then
-									redPackVal = 80
-								elseif randomNum == 3 then
-									redPackVal = 120
-								end
-								userInfo.redPackVal = redPackVal
-								this.sendPlayer(sid, "redPackStart_ack", {playerId = userInfo.playerId, redPackVal = redPackVal})
-								skynet.timeout(30*100, function() 
-									userInfo.redPackVal = nil 
-									this.sendPlayer(sid, "redPackOver_ack", {playerId = userInfo.playerId})
-								end)
-							end
-						end
-					end
+				--this.sendAllAgent("saveGameResult", roomResultList)
+				for k, v in pairs(this.playerInfoList) do
+					this.saveGameResult(v.userInfo, v.playerId, this.roomNo, this.roomType, roomResultList)
 				end
-				]]
+				
 			end
 		end
 		return

@@ -5,7 +5,7 @@ local socket = require "clientsocket"
 local fd = assert(socket.connect("127.0.0.1", 8888))
 --util.reg("gameLogin_ack", function(msg) end)
 
-util.sendmsg(fd, "gameLogin", {userId = "chris1", authCode = "123456", version = 1})
+util.sendmsg(fd, "gameLogin", {userId = "13343461428", authCode = "123456", version = 1})
 
 while true do
 	local msgname, msg = util.recvmsg(fd)
