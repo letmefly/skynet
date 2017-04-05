@@ -1430,6 +1430,8 @@ function this.ai_findAirPlane(levelList, count, level)
     return ret
 end
 function this.ai_getFirstPlayPoker(pokerList, next1Info, next2Info)
+    local myT, myL = this.getPokerType(pokerList)
+    if myT ~= -1 then return pokerList end
     local splitList = this.ai_splitPoker(pokerList)
     local playTurn = this.ai_calcPlayTurn(splitList)
     local minLevel = 6
