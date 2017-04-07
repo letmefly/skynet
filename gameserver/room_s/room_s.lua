@@ -89,7 +89,7 @@ function this.saveGameResult(userInfo, playerId, roomNo, roomType, roomResultLis
 		table.insert(postData.roomResult.history, {n=v.nickname, s=v.totalScore})
 	end
 	if isAllZero == false then
-		print(cjson.encode(postData))
+		--print(cjson.encode(postData))
 		local status, body = httpc.post2(http_server_addr, doc_root_dir.."service_updateUser.php", cjson.encode(postData))
 	end
 end
@@ -391,7 +391,7 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 		skynet.error("ERR: it's not your turning")
 		return 
 	end
-
+	local pokerType, level = pokerUtil.getPokerType(pokerList)
 	-- check client error
 	if playAction == 1 then
 		if #this.prevPokerList == 0 then
@@ -407,7 +407,6 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 			return
 		end
 		local playerInfo = this.playerInfoList[playerId]
-		local pokerType, level = pokerUtil.getPokerType(pokerList)
 		if pokerType == 11 or pokerType == 12 then
 			playerInfo.boomNum = playerInfo.boomNum + 1
 			playerInfo.userInfo.boom = playerInfo.userInfo.boom + 1
@@ -425,9 +424,12 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 		playerInfo.userInfo.playTimes = playerInfo.userInfo.playTimes + 1
 	end
 	this.currWhoPlay = this.getNextPlayer(this.currWhoPlay)
+	
 	this.unsetTickTimerNtf("p", playerId)
-	this.sendAllPlayer("playPoker_ntf", {playerId=playerId, playAction=playAction, pokerType=pokerType, pokerList=pokerList, grabLevel=this.currLevel})
-
+	skynet.timeout(5, function()
+		this.sendAllPlayer("playPoker_ntf", {playerId=playerId, playAction=playAction, pokerType=pokerType, pokerList=pokerList, grabLevel=this.currLevel})
+	end)
+	
 	-- update this player's pokers and previous pokers
 	--print(playerId..":"..cjson.encode(this.allPlayerPokerSet[playerId]))
 	this.allPlayerPokerSet[playerId] = table_remove(this.allPlayerPokerSet[playerId], pokerList)
@@ -858,7 +860,7 @@ end
 
 -- Get AI player number
 function this.setGetAITimer()
-	print("setGetAITimer..\n")
+	--print("setGetAITimer..\n")
 	this.unsetTimer("get_ai_timer")
 	this.setTimer("get_ai_timer", 10*100, function()
 		this.aquireAIPlayer()
@@ -866,7 +868,7 @@ function this.setGetAITimer()
 end
 
 function this.unsetGetAITimer()
-	print("unsetGetAITimer..\n")
+	--print("unsetGetAITimer..\n")
 	this.unsetTimer("get_ai_timer")
 end
 
@@ -879,7 +881,7 @@ function this.aquireAIPlayer()
 		end
 	end
 	if num > 0 and num <= this.maxPlayerNum-1 and human > 0 then
-		print("aquireAIPlayer..\n")
+		--print("aquireAIPlayer..\n")
 		local ret = skynet.call("aiManager_s", "lua", "aquireAIPlayer", num)
 		if ret.isFind == false then
 			this.setGetAITimer()

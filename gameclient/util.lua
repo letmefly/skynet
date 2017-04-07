@@ -86,8 +86,8 @@ function util.print(t)
 end
 
 function util.sendmsg(fd, msgname, msg)
-	print("---"..msgname.."---")
-	util.print(msg)
+	--print("---"..msgname.."---")
+	--util.print(msg)
 	local msgdata, size = netutil.pbencode(msgname, msg)
 	socket.send(fd, msgdata, size)
 end
@@ -100,11 +100,12 @@ function util.recvmsg(fd)
 			local msgname, msg = netutil.pbdecode(buff, size)
 			-- print(msgname .. ":" .. msg.errno)
 			-- print(msgname..":"..cjson.encode(msg))
-			print("---"..msgname.."---")
-			util.print(msg)
+			--print("---"..msgname.."---")
+			--util.print(msg)
 			return msgname, msg
 		else
-			socket.usleep(5)
+			--socket.usleep(5)
+            return nil, nil
 		end
 	end
 end
