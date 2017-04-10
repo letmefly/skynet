@@ -20,8 +20,8 @@ function this.scoreRace_findPrevRoom(userId)
 				return roomNo, sid
 			end
 		end
-	end 
-	return -1, -1	
+	end
+	return -1, -1
 end
 
 function this.scoreRace_findRoom(maxPlayerNum, excludeRoomNo)
