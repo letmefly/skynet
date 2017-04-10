@@ -324,19 +324,26 @@ function this.isThreeByThreeDouble(pokerList)
         end
     end
     local isOneByOne, level = this.isOneByOne(sequence)
+
     if isOneByOne == -1 then
         return -1,-1
     end
+
     for i = 1, #sequence do
-        local level = sequence[i]
-        table.insert(exclude, level)
+        --local level = sequence[i]
+        --table.insert(exclude, level)
+        print("sequence:::"..cjson.encode(pokerList))
         idxList = this.findEqualPoker(pokerList, 2, exclude)
         if #idxList == 0 then
             return -1,-1
         end
         table.insert(exclude, this.getLevel(pokerList[idxList[1]]))
     end
-    return this.TYPE_THREE_BY_THREE_DOUBLE, level
+    
+    if #sequence*5 == #pokerList then
+        return this.TYPE_THREE_BY_THREE_DOUBLE, level
+    end
+    return -1,-1
 end
 function this.getPokerType(pokers)
     local pokerList = {}

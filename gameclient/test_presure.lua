@@ -261,7 +261,7 @@ end
 
 function AI.whoGrabLandlord_ntf(msg)
 	if AI.isMe(msg.playerId) then
-		socket.usleep(AI.getWaitTime())
+		--socket.usleep(AI.getWaitTime())
 		local actionType = 1
 		if AI.calcIsGrabLandlord() then
 			actionType = 2
@@ -310,7 +310,7 @@ function AI.whoPlay_ntf(msg)
 		if extWaitTime < randomVal then
 			extWaitTime = randomVal
 		end
-		socket.usleep(extWaitTime)
+		--socket.usleep(extWaitTime)
 		local playAction = 2
 	    if pokerList == nil or #pokerList == 0 then
 	        playAction = 1
@@ -371,9 +371,24 @@ function AI.changeRoom_ack(msg)
 end
 
 -----------------------------------------------------------------------
---client_fd = assert(socket.connect("115.231.81.96", 8888))
-client_fd = assert(socket.connect("127.0.0.1", 8888))
-test_start({version=1, userId="demo111",authCode="123456"})
+local function get_userid()
+      local file = io.open("gameclient/userid.txt", "r")
+      assert(file)
+      local userIdStr = file:read("*a")
+      if userIdStr == "" then userIdStr = "1" end
+      local userId = tonumber(userIdStr)
+      local ret = userIdStr
+      local newUserIdStr = (userId+1)..""
+      print(newUserIdStr)
+      file:close()
+      file = io.open("gameclient/userid.txt", "w")
+      file:write(newUserIdStr)
+      file:close()
+      return ret
+end
+client_fd = assert(socket.connect("115.231.81.96", 8888))
+--client_fd = assert(socket.connect("127.0.0.1", 8888))
+test_start({version=1, userId="test_race_"..get_userid(), authCode="123456"})
 while true do
 	local msgname, msg = util.recvmsg(client_fd)
 	if msgname and msg then
