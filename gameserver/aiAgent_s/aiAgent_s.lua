@@ -168,7 +168,7 @@ end
 function AI.killMyself()
 	AI.leaveRoom({})
 	local ret = skynet.call("aiManager_s", "lua", "releaseAIUser", user_info.userId)
-	skynet.exit()
+	skynet.timeout(50, function() skynet.exit() end)
 end
 
 ---------------------------- AI STUB API 2 Server ---------------------------
@@ -189,7 +189,8 @@ function AI.joinRoomOk(msg)
 end
 
 function AI.leaveRoom(msg)
-	client_msg_handler("leaveRoom", msg)
+	--client_msg_handler("leaveRoom", msg)
+	skynet.call(my_room_sid, "lua", "leave", room_playerId, 3)
 end
 
 function AI.getReady(msg)
