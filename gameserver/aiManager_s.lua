@@ -50,6 +50,7 @@ function SAPI.releaseAIUser(userId)
 	table.insert(aiUserList, userId)
 	aiAgentList[userId] = nil
 	this.aiUseNum = this.aiUseNum - 1
+	print("----------------releaseAIUser aiUseNum:"..this.aiUseNum.."-------------------")
 end
 
 skynet.start(function()
