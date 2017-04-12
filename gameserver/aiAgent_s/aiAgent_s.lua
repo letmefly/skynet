@@ -35,7 +35,7 @@ local doc_root_dir = "/php_01/html/v0/"
 ------------------------ helper function ------------------------
 local function send_client_msg(msgname, msg)
 	if msgname ~= "alarmTimer_ntf" and msgname ~= "clientHandshake" and msgname ~= "handshake"then
-		print(msgname..": "..cjson.encode(msg))
+		--print(msgname..": "..cjson.encode(msg))
 	end
 	local cb = AI[msgname]
 	if cb then
@@ -46,7 +46,7 @@ end
 local function client_msg_handler(msgname, msg)
 	client_is_alive = true
 	if msgname ~= "alarmTimer_ntf" and msgname ~= "clientHandshake" and msgname ~= "handshake"then
-		print(msgname..": "..cjson.encode(msg))
+		--print(msgname..": "..cjson.encode(msg))
 	end
 	local handler = CLIENT_REQ[msgname]
 	if handler then
@@ -166,7 +166,6 @@ function AI.getPrevPokerList()
 end
 
 function AI.killMyself()
-	print("---killMyself---"..user_info.userId)
 	local ret = skynet.call("aiManager_s", "lua", "releaseAIUser", user_info.userId)
 	AI.leaveRoom({})
 	skynet.timeout(50, function() skynet.exit() end)

@@ -26,9 +26,11 @@ function this.aquireAiUserId()
 end
 
 function SAPI.aquireAIPlayer(num)
-	print("----------------aiUseNum:"..this.aiUseNum.."-------------------")
 	local ret = {}
 	ret.isFind = false
+	local currRoomNum = skynet.call("roomManager_s", "lua", "totalRoom")
+	if currRoomNum > 30 then return ret end
+	print("----------------aiUseNum:"..this.aiUseNum.."-------------------")
 	-- create ai agent
 	for i = 1, num do
 		skynet.timeout((i-1)*300, function()
@@ -50,7 +52,7 @@ function SAPI.releaseAIUser(userId)
 	table.insert(aiUserList, userId)
 	aiAgentList[userId] = nil
 	this.aiUseNum = this.aiUseNum - 1
-	print("----------------releaseAIUser aiUseNum:"..this.aiUseNum.."-------------------")
+	--print("----------------releaseAIUser aiUseNum:"..this.aiUseNum.."-------------------")
 end
 
 skynet.start(function()
