@@ -1210,5 +1210,5 @@ skynet.start(function()
 			error(string.format("Unknown command %s", tostring(cmd)))
 		end
 	end)
-	math.randomseed(skynet.now()/100)
+	math.randomseed(os.time())
 end)
