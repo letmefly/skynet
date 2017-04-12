@@ -245,9 +245,12 @@ end
 
 function AI.gameLogin_ack(msg)
 	if msg.errno == 1000 then
+		AI.isLogin = true
 		AI.userInfo = msg.userInfo
 		-- 2. get room number
 		AI.scoreRaceGetRoomNo({maxPlayerNum=AI.maxPlayerNum})
+	else
+		AI.killMyself()
 	end
 end
 
@@ -441,7 +444,6 @@ function CLIENT_REQ.gameLogin(msg)
 	user_info.ip = math.random(1,999999)..""
 	user_info.userno = userData['userno']
 	user_info.redPackVal = userData['redPackVal']
-	
 	-- verify user auth
 	send_client_msg("gameLogin_ack", {errno = 1000, userInfo = user_info})
 end
@@ -612,6 +614,11 @@ function SERVICE_API.start(conf)
 	local authCode = conf.authCode
 	--print("Now create AI for "..userId)
 	AI.gameLogin({version = version, userId = userId, authCode = authCode})
+	skynet.timeout(20*100, function()
+		if AI.isLogin == nil then
+			AI.killMyself()
+		end
+	end)
 end
 
 function SERVICE_API.disconnect()
