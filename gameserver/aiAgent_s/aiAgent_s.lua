@@ -169,7 +169,7 @@ function AI.killMyself()
 	print("---killMyself---")
 	AI.leaveRoom({})
 	local ret = skynet.call("aiManager_s", "lua", "releaseAIUser", user_info.userId)
-	skynet.exit()
+	skynet.timeout(50, function() skynet.exit() end)
 end
 
 ---------------------------- AI STUB API 2 Server ---------------------------
