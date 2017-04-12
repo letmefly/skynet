@@ -166,9 +166,9 @@ function AI.getPrevPokerList()
 end
 
 function AI.killMyself()
-	print("---killMyself---")
-	AI.leaveRoom({})
+	print("---killMyself---"..user_info.userId)
 	local ret = skynet.call("aiManager_s", "lua", "releaseAIUser", user_info.userId)
+	AI.leaveRoom({})
 	skynet.timeout(50, function() skynet.exit() end)
 end
 
