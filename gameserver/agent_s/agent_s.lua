@@ -57,7 +57,7 @@ end
 
 local function on_client_disconnect()
 	-- todo: do something before exit
-	if my_room_sid then
+	if skynet.queryservice(true, my_room_sid) then
 		skynet.call(my_room_sid, "lua", "disconnect", room_playerId)
 	end
 	skynet.exit()

@@ -250,6 +250,7 @@ function AI.gameLogin_ack(msg)
 		-- 2. get room number
 		AI.scoreRaceGetRoomNo({maxPlayerNum=AI.maxPlayerNum})
 	else
+		print("login fail:"..msg.errno)
 		AI.killMyself()
 	end
 end
