@@ -280,6 +280,10 @@ function this.isDoubleByDouble(pokerList)
             else
                 return -1,-1
             end
+        else
+            if math.ceil(pokerList[i]/4) ~= math.ceil(pokerList[i-1]/4) then
+                return -1,-1
+            end
         end
     end
     return this.TYPE_DOUBLE_BY_DOUBLE, math.ceil(pokerList[1]/4)

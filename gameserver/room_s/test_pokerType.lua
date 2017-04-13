@@ -128,6 +128,10 @@ function M.test()
 	t,l = pokerUtil.getPokerType(playPoker)
 	print("{2,3,4, 6,7,8, 10,11,12, 37,38,31,32,47,48} ---fuck type --- "..t..","..l)
 
+	local playPoker = {42,41,38,37,33,34}
+	t,l = pokerUtil.getPokerType(playPoker)
+	print("{42,41,38,37,33,34} ---fuck sequence type --- "..t..","..l)
+
 	local playPoker = {2,3,4,30}
 	local tip = {}
 	t,l = pokerUtil.getPokerType(playPoker)
