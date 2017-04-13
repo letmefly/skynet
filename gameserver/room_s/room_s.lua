@@ -532,7 +532,9 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 			this.roomOver()
 			return
 		else
-			this.resetGame()
+			skynet.timeout(10, function()
+				this.resetGame()
+			end)
 			if this.isScoreRace() then
 				this.setGetAITimer()
 				for i = 1, this.maxPlayerNum do
