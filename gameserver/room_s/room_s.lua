@@ -2,6 +2,7 @@ local skynet = require "skynet"
 require "skynet.manager"	-- import skynet.register
 local cjson = require "cjson"
 local pokerUtil = require "room_s.pokerUtil"
+local netutil = require "agent_s.netutil"
 local httpc = require "http.httpc"
 local http_server_addr = "127.0.0.1:80"
 local doc_root_dir = "/php_01/html/v0/"
@@ -90,7 +91,7 @@ function this.saveGameResult(userInfo, playerId, roomNo, roomType, roomResultLis
 	end
 	if isAllZero == false then
 		--print(cjson.encode(postData))
-		local status, body = httpc.post2(http_server_addr, doc_root_dir.."service_updateUser.php", cjson.encode(postData))
+		local status, body = netutil.http_post("service_updateUser.php", postData)
 	end
 end
 function this.costRoomCard(userInfo, msg)
@@ -100,7 +101,7 @@ function this.costRoomCard(userInfo, msg)
 	userData.unionid = userInfo.userId
 	userData.roomCardNum = userInfo.roomCardNum - costRoomCardNum
 	postData.userData = userData
-	local status, body = httpc.post2(http_server_addr, doc_root_dir.."service_updateUser.php", cjson.encode(postData))
+	local status, body = netutil.http_post("service_updateUser.php", postData)
 end
 function this.sendAllAgent(cmd, msg)
 	for k, v in pairs(this.playerInfoList) do

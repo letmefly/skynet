@@ -3,8 +3,13 @@ local protobuf = require "protobuf"
 local protohelper = require "proto.protohelper"
 local cjson = require "cjson"
 local crypt = require "crypt"
-
+local httpc = require "http.httpc"
+local dns = require "dns"
 local deskey = "skymobi-"
+
+local http_server_addr = "127.0.0.1:80"
+local doc_root_dir = "/php_01/html/v0/"
+local http_tocken = "this_token"
 
 local netutil = {}
 
@@ -43,6 +48,11 @@ function netutil.jsondecode(msgbuff, buffsize)
 	local msg = cjson.decode(buff)
 	print("<- "..buff)
 	return msgname, msg
+end
+
+function netutil.http_post(cmd, data)
+	data.token = http_tocken
+	return httpc.post2(http_server_addr, doc_root_dir..cmd, cjson.encode(data))
 end
 
 return netutil

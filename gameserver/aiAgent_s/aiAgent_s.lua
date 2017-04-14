@@ -428,8 +428,8 @@ function CLIENT_REQ.gameLogin(msg)
 	local userId = msg.userId
 	local authCode = msg.authCode
 	local version = msg.version
-
-	local status, body = httpc.post2(http_server_addr, doc_root_dir.."service_getUser.php", cjson.encode({unionid=userId}))
+	local status, body = netutil.http_post("service_getUser.php", {unionid=userId})
+	--local status, body = httpc.post2(http_server_addr, doc_root_dir.."service_getUser.php", cjson.encode({unionid=userId}))
 	local userData = cjson.decode(body)
 	user_info.userId = userData['unionid']
 	user_info.nickname = userData['nickname']
@@ -637,6 +637,7 @@ function SERVICE_API.saveGameResult(msg)
 	postData.roomResult.roomNo = my_room_no
 	postData.roomResult.roomType = my_room_type
 	postData.roomResult.history = {}
+	postData.token = "this_token"
 
 	local isAllZero = true
 	for k, v in pairs(roomResultList) do
@@ -655,7 +656,7 @@ function SERVICE_API.saveGameResult(msg)
 		table.insert(postData.roomResult.history, {n=v.nickname, s=v.totalScore})
 	end
 	if isAllZero == false then
-		local status, body = httpc.post2(http_server_addr, doc_root_dir.."service_updateUser.php", cjson.encode(postData))
+		local status, body = netutil.http_post("service_updateUser.php", postData)
 	end
 end
 
@@ -666,7 +667,7 @@ function SERVICE_API.costRoomCard(msg)
 	userData.unionid = user_info.userId
 	userData.roomCardNum = user_info.roomCardNum - costRoomCardNum
 	postData.userData = userData
-	local status, body = httpc.post2(http_server_addr, doc_root_dir.."service_updateUser.php", cjson.encode(postData))
+	local status, body = netutil.http_post("service_updateUser.php", postData)
 end
 
 function SERVICE_API.getRedPack_ack(msg)
@@ -678,7 +679,7 @@ function SERVICE_API.getRedPack_ack(msg)
 		userData.unionid = user_info.userId
 		userData.redPackVal = user_info.redPackVal + redPackVal
 		postData.userData = userData
-		local status, body = httpc.post2(http_server_addr, doc_root_dir.."service_updateUser.php", cjson.encode(postData))
+		local status, body = netutil.http_post("service_updateUser.php", postData)
 	end
 	send_client_msg("getRedPack_ack", {result = result, redPackVal = redPackVal})
 end
