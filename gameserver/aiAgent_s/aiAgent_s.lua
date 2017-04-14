@@ -197,7 +197,8 @@ function AI.getReady(msg)
 	AI.isReady = true
 	AI.gameData = {}
 	client_msg_handler("getReady", msg)
-	skynet.timeout(20*100, function()
+	local randomVal = math.random(30, 300)
+	skynet.timeout(randomVal*100, function()
 		if AI.gameData.pokerList == nil then
 			AI.killMyself()
 		end
@@ -372,9 +373,14 @@ end
 
 function AI.gameResult_ntf(msg)
 	AI.isGamePlaying = false
-	local time = math.random(4, 8)*100
+	local time = math.random(4, 6)*100
 	skynet.timeout(time, function()
-		AI.killMyself()
+		local randomVal = math.random(1,100)
+		if randomVal >= 80 then
+			AI.killMyself()
+		else
+			AI.getReady({playerId = AI.playerId, status = 1})
+		end
 	end)
 end
 

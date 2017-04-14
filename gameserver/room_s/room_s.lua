@@ -37,6 +37,7 @@ this.prevPokerList = {}
 this.readyPlayerNum = 0
 this.isFirstOneGrab = false
 this.firstGrabPlayerId = 0
+this.dispatchRedPackVal = 0
 -- all player's pokerList
 this.allPlayerPokerSet = {{},{},{}}
 this.dismissInfo = {}
@@ -72,6 +73,10 @@ function this.saveGameResult(userInfo, playerId, roomNo, roomType, roomResultLis
 	postData.roomResult.roomNo = roomNo
 	postData.roomResult.roomType = roomType
 	postData.roomResult.history = {}
+	if this.dispatchRedPackVal > 0 then
+		postData.dispatchRedPackVal = this.dispatchRedPackVal
+		this.dispatchRedPackVal = 0
+	end
 
 	local isAllZero = true
 	for k, v in pairs(roomResultList) do
@@ -865,7 +870,8 @@ end
 function this.setGetAITimer()
 	--print("setGetAITimer..\n")
 	this.unsetTimer("get_ai_timer")
-	this.setTimer("get_ai_timer", 10*100, function()
+	local randomVal = math.random(7, 10)
+	this.setTimer("get_ai_timer", randomVal*100, function()
 		this.aquireAIPlayer()
 	end)
 end
@@ -910,6 +916,7 @@ function this.checkRedPack()
 					elseif randomNum == 3 then
 						redPackVal = 120
 					end
+					this.dispatchRedPackVal = this.dispatchRedPackVal + redPackVal
 					userInfo.redPackVal = redPackVal
 					this.sendPlayer(sid, "redPackStart_ack", {playerId = userInfo.playerId, redPackVal = redPackVal})
 					skynet.timeout(30*100, function() 
@@ -1213,5 +1220,6 @@ skynet.start(function()
 			error(string.format("Unknown command %s", tostring(cmd)))
 		end
 	end)
+	print("now time: "..os.time())
 	math.randomseed(os.time())
 end)

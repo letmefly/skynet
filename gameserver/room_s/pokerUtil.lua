@@ -718,8 +718,8 @@ function this.getTipPoker(pokers, playPokers)
     elseif pokerType == this.TYPE_FOUR_FOUR then
         tipPokerIdxs = this.getTipFourFour(pokerList, level)    
     elseif pokerType == this.TYPE_SEQUENCE then
-        --tipPokerIdxs = this.getTipSequence(pokerList, #currPlayPoker, level) 
-        tipPokerIdxs = this.getBestTipSequence(pokerList, #currPlayPoker, level)
+        tipPokerIdxs = this.getTipSequence(pokerList, #currPlayPoker, level) 
+        --tipPokerIdxs = this.getBestTipSequence(pokerList, #currPlayPoker, level)
     elseif pokerType == this.TYPE_DOUBLE_BY_DOUBLE then
         tipPokers = this.getTipDoubleByDouble(pokerList, #currPlayPoker, level) 
     elseif pokerType == this.TYPE_THREE_BY_THREE then
@@ -2051,7 +2051,7 @@ function this.ai_isPlayBoom(splitList)
     turn = turn + #splitList.oneSeqList
     turn = turn + #splitList.twoSeqList
     turn = turn + #splitList.kingBoomList
-    if turn <= 2 then
+    if turn <= 1 then
         return true
     end
     return false
@@ -2341,7 +2341,7 @@ function this.ai_getNotFirstPlayPoker(pokerList, playPokerList, isFriendPlay, ne
     end
 
     -- check it is worth play boom
-    if this.ai_isPlayBoom(splitList) or adversaryLastType ~= -1 or (next1Info and next1Info.isFriend and friendLastType ~= -1) or canWin then
+    if this.ai_isPlayBoom(splitList) or (next1Info and next1Info.isFriend and friendLastType ~= -1) or canWin then
         if #splitList.fourList > 0 then
             local four = splitList.fourList[1]
             local ret1 = this.ai_level2Poker(pokerList, {four, four, four, four})

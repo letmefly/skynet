@@ -154,10 +154,10 @@ function M.test()
 	end
 	print(cjson.encode(pokerList).."--"..cjson.encode(playPoker).."--tip sequecnt-->"..cjson.encode(tip))	
 
-	pokerList = {6,7,10,14,18,22,26}
-	playPoker = {1,5,9,13,17}
+	pokerList = {9,11,12,14,17,18,21,22,26,29,30,34,35,42,43,44,47,48,53}
+	playPoker = {10,16,19,23,25,31}
 	tip = pokerUtil.getTipPoker(pokerList, playPoker)
-	print(cjson.encode(pokerList).."--"..cjson.encode(playPoker).."--tip sequece-->"..cjson.encode(tip))
+	print(cjson.encode(pokerList).."--"..cjson.encode(playPoker).."--tip sequece2-->"..cjson.encode(tip))
 
 	print("{5,6,7,20} > {1,2,3,19} -- "..pokerUtil.pokerCmp({5,6,7,20}, {1,2,3,19}))
 	print("{5} > {1} -- "..pokerUtil.pokerCmp({5}, {1}))
