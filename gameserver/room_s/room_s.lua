@@ -599,7 +599,7 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 
 			if this.isScoreRace() then
 				-- check if some player have readPack
-				local status, body = httpc.post2(http_server_addr, doc_root_dir.."service_getActInfo.php", cjson.encode({tag="tag"}))
+				local status, body = netutil.http_post("service_getActInfo.php", {tag="tag"})
 				local actInfo = cjson.decode(body)
 				this.isRedPackActOpen = actInfo.isOpen
 
