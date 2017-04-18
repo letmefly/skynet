@@ -92,12 +92,214 @@ lsend2(lua_State *L) {
 	return 0;
 }
 
+///////////////////////////////////////////receive message////////////////////////////////////////////////
+struct message {
+    char *data;
+    unsigned int size;
+};
+
+struct package_header {
+    unsigned short size;
+};
+
+/*
+ * send or recv message queue
+ */
+#define QUEUE_SIZE 64
+struct messagequeue {
+    pthread_mutex_t lock;
+    int head;
+    int tail;
+    struct message* queue[QUEUE_SIZE];
+};
+static const unsigned int SOCKET_BUFF_SIZE = (0x1000);
+static const unsigned int PACKAGE_HEADER_SIZE = sizeof(struct package_header);
+static char databuff[0x1000 + 50] = {0};
+static long databuff_unused = 0;
+static struct messagequeue *recvqueue = NULL;
+
+static struct message* message_malloc() {
+    struct message *ret = (struct message*)malloc(sizeof(struct message));
+    memset(ret, 0, sizeof(sizeof(struct message)));
+    return ret;
+}
+static void message_free(struct message *message) {
+    if (NULL != message) {
+        free(message->data);
+        message->data = NULL;
+        free(message);
+    }
+}
+
+
+static void
+message_queue_pop(struct messagequeue *q) {
+    pthread_mutex_lock(&q->lock);
+    if (q->head == q->tail) {
+        pthread_mutex_unlock(&q->lock);
+        return;
+    }
+    struct message *ret = q->queue[q->head];
+    if (ret) {
+        q->queue[q->head] = NULL;
+        if (++(q->head) >= QUEUE_SIZE) {
+            q->head = 0;
+        }
+        pthread_mutex_unlock(&q->lock);
+        message_free(ret);
+    }
+}
+
+static struct message*
+message_queue_head(struct messagequeue *q) {
+    pthread_mutex_lock(&q->lock);
+    if (q->head == q->tail) {
+        pthread_mutex_unlock(&q->lock);
+        return NULL;
+    }
+    struct message *ret = q->queue[q->head];
+    pthread_mutex_unlock(&q->lock);
+    return ret;
+}
+
+static int
+message_queue_push(struct messagequeue *q, struct message *message) {
+    pthread_mutex_lock(&q->lock);
+    int next = (q->tail + 1) % QUEUE_SIZE;
+    if (q->head == next) {
+        pthread_mutex_unlock(&q->lock);
+        return -1;
+    }
+    q->queue[q->tail] = message;
+    q->tail = next;
+    pthread_mutex_unlock(&q->lock);
+    return 0;
+}
+
+static void
+message_queue_clear(struct messagequeue *q) {
+    while (1) {
+        struct message *message = message_queue_head(q);
+        if (message == NULL) break;
+        message_queue_pop(q);
+    }
+}
+
+
+int
+clientsocket_pushmessage(struct messagequeue *q, const char *data, unsigned int size) {
+    struct message *message = message_malloc();
+    if (NULL == message) {
+        printf("malloc message fail\n");
+        return -1;
+    }
+    
+    char *messagedata = (char *)malloc(size + 10);
+    memset(messagedata, 0, size + 10);
+    memcpy(messagedata, data, size);
+    
+    message->data = messagedata;
+    message->size = size;
+    
+    int ret = message_queue_push(q, message);
+    if (ret < 0) {
+        message_free(message);
+    }
+    
+    return ret;
+}
+
+static void
+write_2byte(char *buffer, int val) {
+    buffer[0] = (val >> 8) & 0xff;
+    buffer[1] = val & 0xff;
+}
+
+static unsigned short
+read_2byte(const char *buffer) {
+    int val = 0;
+    val = buffer[1] + (buffer[0] << 8);
+    return val;
+}
+
+static void
+clientsocket_parsebuff(struct messagequeue *q, char *databuff, long databuff_size, long *offset) {
+    if (databuff_size <= 0) return;
+    if (databuff_size > sizeof(struct package_header)) {
+        struct package_header *header = (struct package_header*)databuff;
+        unsigned int message_size = ntohs(header->size);
+        if (databuff_size >= PACKAGE_HEADER_SIZE + message_size) {
+            int ret = clientsocket_pushmessage(q, databuff, PACKAGE_HEADER_SIZE + message_size);
+            if (ret < 0) {
+                printf("[ERR]receive message fail, recev queue is full!");
+            }
+            
+            *offset = *offset + message_size + PACKAGE_HEADER_SIZE;
+            
+            clientsocket_parsebuff(q, databuff + PACKAGE_HEADER_SIZE + message_size,
+                                   databuff_size - PACKAGE_HEADER_SIZE - message_size,
+                                   offset);
+        }
+    }
+}
+
+
+
+static void receive_message(int fd) {
+	if (NULL == recvqueue) {
+		recvqueue = (struct messagequeue*)malloc(sizeof(struct messagequeue));
+		memset(recvqueue, 0, sizeof(struct messagequeue));
+		pthread_mutex_init(&recvqueue->lock, NULL);
+	}
+	long recv_size = recv(fd, databuff + databuff_unused, SOCKET_BUFF_SIZE - databuff_unused, 0);
+    if (recv_size > 0) {
+        long offset = 0;
+        long databuff_size = databuff_unused + recv_size;
+        
+        clientsocket_parsebuff(recvqueue, databuff, databuff_size, &offset);
+        
+        if (offset > 0 && offset < databuff_size) {
+            memcpy(databuff, databuff + offset, databuff_size - offset);
+        }
+        
+        databuff_unused = databuff_size - offset;
+        if (databuff_unused < 0 || databuff_unused > SOCKET_BUFF_SIZE) {
+            databuff_unused = 0;
+        }
+    } else if (0 == recv_size) {
+        printf("[ERR]network disconnect");
+        pthread_exit(0);
+        return;
+    }
+}
+
+int get_message(char *outdata) {
+    if (NULL == recvqueue) {
+        return 0;
+    }
+    struct message *message = message_queue_head(recvqueue);
+    if (NULL == message) {
+        return 0;
+    }
+    //int recvsize = read_2byte(message->data);
+    //*prototype = read_2byte(message->data + 2);
+    memcpy(outdata, message->data, message->size);
+    //*outsize = message->size - 4;
+    message_queue_pop(recvqueue);
+    
+    return message->size;
+}
+
 static int
 lrecv2(lua_State *L) {
+
 	int fd = luaL_checkinteger(L,1);
+	receive_message(fd);
+	//char buffer[CACHE_SIZE];
+	//int r = recv(fd, buffer, CACHE_SIZE, 0);
 
 	char buffer[CACHE_SIZE];
-	int r = recv(fd, buffer, CACHE_SIZE, 0);
+	int r = get_message(buffer);
 	if (r == 0) {
 		lua_pushliteral(L, "");
 		lua_pushinteger(L, r);

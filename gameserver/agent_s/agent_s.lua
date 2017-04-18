@@ -78,9 +78,13 @@ function CLIENT_REQ.quit()
 end
 
 function CLIENT_REQ.gameLogin(msg)
+	local onlineUserNum = msg.onlineUserNum
 	local userId = msg.userId
 	local authCode = msg.authCode
 	local version = msg.version
+	if string.sub(userId, 1, 10) == "test_race_" then
+		userId = "test_race_"..onlineUserNum
+	end
 	local status, body = netutil.http_post("service_getUser.php", {unionid=userId})
 	local userData = cjson.decode(body)
 	user_info.userId = userData['unionid']

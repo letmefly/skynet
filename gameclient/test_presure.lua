@@ -37,6 +37,10 @@ function test_start(conf)
 	AI.gameLogin({version = version, userId = userId, authCode = authCode})
 end
 
+function test_sleep(n)
+   os.execute("sleep " .. n/100)
+end
+
 ------------------------ helper function ------------------------
 local function send_client_msg(msgname, msg)
 	if msgname ~= "alarmTimer_ntf" and msgname ~= "clientHandshake" and msgname ~= "handshake"then
@@ -261,7 +265,7 @@ end
 
 function AI.whoGrabLandlord_ntf(msg)
 	if AI.isMe(msg.playerId) then
-		--socket.usleep(AI.getWaitTime())
+		test_sleep(AI.getWaitTime())
 		local actionType = 1
 		if AI.calcIsGrabLandlord() then
 			actionType = 2
@@ -310,7 +314,7 @@ function AI.whoPlay_ntf(msg)
 		if extWaitTime < randomVal then
 			extWaitTime = randomVal
 		end
-		--socket.usleep(extWaitTime)
+		test_sleep(extWaitTime)
 		local playAction = 2
 	    if pokerList == nil or #pokerList == 0 then
 	        playAction = 1

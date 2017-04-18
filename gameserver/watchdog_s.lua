@@ -6,13 +6,18 @@ local SOCKET = {}
 local gate
 local agent = {}
 
+local online_user_num = 0
+
 function SOCKET.open(fd, addr)
-	skynet.error("New client from : " .. addr)
+	online_user_num = online_user_num + 1
+	skynet.error("New client from : " .. addr .. ", online user number "..online_user_num)
 	agent[fd] = skynet.newservice("agent_s")
-	skynet.call(agent[fd], "lua", "start", { gate = gate, client = fd, watchdog = skynet.self() })
+	skynet.call(agent[fd], "lua", "start", { gate = gate, client = fd, watchdog = skynet.self(), onlineUserNum = online_user_num })
 end
 
 local function close_agent(fd)
+	online_user_num = online_user_num - 1
+	skynet.error("online user number "..online_user_num)
 	local a = agent[fd]
 	agent[fd] = nil
 	if a then
