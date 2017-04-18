@@ -27,6 +27,7 @@ local room_playerId = -1
 local user_info = {}
 local http_server_addr = "127.0.0.1:80"
 local doc_root_dir = "/php_01/html/v0/"
+local online_user_num = 0
 
 ------------------------ helper function ------------------------
 local function send_client_msg(msgname, msg)
@@ -78,12 +79,11 @@ function CLIENT_REQ.quit()
 end
 
 function CLIENT_REQ.gameLogin(msg)
-	local onlineUserNum = msg.onlineUserNum
 	local userId = msg.userId
 	local authCode = msg.authCode
 	local version = msg.version
 	if string.sub(userId, 1, 10) == "test_race_" then
-		userId = "test_race_"..onlineUserNum
+		userId = "test_race_"..online_user_num
 	end
 	local status, body = netutil.http_post("service_getUser.php", {unionid=userId})
 	local userData = cjson.decode(body)
@@ -290,6 +290,7 @@ function SERVICE_API.start(conf)
 	local fd = conf.client
 	local gate = conf.gate
 	WATCHDOG = conf.watchdog
+	online_user_num = conf.onlineUserNum
 	client_fd = fd
 	skynet.call(gate, "lua", "forward", fd)
 	skynet.fork(function()
