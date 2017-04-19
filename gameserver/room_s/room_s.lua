@@ -92,7 +92,9 @@ function this.saveGameResult(userInfo, playerId, roomNo, roomType, roomResultLis
 			end
 			postData.userData.score = userInfo.score
 		end
-		table.insert(postData.roomResult.history, {n=v.nickname, s=v.totalScore})
+		if this.isScoreRace() == false then
+			table.insert(postData.roomResult.history, {n=v.nickname, s=v.totalScore})
+		end
 	end
 	if isAllZero == false then
 		--print(cjson.encode(postData))

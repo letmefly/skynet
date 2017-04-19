@@ -44,7 +44,7 @@ end
 ------------------------ helper function ------------------------
 local function send_client_msg(msgname, msg)
 	if msgname ~= "alarmTimer_ntf" and msgname ~= "clientHandshake" and msgname ~= "handshake"then
-		print(msgname..": "..cjson.encode(msg))
+		--print(msgname..": "..cjson.encode(msg))
 	end
 	local cb = AI[msgname]
 	if cb then
@@ -55,7 +55,7 @@ end
 local function client_msg_handler(msgname, msg)
 	client_is_alive = true
 	if msgname ~= "alarmTimer_ntf" and msgname ~= "clientHandshake" and msgname ~= "handshake"then
-		print(msgname..": "..cjson.encode(msg))
+		--print(msgname..": "..cjson.encode(msg))
 	end
 	util.sendmsg(client_fd, msgname, msg)
 	--[[
@@ -110,8 +110,8 @@ function AI.calcPlayPoker()
 	if AI.gameData and AI.gameData.pokerList then
 		ret = pokerUtil.ai_getPlayPoker(AI.gameData.pokerList, prevPokerList, isFriendPlay)
 		--print("1. "..cjson.encode(next1Info))
-		print("1. "..cjson.encode(prevPokerList))
-		print("2. "..cjson.encode(ret))
+		--print("1. "..cjson.encode(prevPokerList))
+		--print("2. "..cjson.encode(ret))
 	end
 	return ret
 end
