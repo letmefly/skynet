@@ -291,7 +291,8 @@ function this.grabLandlordHandler(playerId, grabAction)
 	if this.grabLandlordMode == 1 then
 		if grabAction > 1 then
 			if this.currGrabLevel == 0 then
-				this.currGrabLevel = 1
+				-----this.currGrabLevel = 1 ------------------------
+				this.currGrabLevel = 3
 			else
 				this.currGrabLevel = this.currGrabLevel*2
 			end
@@ -325,7 +326,7 @@ function this.grabLandlordHandler(playerId, grabAction)
 			this.grabLandlordOver(this.currLandlord)
 			return
 		end
-		--[[
+		--[[--------------------------------------------------------------------
 		if this.currGrabLevel > 0 and this.grabTimes >= maxGrabTimes then
 			-- now landlord is known
 			this.grabLandlordOver(this.currLandlord)
