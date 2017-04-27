@@ -124,9 +124,9 @@ function M.test()
 	local boomLevelList = pokerUtil.getAllBoomLevel(pokerList)
 	print(cjson.encode(pokerList).."--boomLevelList-->"..cjson.encode(boomLevelList))
 
-	local playPoker = {2,3,4, 6,7,8, 10,11,12, 37,38,31,32,47,48}
+	local playPoker = {54,51,52,45,37,38,33,34,29,30,25}
 	t,l = pokerUtil.getPokerType(playPoker)
-	print("{2,3,4, 6,7,8, 10,11,12, 37,38,31,32,47,48} ---fuck type --- "..t..","..l)
+	print("{54,51,52,45,37,38,33,34,29,30,25} ---fuck type --- "..t..","..l)
 
 	local playPoker = {42,41,38,37,33,34}
 	t,l = pokerUtil.getPokerType(playPoker)

@@ -319,11 +319,19 @@ function this.grabLandlordHandler(playerId, grabAction)
 	-- check if grab is over
 	-- 1. random grab mode
 	if this.grabLandlordMode == 1 then
+		if grabAction > 1 then
+			this.currGrabLevel = 3
+			this.currLandlord = playerId
+			this.grabLandlordOver(this.currLandlord)
+			return
+		end
+		--[[
 		if this.currGrabLevel > 0 and this.grabTimes >= maxGrabTimes then
 			-- now landlord is known
 			this.grabLandlordOver(this.currLandlord)
 			return
 		end
+		]]
 	-- 2. score grab mode
 	elseif this.grabLandlordMode == 2 then
 		-- the one who give level 3 first get landlord
