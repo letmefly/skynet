@@ -320,9 +320,8 @@ function this.grabLandlordHandler(playerId, grabAction)
 	-- check if grab is over
 	-- 1. random grab mode
 	if this.grabLandlordMode == 1 then
-		if grabAction > 1 then
+		if grabAction > 1 or this.grabTimes >= 3 then
 			this.currGrabLevel = 3
-			this.currLandlord = playerId
 			this.grabLandlordOver(this.currLandlord)
 			return
 		end
