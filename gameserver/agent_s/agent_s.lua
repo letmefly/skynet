@@ -32,7 +32,7 @@ local online_user_num = 0
 ------------------------ helper function ------------------------
 local function send_client_msg(msgname, msg)
 	if msgname ~= "alarmTimer_ntf" and msgname ~= "clientHandshake" and msgname ~= "handshake"then
-		--print(msgname..": "..cjson.encode(msg))
+		print(msgname..": "..cjson.encode(msg))
 	end
 	if 1 == PROTO_TYPE then
 		local buff, size = netutil.pbencode(msgname, msg)
@@ -46,7 +46,7 @@ end
 local function client_msg_handler(msgname, msg)
 	client_is_alive = true
 	if msgname ~= "alarmTimer_ntf" and msgname ~= "clientHandshake" and msgname ~= "handshake"then
-		--print(msgname..": "..cjson.encode(msg))
+		print(msgname..": "..cjson.encode(msg))
 	end
 	local handler = CLIENT_REQ[msgname]
 	if handler then

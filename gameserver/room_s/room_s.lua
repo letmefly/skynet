@@ -289,14 +289,20 @@ function this.grabLandlordHandler(playerId, grabAction)
 	this.unsetTickTimerNtf("g", playerId)
 	this.grabTimes = this.grabTimes + 1
 	if this.grabLandlordMode == 1 then
-		if grabAction > 1 then
-			if this.currGrabLevel == 0 then
-				-----this.currGrabLevel = 1 ------------------------
+		if this.isScoreRace() then
+			if grabAction > 1 then
 				this.currGrabLevel = 3
-			else
-				this.currGrabLevel = this.currGrabLevel*2
+				this.currLandlord = playerId
 			end
-			this.currLandlord = playerId
+		else
+			if grabAction > 1 then
+				if this.currGrabLevel == 0 then
+					this.currGrabLevel = 1
+				else
+					this.currGrabLevel = this.currGrabLevel*2
+				end
+				this.currLandlord = playerId
+			end
 		end
 	else
 		if grabAction - 1 >= this.currGrabLevel then
@@ -320,18 +326,20 @@ function this.grabLandlordHandler(playerId, grabAction)
 	-- check if grab is over
 	-- 1. random grab mode
 	if this.grabLandlordMode == 1 then
-		if grabAction > 1 or this.grabTimes >= 3 then
-			this.currGrabLevel = 3
-			this.grabLandlordOver(this.currLandlord)
-			return
+		if this.isScoreRace() then
+			if grabAction > 1 or this.grabTimes >= 3 then
+				this.currGrabLevel = 3
+				this.grabLandlordOver(this.currLandlord)
+				return
+			end
+		else
+			if this.currGrabLevel > 0 and this.grabTimes >= maxGrabTimes then
+				-- now landlord is known
+				this.grabLandlordOver(this.currLandlord)
+				return
+			end			
 		end
-		--[[--------------------------------------------------------------------
-		if this.currGrabLevel > 0 and this.grabTimes >= maxGrabTimes then
-			-- now landlord is known
-			this.grabLandlordOver(this.currLandlord)
-			return
-		end
-		]]
+
 	-- 2. score grab mode
 	elseif this.grabLandlordMode == 2 then
 		-- the one who give level 3 first get landlord
