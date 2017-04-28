@@ -329,6 +329,9 @@ function this.grabLandlordHandler(playerId, grabAction)
 		if this.isScoreRace() then
 			if grabAction > 1 or this.grabTimes >= 3 then
 				this.currGrabLevel = 3
+				if this.currLandlord == 0 then
+					this.currLandlord = this.firstStartPlayerId
+				end
 				this.grabLandlordOver(this.currLandlord)
 				return
 			end
