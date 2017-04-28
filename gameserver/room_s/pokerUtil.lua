@@ -2355,6 +2355,8 @@ function this.ai_getNotFirstPlayPoker(pokerList, playPokerList, isFriendPlay, ne
     return {}
 end
 function this.ai_getPlayPoker(pokerList, playPokerList, isFriendPlay, next1Info, next2Info)
+    table.sort(pokerList)
+    table.sort(playPokerList)
     local isFirstPlay = false
     if #playPokerList == 0 or playPokerList == nil then
         isFirstPlay = true
