@@ -447,7 +447,7 @@ function CLIENT_REQ.gameLogin(msg)
 	user_info.win = userData['win']
 	user_info.lose = userData['lose']
 	user_info.score = userData['score']
-	user_info.ip = math.random(1,999999)..""
+	user_info.ip = math.random(10,245).."."..math.random(10,245).."."..math.random(10,245).."."..math.random(10,245)
 	user_info.userno = userData['userno']
 	user_info.redPackVal = userData['redPackVal']
 	-- verify user auth
