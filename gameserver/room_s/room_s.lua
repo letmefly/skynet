@@ -92,11 +92,13 @@ function this.saveGameResult(userInfo, playerId, roomNo, roomType, roomResultLis
 			end
 			postData.userData.score = userInfo.score
 		end
-		--if this.isScoreRace() == false then
-			table.insert(postData.roomResult.history, {n=v.nickname, s=v.totalScore})
-		--end
+		table.insert(postData.roomResult.history, {n=v.nickname, s=v.totalScore})
 	end
+
 	if isAllZero == false then
+		if this.isScoreRace() then
+			postData.roomResult.history = {}
+		end
 		--print(cjson.encode(postData))
 		local status, body = netutil.http_post("service_updateUser.php", postData)
 	end
@@ -627,7 +629,7 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 				-- check if some player have readPack
 				local status, body = netutil.http_post("service_getActInfo.php", {tag="tag"})
 				local actInfo = cjson.decode(body)
-				this.isRedPackActOpen = actInfo.isOpen
+				this.actInfo = actInfo
 
 				local roomResultList = this.calcRoomResult()
 				this.playResultList = {}
@@ -921,20 +923,20 @@ end
 
 function this.checkRedPack()
 	this.isStartCheckRedPack = true
-	if this.isScoreRace() and this.isRedPackActOpen == 1 then
+	if this.isScoreRace() and this.actInfo.activitySwitch == "on" then
 		for k, v in pairs(this.playerInfoList) do
 			if v and v.sid then
 				local userInfo = v.userInfo
 				local sid = v.sid
 				if userInfo.gameOverTimes >= 3 then
 					userInfo.gameOverTimes = 0
-					local randomNum = math.random(1,3)
+					local randomNum = math.random(1,100)
 					local redPackVal = 0
-					if randomNum == 1 then
+					if randomNum <= this.actInfo.rate_40 then
 						redPackVal = 40
-					elseif randomNum == 2 then
+					elseif randomNum <= this.actInfo.rate_80+this.actInfo.rate_40 then
 						redPackVal = 80
-					elseif randomNum == 3 then
+					elseif randomNum <= this.actInfo.rate_120+this.actInfo.rate_80+this.actInfo.rate_40 then
 						redPackVal = 120
 					end
 					this.dispatchRedPackVal = this.dispatchRedPackVal + redPackVal
