@@ -923,7 +923,7 @@ end
 
 function this.checkRedPack()
 	this.isStartCheckRedPack = true
-	if this.isScoreRace() and this.actInfo.activitySwitch == "on" then
+	if this.isScoreRace() and this.actInfo and this.actInfo.activitySwitch == "on" then
 		for k, v in pairs(this.playerInfoList) do
 			if v and v.sid then
 				local userInfo = v.userInfo
