@@ -1159,7 +1159,7 @@ function SAPI.dismissRoom(msg)
 		end)
 	end
 	
-	if dismissNum == this.maxPlayerNum-1 then
+	if dismissNum >= this.maxPlayerNum-1 then
 		skynet.timeout(300, function()
 			this.sendAllPlayer("stopAlarmTimer_ntf", {playerId = playerId, timerType = "dis"})
 			this.unsetSecondTimer("dis")

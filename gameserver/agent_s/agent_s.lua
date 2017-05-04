@@ -360,10 +360,11 @@ function SERVICE_API.getRedPack_ack(msg)
 	local result = msg.result
 	local redPackVal = msg.redPackVal
 	if result == 2 and (redPackVal == 40 or redPackVal == 80 or redPackVal == 120) then
+		user_info.redPackVal = user_info.redPackVal + redPackVal
 		local postData = {}
 		local userData = {}
 		userData.unionid = user_info.userId
-		userData.redPackVal = user_info.redPackVal + redPackVal
+		userData.redPackVal = user_info.redPackVal
 		postData.userData = userData
 		local status, body = netutil.http_post("service_updateUser.php", postData)
 	end

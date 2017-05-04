@@ -225,6 +225,12 @@ function M.test()
 	pokerList = {1,2,3,5,6,7,25,29,33,37,41}
 	local playTurn = pokerUtil.ai_getPlayTurn(pokerList)
 	print(cjson.encode(pokerList)..", play_turn=="..playTurn)
+
+	print("-------------light pokers----------------")
+	pokerList = {29,30,31,37,38}
+	playPokerList = {21,22,23,39,40}
+	local ret = pokerUtil.getLightPokerIdList(pokerList, playPokerList)
+	print(cjson.encode(ret))
 end
 
 return M

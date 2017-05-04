@@ -275,7 +275,7 @@ function this.isDoubleByDouble(pokerList)
     local prev = pokerList[1]
     for i = 2, #pokerList do
         if i % 2 == 1 then
-            if math.ceil(pokerList[i]/4) - math.ceil(prev/4) == 1 then
+            if math.ceil(pokerList[i]/4) - math.ceil(prev/4) == 1 and math.ceil(pokerList[i]/4)<=12 then
                 prev = pokerList[i]
             else
                 return -1,-1
@@ -926,6 +926,8 @@ function this.getLightPokerIdList(pokerList, playPokerList)
         local allBoomLevelList = this.getAllBoomLevel(tmpPokerList)
         local allThreeLevel = this.getAllThreeLevel(tmpPokerList)
         local allDoubleLevel = this.getAllDoubleLevel(tmpPokerList)
+        allDoubleLevel = table_remove(allDoubleLevel, allThreeLevel)
+
         local hasBiggerThree = false
         table.sort(allThreeLevel)
         if allThreeLevel[1] and allThreeLevel[#allThreeLevel] > l then
@@ -933,7 +935,7 @@ function this.getLightPokerIdList(pokerList, playPokerList)
         end
         for i = 1, #tmpPokerList do
             local level = this.getLevel(tmpPokerList[i])
-            if (this.isContains(allThreeLevel, level) == true and level > l) or
+            if (this.isContains(allThreeLevel, level) == true and level > l and #allDoubleLevel > 0) or
                 (this.isContains(allDoubleLevel, level) == true and hasBiggerThree) or
                 this.isContains(allBoomLevelList, level) == true then
                 table.insert(retLightPokerIdList, tmpPokerList[i])
