@@ -700,6 +700,8 @@ function this.calcRoomResult()
 end
 
 function this.roomOver(t)
+	if this.isRoomOver then return end
+	this.isRoomOver = true
 	local delay = 300
 	if t then delay = t end
 	local roomResultList = this.calcRoomResult()
