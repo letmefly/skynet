@@ -216,6 +216,12 @@ function this.startGame()
 		pokerUtil.sortPoker(pokerList)
 		this.allPlayerPokerSet[playerId] = pokerList
 		--table.insert(allPokerList, pokerList)
+		--this.sendPlayer(sid, "startGame_ntf", {pokerList=pokerList, bottomList=this.bottomPokerList, status=3, currPlayTimes=v.userInfo.gameOverTimes})
+	end
+	for k, v in ipairs(this.playerInfoList) do
+		local sid = v.sid
+		local playerId = v.playerId
+		local pokerList = this.allPlayerPokerSet[playerId]
 		this.sendPlayer(sid, "startGame_ntf", {pokerList=pokerList, bottomList=this.bottomPokerList, status=3, currPlayTimes=v.userInfo.gameOverTimes})
 	end
 	this.testPokers = nil
