@@ -107,6 +107,7 @@ function AI.calcPlayPoker()
 		next2Info.isFriend = AI.isFriend(next2PlayerId)
 		next1Info.pokerList = AI.gameData.allPlayerPokerList[next1PlayerId].pokerList
 		next2Info.pokerList = AI.gameData.allPlayerPokerList[next2PlayerId].pokerList
+		--[[
 		if next1Info.isFriend == true and next2Info.isFriend == false then
 			if AI.gameData.allPlayerPokerList[next1PlayerId].userType == 1 and
 				AI.gameData.allPlayerPokerList[next2PlayerId].userType == 2 then
@@ -122,11 +123,19 @@ function AI.calcPlayPoker()
 				--isFriendPlay = false
 			end
 		end
-
+		]]
 		ret = pokerUtil.ai_getPlayPoker(AI.gameData.pokerList, prevPokerList, isFriendPlay, next1Info, next2Info)
-		--print("1. "..cjson.encode(next1Info))
-		--print("2. "..cjson.encode(next2Info))
-		--print("3. "..cjson.encode(ret))
+		
+		--[[
+		print("--------------"..user_info.nickname.."--------------")
+		print("allPlayerPokerList: "..cjson.encode(AI.gameData.allPlayerPokerList))
+		print("myPokerList: "..cjson.encode(AI.gameData.pokerList))
+		print("prevPokerList: "..cjson.encode(prevPokerList))
+		print("isFriendPlay: "..cjson.encode(isFriendPlay))
+		print("next1Info: "..cjson.encode(next1Info))
+		print("next2Info: "..cjson.encode(next2Info))
+		print("play: "..cjson.encode(ret))
+		]]
 	end
 	return ret
 end
