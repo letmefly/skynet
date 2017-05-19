@@ -124,6 +124,7 @@ function AI.calcPlayPoker()
 			end
 		end
 		]]
+		
 		ret = pokerUtil.ai_getPlayPoker(AI.gameData.pokerList, prevPokerList, isFriendPlay, next1Info, next2Info)
 		
 		--[[

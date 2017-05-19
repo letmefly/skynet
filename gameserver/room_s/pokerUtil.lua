@@ -2087,12 +2087,12 @@ function this.ai_getNotFirstPlayPoker(pokerList, playPokerList, isFriendPlay, ne
         adversaryLastType, adversaryLastLevel = this.getPokerType(next2Info.pokerList)
     end
 
-    if friendLastType ~= -1 and canWin == false then
+    if isFriendPlay and canWin == false then
         if next1Info then
             if next1Info.isFriend == true then
                 return {}
             else
-                if adversaryLastType < level then
+                if adversaryLastType ~= -1 and adversaryLastType < level then
                     return {}
                 end
             end
@@ -2112,7 +2112,7 @@ function this.ai_getNotFirstPlayPoker(pokerList, playPokerList, isFriendPlay, ne
             biggerLevel = this.ai_findFirstBigger(splitList.oneList, adversaryLastLevel)
         end
         -- if friend play bigger than J, then you skip
-        if isFriendPlay and level >= 12 and playTurn >= 3 and adversaryLastType == -1 and canWin==false then
+        if isFriendPlay and level >= 9 and playTurn >= 2 and adversaryLastType == -1 and canWin==false then
             return {}
         end
         -- you can play if there is bigger single poker no matter who
