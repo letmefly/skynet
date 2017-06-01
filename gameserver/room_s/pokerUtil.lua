@@ -1799,7 +1799,7 @@ function this.ai_getFirstPlayPoker(pokerList, next1Info, next2Info)
             end
         elseif friendLastType == this.TYPE_DOUBLE then
             local idxList = this.findEqualPoker(pokerList, 2, {})
-            if #idxList > 0 and this.getLevel(pokerList[idxList[1]] < friendLastLevel) then
+            if #idxList > 0 and this.getLevel(pokerList[idxList[1]]) < friendLastLevel then
                 if #splitList.kingBoomList == 2 then
                     local ret1 = this.ai_level2Poker(pokerList, {splitList.kingBoomList[1], splitList.kingBoomList[2]})
                     return ret1
