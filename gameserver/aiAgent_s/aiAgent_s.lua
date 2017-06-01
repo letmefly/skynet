@@ -204,6 +204,7 @@ function AI.leaveRoom(msg)
 end
 
 function AI.getReady(msg)
+	if AI.isReady then return end
 	AI.isReady = true
 	AI.gameData = {}
 	client_msg_handler("getReady", msg)
@@ -383,10 +384,11 @@ end
 
 function AI.gameResult_ntf(msg)
 	AI.isGamePlaying = false
+	AI.isReady = false
 	local time = math.random(4, 6)*100
 	skynet.timeout(time, function()
 		local randomVal = math.random(1,100)
-		if randomVal >= 0 then
+		if randomVal >= 90 then
 			AI.killMyself()
 		else
 			AI.getReady({playerId = AI.playerId, status = 1})
