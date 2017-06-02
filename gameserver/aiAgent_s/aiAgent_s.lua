@@ -208,7 +208,7 @@ function AI.getReady(msg)
 	AI.isReady = true
 	AI.gameData = {}
 	client_msg_handler("getReady", msg)
-	local randomVal = math.random(30, 300)
+	local randomVal = math.random(20, 30)
 	skynet.timeout(randomVal*100, function()
 		if AI.gameData.pokerList == nil then
 			AI.killMyself()
