@@ -1997,7 +1997,19 @@ function this.ai_getFirstPlayPoker(pokerList, next1Info, next2Info)
         local ret1 = this.ai_level2Poker(pokerList, {splitList.kingBoomList[1], splitList.kingBoomList[2]})
         return ret1
     end
-    return {pokerList[#pokerList]}
+
+    if #splitList.twoList > 0 then
+        local two = splitList.twoList[1]
+        local ret1 = this.ai_level2Poker(pokerList, {two,two})
+        return ret1
+    end
+    if #splitList.oneList > 0 then
+        local one = splitList.oneList[1]
+        local ret1 = this.ai_level2Poker(pokerList, {one})
+        return ret1
+    end
+
+    return {pokerList[1]}
 end
 function this.ai_findFirstBigger(levelList, level)
     for i = 1, #levelList do
