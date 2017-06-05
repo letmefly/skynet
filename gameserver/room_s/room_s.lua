@@ -1058,6 +1058,7 @@ end
 
 function SAPI.getReady(playerId)
 	local playerInfo = this.playerInfoList[playerId]
+	if playerInfo == nil then return end
 	if this.isScoreRace() then
 		if playerInfo.userInfo.score < 24 then return end
 	end
