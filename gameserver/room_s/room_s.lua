@@ -950,6 +950,7 @@ function this.checkRedPack()
 					this.dispatchRedPackVal = this.dispatchRedPackVal + redPackVal
 					userInfo.redPackVal = redPackVal
 					this.sendPlayer(sid, "redPackStart_ack", {playerId = userInfo.playerId, redPackVal = redPackVal})
+					--[[
 					skynet.timeout(30*100, function() 
 						if userInfo and userInfo.redPackVal and userInfo.playerId then
 							userInfo.redPackVal = 0 
@@ -957,6 +958,7 @@ function this.checkRedPack()
 							this.sendPlayer(nowSid, "redPackOver_ack", {playerId = userInfo.playerId})
 						end
 					end)
+					]]
 				end
 			end
 		end
