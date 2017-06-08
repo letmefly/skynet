@@ -203,7 +203,9 @@ function CLIENT_REQ.playPoker(msg)
 	local playerId = msg.playerId
 	local playAction = msg.playAction
 	local pokerList = msg.pokerList
-	skynet.call(my_room_sid, "lua", "playPoker", {playerId = playerId, playAction =playAction, pokerList=pokerList})
+	if my_room_sid and skynet.queryservice(true, my_room_sid) then
+		skynet.call(my_room_sid, "lua", "playPoker", {playerId = playerId, playAction =playAction, pokerList=pokerList})
+	end
 end
 
 function CLIENT_REQ.chat(msg)
