@@ -185,7 +185,9 @@ end
 
 function CLIENT_REQ.getReady(msg)
 	local status = msg.status
-	skynet.call(my_room_sid, "lua", "getReady", room_playerId)
+	if my_room_sid and skynet.queryservice(true, my_room_sid) then
+		skynet.call(my_room_sid, "lua", "getReady", room_playerId)
+	end
 end
 
 function CLIENT_REQ.startGame(msg)
@@ -256,6 +258,23 @@ end
 function CLIENT_REQ.changeRoom(msg)
 	local playerId = msg.playerId
 	local maxPlayerNum = msg.maxPlayerNum
+
+	local status, body = netutil.http_post("service_getUser.php", {unionid=user_info.userId})
+	local userData = cjson.decode(body)
+	user_info.userId = userData['unionid']
+	user_info.nickname = userData['nickname']
+	user_info.sexType = userData['sex']
+	user_info.iconUrl = userData['headimgurl']
+	user_info.level = userData['level']
+	user_info.roomCardNum = userData['roomCardNum']
+	user_info.playerId = 0
+	user_info.win = userData['win']
+	user_info.lose = userData['lose']
+	user_info.score = userData['score']
+	user_info.ip = userData['ip']
+	user_info.userno = userData['userno']
+	user_info.redPackVal = userData['redPackVal']
+
 	if user_info.score < 24 then
 		send_client_msg("changeRoom_ack", {errno = 1001, roomNo = -1})
 		return
