@@ -58,7 +58,7 @@ end
 
 local function on_client_disconnect()
 	-- todo: do something before exit
-	if my_room_sid and skynet.queryservice(true, my_room_sid) then
+	if my_room_sid then
 		skynet.call(my_room_sid, "lua", "disconnect", room_playerId)
 	end
 	skynet.exit()
@@ -185,7 +185,7 @@ end
 
 function CLIENT_REQ.getReady(msg)
 	local status = msg.status
-	if my_room_sid and skynet.queryservice(true, my_room_sid) then
+	if my_room_sid then
 		skynet.call(my_room_sid, "lua", "getReady", room_playerId)
 	end
 end
@@ -205,7 +205,7 @@ function CLIENT_REQ.playPoker(msg)
 	local playerId = msg.playerId
 	local playAction = msg.playAction
 	local pokerList = msg.pokerList
-	if my_room_sid and skynet.queryservice(true, my_room_sid) then
+	if my_room_sid then
 		skynet.call(my_room_sid, "lua", "playPoker", {playerId = playerId, playAction =playAction, pokerList=pokerList})
 	end
 end
