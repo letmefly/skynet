@@ -15,6 +15,9 @@
 static char * 
 wiretype_decode(uint8_t *buffer, int cap , struct atom *a , int start)
 {
+	if (cap <= 0) {
+		return NULL;
+	}
 	uint8_t temp[10];
 	struct longlong r;
 	int len;

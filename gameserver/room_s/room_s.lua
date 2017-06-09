@@ -715,7 +715,7 @@ function this.roomOver(t)
 		this.sendAllPlayer("roomResult_ntf", {roomResultList = roomResultList})
 		skynet.timeout(100, function()
 			skynet.call("roomManager_s", "lua", "destroyRoom", this.roomNo)
-			--this.gameTimers = nil
+			this.gameTimers = nil
 		end)
 	end)
 	-- save user game data
@@ -878,7 +878,7 @@ function this.leaveRoom(playerId, t)
 	-- dismiss room
 	if playerNum == 0 then
 		skynet.timeout(100, function()
-			--this.gameTimers = nil
+			this.gameTimers = nil
 			skynet.call("roomManager_s", "lua", "destroyRoom", this.roomNo)
 		end)
 	end
