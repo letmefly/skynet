@@ -803,7 +803,7 @@ function this.joinRoomOkNtf(playerId)
 
 	-- If rejoin room, no need start ready timer
 	--print(cjson.encode(this.playerInfoList))
-	if this.playerInfoList[playerId].userInfo.status > 0 then
+	if this.playerInfoList[playerId] and this.playerInfoList[playerId].userInfo.status > 0 then
 		local sid =this.playerInfoList[playerId].sid
 		this.sendPlayer(sid, "reJoinRoomOk_ack", {
 			userInfoList = userInfoList,
@@ -816,7 +816,7 @@ function this.joinRoomOkNtf(playerId)
 		})
 	end
 
-	if this.playerInfoList[playerId].userInfo.status < 2 then
+	if this.playerInfoList[playerId] and this.playerInfoList[playerId].userInfo.status < 2 then
 		this.setTickTimer("r"..playerId, 15, function(timerVal)
 			if timerVal == 0 then
 				if this.isScoreRace() then
