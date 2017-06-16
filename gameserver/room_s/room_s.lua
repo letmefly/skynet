@@ -968,11 +968,11 @@ function this.checkRedPack()
 						end
 					else
 						if randomNum <= this.actInfo.rate_4 then
-							redPackVal = 4
+							redPackVal = 1
 						elseif randomNum <= this.actInfo.rate_8+this.actInfo.rate_4 then
-							redPackVal = 8
+							redPackVal = 5
 						elseif randomNum <= this.actInfo.rate_12+this.actInfo.rate_8+this.actInfo.rate_4 then
-							redPackVal = 12
+							redPackVal = 50
 						end
 					end
 					this.dispatchRedPackVal = this.dispatchRedPackVal + redPackVal
