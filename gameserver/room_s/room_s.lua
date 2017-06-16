@@ -72,6 +72,7 @@ function this.saveGameResult(userInfo, playerId, roomNo, roomType, roomResultLis
 	postData.roomResult = {}
 	postData.roomResult.roomNo = roomNo
 	postData.roomResult.roomType = roomType
+	postData.roomResult.coinType = this.coinType
 	postData.roomResult.history = {}
 	if this.dispatchRedPackVal > 0 then
 		postData.dispatchRedPackVal = this.dispatchRedPackVal
@@ -90,7 +91,11 @@ function this.saveGameResult(userInfo, playerId, roomNo, roomType, roomResultLis
 			else 
 				postData.userData.lose = userInfo.lose + 1
 			end
-			postData.userData.score = userInfo.score
+			if this.coinType == 1 then
+				postData.userData.score = userInfo.score
+			else
+				postData.userData.score2 = userInfo.score2
+			end
 		end
 		table.insert(postData.roomResult.history, {n=v.nickname, s=v.totalScore})
 	end
@@ -544,11 +549,23 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 					end
 				end
 				--item.score = item.score + costCoin
-				this.playerInfoList[i].userInfo.score = item.score + this.playerInfoList[i].userInfo.score + costCoin
+				if this.coinType == 1 then
+					this.playerInfoList[i].userInfo.score = item.score + this.playerInfoList[i].userInfo.score + costCoin
+				else
+					this.playerInfoList[i].userInfo.score2 = item.score + this.playerInfoList[i].userInfo.score2 + costCoin
+				end
 			else
-				this.playerInfoList[i].userInfo.score = item.score + this.playerInfoList[i].userInfo.score
+				if this.coinType == 1 then
+					this.playerInfoList[i].userInfo.score = item.score + this.playerInfoList[i].userInfo.score
+				else
+					this.playerInfoList[i].userInfo.score2 = item.score + this.playerInfoList[i].userInfo.score2
+				end
 			end
-			item.totalScore = this.playerInfoList[i].userInfo.score
+			if this.coinType == 1 then
+				item.totalScore = this.playerInfoList[i].userInfo.score
+			else
+				item.totalScore = this.playerInfoList[i].userInfo.score2
+			end
 			table.insert(resultList, item)
 		end
 		local allPlayerLeftPokerSet = {}
@@ -788,6 +805,7 @@ function this.joinRoomOkNtf(playerId)
 			userInfo.win = v.userInfo.win
 			userInfo.lose = v.userInfo.lose
 			userInfo.score = v.userInfo.score
+			userInfo.score2 = v.userInfo.score2
 			userInfo.ip = v.userInfo.ip
 			userInfo.status = v.userInfo.status
 			userInfo.hasPlay = v.userInfo.hasPlay
@@ -922,7 +940,7 @@ function this.aquireAIPlayer()
 	end
 	if num > 0 and num <= this.maxPlayerNum-1 and human > 0 then
 		--print("aquireAIPlayer..\n")
-		local ret = skynet.call("aiManager_s", "lua", "aquireAIPlayer", num)
+		local ret = skynet.call("aiManager_s", "lua", "aquireAIPlayer", num, this.coinType)
 		if ret.isFind == false then
 			this.setGetAITimer()
 		end
@@ -940,12 +958,22 @@ function this.checkRedPack()
 					userInfo.gameOverTimes = 0
 					local randomNum = math.random(1,100)
 					local redPackVal = 0
-					if randomNum <= this.actInfo.rate_40 then
-						redPackVal = 40
-					elseif randomNum <= this.actInfo.rate_80+this.actInfo.rate_40 then
-						redPackVal = 80
-					elseif randomNum <= this.actInfo.rate_120+this.actInfo.rate_80+this.actInfo.rate_40 then
-						redPackVal = 120
+					if this.coinType == 1 then
+						if randomNum <= this.actInfo.rate_40 then
+							redPackVal = 40
+						elseif randomNum <= this.actInfo.rate_80+this.actInfo.rate_40 then
+							redPackVal = 80
+						elseif randomNum <= this.actInfo.rate_120+this.actInfo.rate_80+this.actInfo.rate_40 then
+							redPackVal = 120
+						end
+					else
+						if randomNum <= this.actInfo.rate_4 then
+							redPackVal = 4
+						elseif randomNum <= this.actInfo.rate_8+this.actInfo.rate_4 then
+							redPackVal = 8
+						elseif randomNum <= this.actInfo.rate_12+this.actInfo.rate_8+this.actInfo.rate_4 then
+							redPackVal = 12
+						end
 					end
 					this.dispatchRedPackVal = this.dispatchRedPackVal + redPackVal
 					userInfo.redPackVal = redPackVal
@@ -975,6 +1003,10 @@ function SAPI.init(conf)
 	this.maxPlayTimes = conf.playTimes
 	this.grabLandlordMode = conf.grabMode
 	this.maxBoom = conf.maxBoom
+	this.coinType = conf.coinType
+	if this.coinType == nil then 
+		this.coinType = 1 
+	end
 
 	this.currPlayTimes = 0
 	this.roomOwner = 1
@@ -1064,7 +1096,8 @@ function SAPI.getReady(playerId)
 	local playerInfo = this.playerInfoList[playerId]
 	if playerInfo == nil then return end
 	if this.isScoreRace() then
-		if playerInfo.userInfo.score < 24 then return end
+		if this.coinType == 1 and playerInfo.userInfo.score < 24 then return end
+		if this.coinType == 2 and playerInfo.userInfo.score2 < 24 then return end
 	end
 	if playerInfo.userInfo.status >= 2 then return end
 	this.unsetTickTimerNtf("r", playerId)

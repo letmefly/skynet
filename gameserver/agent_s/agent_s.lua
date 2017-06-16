@@ -97,6 +97,7 @@ function CLIENT_REQ.gameLogin(msg)
 	user_info.win = userData['win']
 	user_info.lose = userData['lose']
 	user_info.score = userData['score']
+	user_info.score2 = userData['score2']
 	user_info.ip = userData['ip']
 	user_info.userno = userData['userno']
 	user_info.redPackVal = userData['redPackVal']
@@ -238,12 +239,18 @@ end
 
 function CLIENT_REQ.scoreRaceGetRoomNo(msg)
 	local maxPlayerNum = msg.maxPlayerNum
+	local coinType = msg.coinType
+	if coinType == nil then coinType = 1 end
 	local errno = 1000
-	if user_info.score < 24 then
+	if coinType == 1 and user_info.score < 24 then
 		send_client_msg("scoreRaceGetRoomNo_ack", {errno = 1001, roomNo = -1})
 		return
 	end
-	local ret = skynet.call("roomManager_s", "lua", "scoreRaceGetRoomNo", {userId = user_info.userId, maxPlayerNum=maxPlayerNum, excludeRoomNo=my_room_no})
+	if coinType == 2 and user_info.score2 < 24 then
+		send_client_msg("scoreRaceGetRoomNo_ack", {errno = 1002, roomNo = -1})
+		return
+	end	
+	local ret = skynet.call("roomManager_s", "lua", "scoreRaceGetRoomNo", {userId = user_info.userId, maxPlayerNum=maxPlayerNum, excludeRoomNo=my_room_no, coinType=coinType})
 	local roomNo = ret.roomNo
 	send_client_msg("scoreRaceGetRoomNo_ack", {errno = errno, roomNo = roomNo})
 end
@@ -258,6 +265,8 @@ end
 function CLIENT_REQ.changeRoom(msg)
 	local playerId = msg.playerId
 	local maxPlayerNum = msg.maxPlayerNum
+	local coinType = msg.coinType
+	if coinType == nil then coinType = 1 end
 
 	local status, body = netutil.http_post("service_getUser.php", {unionid=user_info.userId})
 	local userData = cjson.decode(body)
@@ -271,15 +280,20 @@ function CLIENT_REQ.changeRoom(msg)
 	user_info.win = userData['win']
 	user_info.lose = userData['lose']
 	user_info.score = userData['score']
+	user_info.score2 = userData['score2']
 	user_info.ip = userData['ip']
 	user_info.userno = userData['userno']
 	user_info.redPackVal = userData['redPackVal']
 
-	if user_info.score < 24 then
+	if coinType == 1 and user_info.score < 24 then
 		send_client_msg("changeRoom_ack", {errno = 1001, roomNo = -1})
 		return
 	end
-	local ret = skynet.call("roomManager_s", "lua", "scoreRaceGetRoomNo", {maxPlayerNum=maxPlayerNum, excludeRoomNo=my_room_no})
+	if coinType == 2 and user_info.score2 < 24 then
+		send_client_msg("changeRoom_ack", {errno = 1001, roomNo = -1})
+		return
+	end	
+	local ret = skynet.call("roomManager_s", "lua", "scoreRaceGetRoomNo", {maxPlayerNum=maxPlayerNum, excludeRoomNo=my_room_no, coinType=coinType})
 	local roomNo = ret.roomNo
 	send_client_msg("changeRoom_ack", {errno = 1000, roomNo = roomNo})	
 
@@ -380,7 +394,8 @@ end
 function SERVICE_API.getRedPack_ack(msg)
 	local result = msg.result
 	local redPackVal = msg.redPackVal
-	if result == 2 and (redPackVal == 40 or redPackVal == 80 or redPackVal == 120) then
+	if result == 2 and (redPackVal == 40 or redPackVal == 80 or redPackVal == 120 or
+		redPackVal == 4 or redPackVal == 8 or redPackVal == 12) then
 		user_info.redPackVal = user_info.redPackVal + redPackVal
 		local postData = {}
 		local userData = {}

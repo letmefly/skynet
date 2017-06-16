@@ -22,6 +22,7 @@ message userInfo_t {
     optional int32 hasPlay = 16;
     optional int32 userno = 17;
     optional int32 redPackVal = 18;
+    optional int32 score2 = 19;
 }
 message handshake {
   optional int32 sn = 1;
@@ -247,6 +248,7 @@ message dismissRoom {
 }
 message scoreRaceGetRoomNo {
     optional int32 maxPlayerNum = 1;
+    optional int32 coinType = 2;
 }
 message scoreRaceGetRoomNo_ack {
     optional string roomNo = 1;
@@ -269,6 +271,7 @@ message getRedPack_ack {
 message changeRoom {
     optional int32 playerId = 1;
     optional int32 maxPlayerNum = 2;
+    optional int32 coinType = 3;
 }
 message changeRoom_ack {
     optional string roomNo = 1;

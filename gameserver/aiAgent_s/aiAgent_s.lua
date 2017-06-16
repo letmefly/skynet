@@ -260,7 +260,7 @@ function AI.gameLogin_ack(msg)
 		AI.isLogin = true
 		AI.userInfo = msg.userInfo
 		-- 2. get room number
-		AI.scoreRaceGetRoomNo({maxPlayerNum=AI.maxPlayerNum})
+		AI.scoreRaceGetRoomNo({maxPlayerNum=AI.maxPlayerNum, coinType = AI.coinType})
 	else
 		AI.killMyself()
 	end
@@ -459,6 +459,7 @@ function CLIENT_REQ.gameLogin(msg)
 	user_info.win = userData['win']
 	user_info.lose = userData['lose']
 	user_info.score = userData['score']
+	user_info.score2 = userData['score2']
 	user_info.ip = math.random(10,245).."."..math.random(10,245).."."..math.random(10,245).."."..math.random(10,245)
 	user_info.userno = userData['userno']
 	user_info.redPackVal = userData['redPackVal']
@@ -594,12 +595,13 @@ end
 
 function CLIENT_REQ.scoreRaceGetRoomNo(msg)
 	local maxPlayerNum = msg.maxPlayerNum
+	local coinType = msg.coinType
 	local errno = 1000
 	if user_info.score < 24 then
 		send_client_msg("scoreRaceGetRoomNo_ack", {errno = 1001, roomNo = -1})
 		return
 	end
-	local ret = skynet.call("roomManager_s", "lua", "scoreRaceGetRoomNo", {maxPlayerNum=maxPlayerNum, excludeRoomNo=my_room_no})
+	local ret = skynet.call("roomManager_s", "lua", "scoreRaceGetRoomNo", {maxPlayerNum=maxPlayerNum, excludeRoomNo=my_room_no, coinType = coinType})
 	local roomNo = ret.roomNo
 	send_client_msg("scoreRaceGetRoomNo_ack", {errno = errno, roomNo = roomNo})
 end
@@ -630,6 +632,7 @@ function SERVICE_API.start(conf)
 	local version = conf.version
 	local userId =  conf.userId
 	local authCode = conf.authCode
+	AI.coinType = conf.coinType
 	--print("Now create AI for "..userId)
 	AI.gameLogin({version = version, userId = userId, authCode = authCode})
 	skynet.timeout(20*100, function()

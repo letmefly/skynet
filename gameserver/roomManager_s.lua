@@ -14,7 +14,7 @@ function this.scoreRace_findPrevRoom(userId)
 	for k, v in pairs(this.scoreRace_rooms) do
 		if v then
 			local roomNo = k
-			local sid = v
+			local sid = v.sid
 			local ret = skynet.call(sid, "lua", "findByUserId", userId)
 			if ret == 1 then
 				return roomNo, sid
@@ -24,11 +24,11 @@ function this.scoreRace_findPrevRoom(userId)
 	return -1, -1
 end
 
-function this.scoreRace_findRoom(maxPlayerNum, excludeRoomNo)
+function this.scoreRace_findRoom(maxPlayerNum, excludeRoomNo, coinType)
 	for k, v in pairs(this.scoreRace_rooms) do
-		if v then
+		if v and v.coinType == coinType then
 			local roomNo = k
-			local sid = v 
+			local sid = v.sid
 			local playerNum = skynet.call(sid, "lua", "getCurrPlayerNum", {})
 			if playerNum < maxPlayerNum and excludeRoomNo ~= roomNo then
 				return roomNo, sid
@@ -38,7 +38,7 @@ function this.scoreRace_findRoom(maxPlayerNum, excludeRoomNo)
 	return -1,-1
 end
 
-function this.scoreRace_createRoom(roomType)
+function this.scoreRace_createRoom(roomType, coinType)
 	print("---------------------total_room "..total_room.."----------------------")
 	local roomType = roomType
 	local playTimes = 9999
@@ -56,9 +56,10 @@ function this.scoreRace_createRoom(roomType)
 		roomType =roomType,
 		playTimes = playTimes,
 		grabMode = grabMode,
-		maxBoom = maxBoom
+		maxBoom = maxBoom,
+		coinType = coinType
 	})
-	this.scoreRace_rooms[roomNo] = sid
+	this.scoreRace_rooms[roomNo] = {sid = sid, coinType = coinType}
 	total_room = total_room + 1
 	return roomNo, sid 
 end
@@ -90,8 +91,8 @@ end
 
 function SERVICE_API.queryRoom(roomNo)
 	local sid = rooms[roomNo]
-	if sid == nil then
-		sid = this.scoreRace_rooms[roomNo]
+	if sid == nil and this.scoreRace_rooms[roomNo] then
+		sid = this.scoreRace_rooms[roomNo].sid
 	end
 	return sid
 end
@@ -108,23 +109,26 @@ function SERVICE_API.destroyRoom(roomNo)
 		rooms[roomNo] = nil
 	elseif nil ~= this.scoreRace_rooms[roomNo] then
 		total_room = total_room - 1
-		skynet.kill(this.scoreRace_rooms[roomNo])
+		skynet.kill(this.scoreRace_rooms[roomNo].sid)
 		this.scoreRace_rooms[roomNo] = nil
 	end
 end
 
+-- coinType 1 big redpack, coinType 2 small redpack 
 function SERVICE_API.scoreRaceGetRoomNo(msg)
 	local maxPlayerNum = msg.maxPlayerNum
 	local excludeRoomNo = msg.excludeRoomNo
+	local coinType = msg.coinType
 	local userId = msg.userId
+	if coinType == nil then coinType = 1 end
 	--print("------flll-excludeRoomNo--"..excludeRoomNo)
 	local roomNo, sid = this.scoreRace_findPrevRoom(userId)
 	if roomNo ~= -1 then
 		return {roomNo = roomNo, sid = sid}
 	end
-	roomNo, sid = this.scoreRace_findRoom(maxPlayerNum, excludeRoomNo)
+	roomNo, sid = this.scoreRace_findRoom(maxPlayerNum, excludeRoomNo, coinType)
 	if roomNo == -1 or sid == -1 then
-		roomNo, sid =  this.scoreRace_createRoom(maxPlayerNum)
+		roomNo, sid =  this.scoreRace_createRoom(maxPlayerNum, coinType)
 	end
 	return {roomNo = roomNo, sid = sid}
 end

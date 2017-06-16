@@ -25,7 +25,7 @@ function this.aquireAiUserId()
 	return ret
 end
 
-function SAPI.aquireAIPlayer(num)
+function SAPI.aquireAIPlayer(num, coinType)
 	local ret = {}
 	ret.isFind = false
 	local currRoomNum = skynet.call("roomManager_s", "lua", "totalRoom")
@@ -39,7 +39,7 @@ function SAPI.aquireAIPlayer(num)
 			local userId =  this.aquireAiUserId()
 			if userId then
 				local authCode = "123456"
-				skynet.call(sid, "lua", "start", {version = version, userId = userId, authCode = authCode})
+				skynet.call(sid, "lua", "start", {version = version, userId = userId, authCode = authCode, coinType = coinType})
 				aiAgentList[userId] = sid
 				ret.isFind = true
 			end
