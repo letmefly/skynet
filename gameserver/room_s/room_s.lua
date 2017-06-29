@@ -952,14 +952,13 @@ function this.aquireAIPlayer()
 end
 
 function this.checkRedPack()
-	print("checkRedPack...");
 	this.isStartCheckRedPack = true
 	if this.isScoreRace() and this.actInfo and this.actInfo.activitySwitch == "on" then
 		for k, v in pairs(this.playerInfoList) do
 			if v and v.sid then
 				local userInfo = v.userInfo
 				local sid = v.sid
-				if userInfo.gameOverTimes >= 1 then --- here for testing
+				if userInfo.gameOverTimes >= 3 then
 					userInfo.gameOverTimes = 0
 					local randomNum = math.random(1,100)
 					local redPackVal = 0
@@ -1064,7 +1063,7 @@ function this.checkRedPack()
 			end
 		end
 	end
-	skynet.timeout(100*60*1, function()
+	skynet.timeout(100*60*5, function()
 		this.checkRedPack()
 	end)
 end
