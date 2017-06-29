@@ -34,7 +34,6 @@ function SERVICE_API.getRewardPoolVal()
 	local status, body = netutil.http_post("service_getRewardPool.php", postData)
 	local poolInfo = cjson.decode(body)
 	this.rewardPoolVal = poolInfo.rewardPoolVal
-	this.rewardPoolVal = 2000
 	return this.rewardPoolVal
 end
 
