@@ -447,6 +447,7 @@ function CLIENT_REQ.gameLogin(msg)
 	local authCode = msg.authCode
 	local version = msg.version
 	local status, body = netutil.http_post("service_getUser.php", {unionid=userId})
+	print(body)
 	--local status, body = httpc.post2(http_server_addr, doc_root_dir.."service_getUser.php", cjson.encode({unionid=userId}))
 	local userData = cjson.decode(body)
 	user_info.userId = userData['unionid']
@@ -463,6 +464,10 @@ function CLIENT_REQ.gameLogin(msg)
 	user_info.ip = math.random(10,245).."."..math.random(10,245).."."..math.random(10,245).."."..math.random(10,245)
 	user_info.userno = userData['userno']
 	user_info.redPackVal = userData['redPackVal']
+	user_info.loginDayCount = userData['loginDayCount']
+	user_info.lastLoginTime = userData['lastLoginTime']
+	user_info.todayRedPackCount = userData['todayRedPackCount']
+	user_info.lastRechargeDate = userData['lastRechargeDate']
 	-- verify user auth
 	send_client_msg("gameLogin_ack", {errno = 1000, userInfo = user_info})
 end

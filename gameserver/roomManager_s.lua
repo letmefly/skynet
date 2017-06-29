@@ -114,6 +114,13 @@ function SERVICE_API.destroyRoom(roomNo)
 	end
 end
 
+function SERVICE_API.isRoomExist(roomNo)
+	if nil ~= rooms[roomNo] or nil ~= this.scoreRace_rooms[roomNo] then
+		return true
+	end
+	return false
+end
+
 -- coinType 1 big redpack, coinType 2 small redpack 
 function SERVICE_API.scoreRaceGetRoomNo(msg)
 	local maxPlayerNum = msg.maxPlayerNum

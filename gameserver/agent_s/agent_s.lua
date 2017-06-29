@@ -59,7 +59,10 @@ end
 local function on_client_disconnect()
 	-- todo: do something before exit
 	if my_room_sid then
-		skynet.call(my_room_sid, "lua", "disconnect", room_playerId)
+		local isExist = skynet.call("roomManager_s", "lua", "isRoomExist", my_room_no)
+		if isExist then
+			skynet.call(my_room_sid, "lua", "disconnect", room_playerId)
+		end
 	end
 	skynet.exit()
 end
@@ -86,6 +89,7 @@ function CLIENT_REQ.gameLogin(msg)
 		userId = "test_race_"..online_user_num
 	end
 	local status, body = netutil.http_post("service_getUser.php", {unionid=userId})
+	print(body)
 	local userData = cjson.decode(body)
 	user_info.userId = userData['unionid']
 	user_info.nickname = userData['nickname']
@@ -101,7 +105,11 @@ function CLIENT_REQ.gameLogin(msg)
 	user_info.ip = userData['ip']
 	user_info.userno = userData['userno']
 	user_info.redPackVal = userData['redPackVal']
-	
+	user_info.loginDayCount = userData['loginDayCount']
+	user_info.lastLoginTime = userData['lastLoginTime']
+	user_info.todayRedPackCount = userData['todayRedPackCount']
+	user_info.lastRechargeDate = userData['lastRechargeDate']
+
 	-- verify user auth
 	send_client_msg("gameLogin_ack", {errno = 1000, userInfo = user_info})
 end
@@ -219,7 +227,10 @@ function CLIENT_REQ.chat(msg)
 end
 
 function CLIENT_REQ.leaveRoom(msg)
-	skynet.call(my_room_sid, "lua", "leave", room_playerId, 3)	
+	local isExist = skynet.call("roomManager_s", "lua", "isRoomExist", my_room_no)
+	if isExist then
+		skynet.call(my_room_sid, "lua", "leave", room_playerId, 3)	
+	end
 	---on_client_disconnect()
 end
 
@@ -283,7 +294,11 @@ function CLIENT_REQ.changeRoom(msg)
 	user_info.score2 = userData['score2']
 	user_info.ip = userData['ip']
 	user_info.userno = userData['userno']
-	user_info.redPackVal = userData['redPackVal']
+	--user_info.redPackVal = userData['redPackVal']
+	user_info.loginDayCount = userData['loginDayCount']
+	user_info.lastLoginTime = userData['lastLoginTime']
+	user_info.todayRedPackCount = userData['todayRedPackCount']
+	user_info.lastRechargeDate = userData['lastRechargeDate']
 
 	if coinType == 1 and user_info.score < 24 then
 		send_client_msg("changeRoom_ack", {errno = 1001, roomNo = -1})
@@ -394,17 +409,22 @@ end
 function SERVICE_API.getRedPack_ack(msg)
 	local result = msg.result
 	local redPackVal = msg.redPackVal
-	if result == 2 and (redPackVal == 40 or redPackVal == 80 or redPackVal == 120 or
-		redPackVal == 4 or redPackVal == 8 or redPackVal == 12) then
+	local coinVal = msg.coinVal
+	if result == 2 then
 		user_info.redPackVal = user_info.redPackVal + redPackVal
+		user_info.score = user_info.score + coinVal
+		user_info.todayRedPackCount = user_info.todayRedPackCount + 1
 		local postData = {}
 		local userData = {}
 		userData.unionid = user_info.userId
 		userData.redPackVal = user_info.redPackVal
+		userData.score = user_info.score
+		userData.todayRedPackCount = user_info.todayRedPackCount
+
 		postData.userData = userData
 		local status, body = netutil.http_post("service_updateUser.php", postData)
 	end
-	send_client_msg("getRedPack_ack", {result = result, redPackVal = redPackVal})
+	send_client_msg("getRedPack_ack", {result = result, redPackVal = redPackVal, coinVal = coinVal})
 end
 
 ------------------------ service start! -----------------------------

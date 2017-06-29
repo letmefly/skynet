@@ -102,7 +102,7 @@ function this.saveGameResult(userInfo, playerId, roomNo, roomType, roomResultLis
 
 	if isAllZero == false then
 		if this.isScoreRace() then
-			postData.roomResult.history = {}
+			--postData.roomResult.history = {}
 		end
 		--print(cjson.encode(postData))
 		local status, body = netutil.http_post("service_updateUser.php", postData)
@@ -502,6 +502,7 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 			end
 		end
 		totalBoom = math.min(totalBoom, this.maxBoom)
+		local redpackPoolVal = skynet.call("redpackPool_s", "lua", "getRewardPoolVal")
 		local resultList = {}
 		for i = 1, this.maxPlayerNum do
 			this.playerInfoList[i].userInfo.gameOverTimes = this.playerInfoList[i].userInfo.gameOverTimes + 1
@@ -543,9 +544,11 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 				local costCoin = 0
 				if item.result == 2 then
 					if isLandlordWin then
-						costCoin = -4
+						--costCoin = -4
+						costCoin = -1*math.floor(math.abs(item.score)/3)
 					else
-						costCoin = -2
+						--costCoin = -2
+						costCoin = -1*math.floor(math.abs(item.score)/3)
 					end
 				end
 				--item.score = item.score + costCoin
@@ -575,7 +578,7 @@ function this.playPokerHandler(playerId, playAction, pokerList)
 			end
 		end
 		this.setTimer("gameResult", 10, function()
-			this.sendAllPlayer("gameResult_ntf", {resultList = resultList, allPlayerPokerSet=allPlayerLeftPokerSet})
+			this.sendAllPlayer("gameResult_ntf", {resultList = resultList, allPlayerPokerSet=allPlayerLeftPokerSet, redpackPoolVal=redpackPoolVal})
 		end)
 		this.playResultList[this.currPlayTimes] = resultList
 
@@ -816,8 +819,8 @@ function this.joinRoomOkNtf(playerId)
 			table.insert(userInfoList, userInfo)
 		end
 	end
-
-	this.sendAllPlayer("joinRoomOk_ntf", {userInfoList = userInfoList})
+	local redpackPoolVal = skynet.call("redpackPool_s", "lua", "getRewardPoolVal")
+	this.sendAllPlayer("joinRoomOk_ntf", {userInfoList = userInfoList, redpackPoolVal=redpackPoolVal})
 
 	-- If rejoin room, no need start ready timer
 	--print(cjson.encode(this.playerInfoList))
@@ -830,7 +833,8 @@ function this.joinRoomOkNtf(playerId)
 			prevPlayerId = this.prevPlayerId,
 			prevPlayPokerList = this.prevPokerList,
 			currPlayTimes = this.playerInfoList[playerId].userInfo.gameOverTimes,
-			grabLevel = this.currLevel
+			grabLevel = this.currLevel,
+			redpackPoolVal=redpackPoolVal
 		})
 	end
 
@@ -895,7 +899,7 @@ function this.leaveRoom(playerId, t)
 	end
 	-- dismiss room
 	if playerNum == 0 then
-		skynet.timeout(100, function()
+		skynet.timeout(0, function()
 			this.gameTimers = nil
 			skynet.call("roomManager_s", "lua", "destroyRoom", this.roomNo)
 		end)
@@ -948,17 +952,84 @@ function this.aquireAIPlayer()
 end
 
 function this.checkRedPack()
+	print("checkRedPack...");
 	this.isStartCheckRedPack = true
 	if this.isScoreRace() and this.actInfo and this.actInfo.activitySwitch == "on" then
 		for k, v in pairs(this.playerInfoList) do
 			if v and v.sid then
 				local userInfo = v.userInfo
 				local sid = v.sid
-				if userInfo.gameOverTimes >= 3 then
+				if userInfo.gameOverTimes >= 1 then --- here for testing
 					userInfo.gameOverTimes = 0
 					local randomNum = math.random(1,100)
 					local redPackVal = 0
+					local coinVal = 0
 					if this.coinType == 1 then
+						userInfo.todayRedPackCount = userInfo.todayRedPackCount + 1
+						local isTodayRecharge = false
+						if userInfo.lastRechargeDate == userInfo.lastLoginTime then
+							isTodayRecharge = true
+						end
+
+						local rewardPoolRedPackVal = skynet.call("redpackPool_s", "lua", "getRewardRedPack")
+						if isTodayRecharge and rewardPoolRedPackVal > 0 then
+							redPackVal = rewardPoolRedPackVal
+						else
+							if userInfo.loginDayCount == 1 and userInfo.todayRedPackCount == 1 then
+								redPackVal = 120
+							elseif userInfo.loginDayCount == 1 and userInfo.todayRedPackCount == 2 then
+								redPackVal = 60
+							elseif userInfo.loginDayCount == 1 and userInfo.todayRedPackCount == 4 then
+								redPackVal = 60
+							elseif userInfo.loginDayCount == 1 and userInfo.todayRedPackCount == 4 then
+								redPackVal = 60
+							elseif userInfo.loginDayCount == 2 and userInfo.todayRedPackCount == 1 then
+								redPackVal = 60
+							elseif userInfo.loginDayCount == 5 and userInfo.todayRedPackCount == 2 then
+								redPackVal = 120
+							elseif userInfo.loginDayCount == 10 and userInfo.todayRedPackCount == 2 then
+								redPackVal = 120
+							elseif userInfo.loginDayCount == 15 and userInfo.todayRedPackCount == 2 then
+								redPackVal = 120
+							else
+								local function calc_sum(t, i)
+									local sum = 0
+									for k, v in pairs(t) do
+										if k <= i then
+											sum = sum + v 
+										end
+									end
+									return sum
+								end
+								local function calc_redpack(configT, randomVal)
+									local redpack, coin = 0, 0
+									if randomVal <= calc_sum(configT, 1) then
+										coin = 3
+									elseif randomVal <= calc_sum(configT, 2) then
+										coin = 6
+									elseif randomVal <= calc_sum(configT, 3) then
+										coin = 9
+									elseif randomVal <= calc_sum(configT, 4) then
+										redpack = 30
+									elseif randomVal <= calc_sum(configT, 5) then
+										redpack = 60
+									elseif randomVal <= calc_sum(configT, 6) then
+										redpack = 90
+									end
+									return redpack, coin
+								end
+
+								local randomVal = math.random(1, 100)
+								if isTodayRecharge then
+									local configNotFree = {0,0,0,50,30,20}
+									redPackVal, coinVal = calc_redpack(configNotFree, randomVal)
+								else
+									local configFree = {45,27,18,5,3,2}
+									redPackVal, coinVal = calc_redpack(configFree, randomVal)
+								end
+							end
+						end
+						--[[
 						if randomNum <= this.actInfo.rate_40 then
 							redPackVal = 40
 						elseif randomNum <= this.actInfo.rate_80+this.actInfo.rate_40 then
@@ -966,6 +1037,7 @@ function this.checkRedPack()
 						elseif randomNum <= this.actInfo.rate_120+this.actInfo.rate_80+this.actInfo.rate_40 then
 							redPackVal = 120
 						end
+						]]
 					else
 						if randomNum <= this.actInfo.rate_4 then
 							redPackVal = 1
@@ -977,7 +1049,8 @@ function this.checkRedPack()
 					end
 					this.dispatchRedPackVal = this.dispatchRedPackVal + redPackVal
 					userInfo.redPackVal = redPackVal
-					this.sendPlayer(sid, "redPackStart_ack", {playerId = userInfo.playerId, redPackVal = redPackVal})
+					userInfo.redPackCoinVal = coinVal
+					this.sendPlayer(sid, "redPackStart_ack", {playerId = userInfo.playerId, redPackVal = redPackVal, coinVal = coinVal})
 					--[[
 					skynet.timeout(30*100, function() 
 						if userInfo and userInfo.redPackVal and userInfo.playerId then
@@ -991,7 +1064,7 @@ function this.checkRedPack()
 			end
 		end
 	end
-	skynet.timeout(100*60*5, function()
+	skynet.timeout(100*60*1, function()
 		this.checkRedPack()
 	end)
 end
@@ -1049,6 +1122,7 @@ function SAPI.joinRoom(agent)
 			playerId = v.playerId
 			v.sid = sid
 			v.userInfo.redPackVal = 0
+			v.userInfo.redPackCoinVal = 0
 		end
 	end
 	-- If not join room before, create a new game player
@@ -1069,6 +1143,7 @@ function SAPI.joinRoom(agent)
 		userInfo.gameOverTimes = 0
 		userInfo.grabRecord = -1
 		userInfo.redPackVal = 0
+		userInfo.redPackCoinVal = 0
 		if this.isScoreRace() == false then
 			userInfo.score = 0
 		end
@@ -1251,12 +1326,17 @@ function SAPI.getRedPack(msg)
 	if this.playerInfoList[playerId] then
 		local result = 1
 		local redPackVal = 0
-		if this.playerInfoList[playerId].userInfo.redPackVal > 0 then
+		local coinVal = 0
+		if this.playerInfoList[playerId].userInfo.redPackVal > 0 or 
+			this.playerInfoList[playerId].userInfo.redPackCoinVal > 0 then
 			result = 2
 			redPackVal = this.playerInfoList[playerId].userInfo.redPackVal
+			coinVal = this.playerInfoList[playerId].userInfo.redPackCoinVal
 			this.playerInfoList[playerId].userInfo.redPackVal = 0
+			this.playerInfoList[playerId].userInfo.redPackCoinVal = 0
+			this.playerInfoList[playerId].userInfo.score = this.playerInfoList[playerId].userInfo.score + coinVal
 		end
-		skynet.call(this.playerInfoList[playerId].sid, "lua", "getRedPack_ack", {result = result, redPackVal = redPackVal})
+		skynet.call(this.playerInfoList[playerId].sid, "lua", "getRedPack_ack", {result = result, redPackVal = redPackVal, coinVal = coinVal})
 	end
 end
 

@@ -23,6 +23,10 @@ message userInfo_t {
     optional int32 userno = 17;
     optional int32 redPackVal = 18;
     optional int32 score2 = 19;
+    optional string lastLoginTime = 20;
+    optional int32 todayRedPackCount = 21;
+    optional string lastRechargeDate = 22;
+    optional int32 loginDayCount = 23;
 }
 message handshake {
   optional int32 sn = 1;
@@ -82,6 +86,7 @@ message joinRoomOk {
 }
 message joinRoomOk_ntf {
     repeated userInfo_t userInfoList = 1;
+    optional int32 redpackPoolVal = 2;
 }
 message reJoinRoomOk_ack {
     repeated userInfo_t userInfoList = 1;
@@ -91,6 +96,7 @@ message reJoinRoomOk_ack {
     repeated int32 prevPlayPokerList = 5;
     optional int32 currPlayTimes = 6;
     optional int32 grabLevel = 7;
+    optional int32 redpackPoolVal = 8;
 }
 message leaveRoom {
     // player 1, 2, 3
@@ -221,6 +227,7 @@ message gameResult_ntf {
     }
     repeated GameResultInfo resultList = 1;
     repeated PokerList_t allPlayerPokerSet = 2;
+    optional int32 redpackPoolVal = 3;
 }
 message roomResult_ntf {
     message RoomResultItem_t {
@@ -257,6 +264,7 @@ message scoreRaceGetRoomNo_ack {
 message redPackStart_ack {
     optional int32 playerId = 1;
     optional int32 redPackVal = 2;
+    optional int32 coinVal = 3;
 }
 message redPackOver_ack {
     optional int32 playerId = 1;
@@ -267,6 +275,7 @@ message getRedPack {
 message getRedPack_ack {
     optional int32 result = 1;
     optional int32 redPackVal = 2;
+    optional int32 coinVal = 3;
 }
 message changeRoom {
     optional int32 playerId = 1;

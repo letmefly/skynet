@@ -13,6 +13,7 @@ skynet.start(function()
 	--skynet.newservice("db_s")
 	skynet.newservice("roomManager_s")
 	skynet.newservice("aiManager_s")
+	skynet.newservice("redpackPool_s")
 	local watchdog_s = skynet.newservice("watchdog_s")
 	
 	skynet.call(watchdog_s, "lua", "start", {
