@@ -13,7 +13,7 @@ local function calc_getRewardRedPack()
 	local postData = {}
 	local status, body = netutil.http_post("service_getRewardPool.php", postData)
 	local poolInfo = cjson.decode(body)
-	this.rewardPoolVal = poolInfo.rewardPoolVal
+	this.rewardPoolVal = tonumber(poolInfo.rewardPoolVal)
 	local randomVal = math.random(1, 100)
 	if this.rewardPoolVal > 600 and (randomVal >= 50 and randomVal < 55) then
 		postData = {}
@@ -33,7 +33,7 @@ function SERVICE_API.getRewardPoolVal()
 	local postData = {}
 	local status, body = netutil.http_post("service_getRewardPool.php", postData)
 	local poolInfo = cjson.decode(body)
-	this.rewardPoolVal = poolInfo.rewardPoolVal
+	this.rewardPoolVal = tonumber(poolInfo.rewardPoolVal)
 	return this.rewardPoolVal
 end
 
