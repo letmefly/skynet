@@ -41,6 +41,7 @@ this.dispatchRedPackVal = 0
 -- all player's pokerList
 this.allPlayerPokerSet = {{},{},{}}
 this.dismissInfo = {}
+this.startGameTime = os.clock()
 
 this.testPokers = {
 	{1,5,9,13,17,49,50,51,2,3,4,45,46,47,48,16,24},
@@ -73,6 +74,7 @@ function this.saveGameResult(userInfo, playerId, roomNo, roomType, roomResultLis
 	postData.roomResult.roomNo = roomNo
 	postData.roomResult.roomType = roomType
 	postData.roomResult.coinType = this.coinType
+	postData.roomResult.duringTime = os.clock() - this.startGameTime
 	postData.roomResult.history = {}
 	if this.dispatchRedPackVal > 0 then
 		postData.dispatchRedPackVal = this.dispatchRedPackVal
@@ -176,6 +178,7 @@ end
 
 -- send 17 poker to all player
 function this.startGame()
+	this.startGameTime = os.clock()
 	if this.isStartCheckRedPack == nil then
 		this.checkRedPack()
 	end
@@ -1335,7 +1338,7 @@ function SAPI.getRedPack(msg)
 			this.playerInfoList[playerId].userInfo.redPackCoinVal = 0
 			this.playerInfoList[playerId].userInfo.score = this.playerInfoList[playerId].userInfo.score + coinVal
 		end
-		skynet.call(this.playerInfoList[playerId].sid, "lua", "getRedPack_ack", {result = result, redPackVal = redPackVal, coinVal = coinVal})
+		skynet.call(this.playerInfoList[playerId].sid, "lua", "getRedPack_ack", {result = result, redPackVal = redPackVal, coinVal = coinVal, playTurn=this.playerInfoList[playerId].userInfo.gameOverTimes})
 	end
 end
 

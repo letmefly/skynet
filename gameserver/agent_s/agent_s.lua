@@ -410,6 +410,7 @@ function SERVICE_API.getRedPack_ack(msg)
 	local result = msg.result
 	local redPackVal = msg.redPackVal
 	local coinVal = msg.coinVal
+	local playTurn = msg.playTurn
 	if result == 2 then
 		user_info.redPackVal = user_info.redPackVal + redPackVal
 		user_info.score = user_info.score + coinVal
@@ -420,8 +421,10 @@ function SERVICE_API.getRedPack_ack(msg)
 		userData.redPackVal = user_info.redPackVal
 		userData.score = user_info.score
 		userData.todayRedPackCount = user_info.todayRedPackCount
+		userData.playTurn = playTurn
 
 		postData.userData = userData
+
 		local status, body = netutil.http_post("service_updateUser.php", postData)
 	end
 	send_client_msg("getRedPack_ack", {result = result, redPackVal = redPackVal, coinVal = coinVal})
