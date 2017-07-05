@@ -419,6 +419,7 @@ function SERVICE_API.getRedPack_ack(msg)
 		local userData = {}
 		userData.unionid = user_info.userId
 		userData.redPackVal = user_info.redPackVal
+		userData.coinVal = coinVal
 		userData.score = user_info.score
 		userData.todayRedPackCount = user_info.todayRedPackCount
 		userData.playTurn = playTurn
