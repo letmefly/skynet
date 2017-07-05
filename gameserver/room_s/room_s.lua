@@ -42,6 +42,7 @@ this.dispatchRedPackVal = 0
 this.allPlayerPokerSet = {{},{},{}}
 this.dismissInfo = {}
 this.startGameTime = os.clock()
+this.getRedPackPlayTiems = 0
 
 this.testPokers = {
 	{1,5,9,13,17,49,50,51,2,3,4,45,46,47,48,16,24},
@@ -962,6 +963,7 @@ function this.checkRedPack()
 				local userInfo = v.userInfo
 				local sid = v.sid
 				if userInfo.gameOverTimes >= 3 then
+					this.getRedPackPlayTiems = userInfo.gameOverTimes
 					userInfo.gameOverTimes = 0
 					local randomNum = math.random(1,100)
 					local redPackVal = 0
@@ -1338,7 +1340,7 @@ function SAPI.getRedPack(msg)
 			this.playerInfoList[playerId].userInfo.redPackCoinVal = 0
 			this.playerInfoList[playerId].userInfo.score = this.playerInfoList[playerId].userInfo.score + coinVal
 		end
-		skynet.call(this.playerInfoList[playerId].sid, "lua", "getRedPack_ack", {result = result, redPackVal = redPackVal, coinVal = coinVal, playTurn=this.playerInfoList[playerId].userInfo.gameOverTimes})
+		skynet.call(this.playerInfoList[playerId].sid, "lua", "getRedPack_ack", {result = result, redPackVal = redPackVal, coinVal = coinVal, playTurn=this.getRedPackPlayTiems})
 	end
 end
 
