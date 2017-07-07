@@ -33,7 +33,7 @@ function SERVICE_API.getRewardPoolVal()
 	local postData = {}
 	local status, body = netutil.http_post("service_getRewardPool.php", postData)
 	local poolInfo = cjson.decode(body)
-	this.rewardPoolVal = tonumber(poolInfo.rewardPoolVal)
+	this.rewardPoolVal = math.ceil(tonumber(poolInfo.rewardPoolVal))
 	return this.rewardPoolVal
 end
 

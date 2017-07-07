@@ -1018,7 +1018,7 @@ function this.checkRedPack()
 									elseif randomVal <= calc_sum(configT, 5) then
 										redpack = 60
 									elseif randomVal <= calc_sum(configT, 6) then
-										redpack = 90
+										redpack = 120
 									end
 									return redpack, coin
 								end
@@ -1028,7 +1028,7 @@ function this.checkRedPack()
 									local configNotFree = {0,0,0,50,30,20}
 									redPackVal, coinVal = calc_redpack(configNotFree, randomVal)
 								else
-									local configFree = {45,27,18,5,3,2}
+									local configFree = {60,10,10,10,5,5}
 									redPackVal, coinVal = calc_redpack(configFree, randomVal)
 								end
 							end
