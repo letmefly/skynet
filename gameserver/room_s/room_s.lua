@@ -401,9 +401,15 @@ function this.grabLandlordHandler(playerId, grabAction)
 end
 
 function this.playPoker()
+	local overTime = 0
+	local lightPokerIdList = pokerUtil.getLightPokerIdList(this.allPlayerPokerSet[this.currWhoPlay], this.prevPokerList)
+	if #lightPokerIdList <= 0 then
+		overTime = 10
+	end
+
 	this.sendAllPlayer("whoPlay_ntf", {playerId = this.currWhoPlay, prevPlayerId = this.prevPlayerId})
 	this.setTickTimer("p"..this.currWhoPlay, 15, function(timerVal)
-		if timerVal == 0 then
+		if timerVal == overTime then
 			if this.isScoreRace() then
 				this.playTimeout(this.currWhoPlay, 1)
 			end
