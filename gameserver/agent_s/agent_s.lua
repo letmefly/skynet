@@ -89,7 +89,7 @@ function CLIENT_REQ.gameLogin(msg)
 		userId = "test_race_"..online_user_num
 	end
 	local status, body = netutil.http_post("service_getUser.php", {unionid=userId})
-	print(body)
+	--print(body)
 	local userData = cjson.decode(body)
 	user_info.userId = userData['unionid']
 	user_info.nickname = userData['nickname']
@@ -415,18 +415,13 @@ function SERVICE_API.getRedPack_ack(msg)
 		user_info.redPackVal = user_info.redPackVal + redPackVal
 		user_info.score = user_info.score + coinVal
 		user_info.todayRedPackCount = user_info.todayRedPackCount + 1
-		local postData = {}
-		local userData = {}
-		userData.unionid = user_info.userId
-		userData.redPackVal = user_info.redPackVal
-		userData.coinVal = coinVal
-		userData.score = user_info.score
-		userData.todayRedPackCount = user_info.todayRedPackCount
-		userData.playTurn = playTurn
 
-		postData.userData = userData
-
-		local status, body = netutil.http_post("service_updateUser.php", postData)
+		local cmdData = {}
+		cmdData.unionid = user_info.userId
+		cmdData.cashVal = redPackVal
+		cmdData.coinVal = coinVal
+		cmdData.playTurn = playTurn
+		local status, body = netutil.http_do_cmd("cmd_addRedpack", cmdData)
 	end
 	send_client_msg("getRedPack_ack", {result = result, redPackVal = redPackVal, coinVal = coinVal})
 end

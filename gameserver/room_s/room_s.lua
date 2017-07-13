@@ -69,16 +69,15 @@ function this.sendPlayer(sid, msgname, msg)
 end
 
 function this.saveGameResult(userInfo, playerId, roomNo, roomType, roomResultList)
-	local postData = {}
-	postData.userData = {}
-	postData.roomResult = {}
-	postData.roomResult.roomNo = roomNo
-	postData.roomResult.roomType = roomType
-	postData.roomResult.coinType = this.coinType
-	postData.roomResult.duringTime = os.clock() - this.startGameTime
-	postData.roomResult.history = {}
+	local cmdData = {}
+	cmdData.roomResult = {}
+	cmdData.roomResult.roomNo = roomNo
+	cmdData.roomResult.roomType = roomType
+	cmdData.roomResult.coinType = this.coinType
+	cmdData.roomResult.duringTime = os.clock() - this.startGameTime
+	cmdData.roomResult.history = {}
 	if this.dispatchRedPackVal > 0 then
-		postData.dispatchRedPackVal = this.dispatchRedPackVal
+		cmdData.dispatchRedPackVal = this.dispatchRedPackVal
 		this.dispatchRedPackVal = 0
 	end
 
@@ -88,19 +87,20 @@ function this.saveGameResult(userInfo, playerId, roomNo, roomType, roomResultLis
 			isAllZero = false
 		end
 		if v.playerId == playerId then
-			postData.userData.unionid = userInfo.userId
-			if v.totalScore >= 0 then
-				postData.userData.win = userInfo.win + 1
-			else 
-				postData.userData.lose = userInfo.lose + 1
-			end
-			if this.coinType == 1 then
-				postData.userData.score = userInfo.score
-			else
-				postData.userData.score2 = userInfo.score2
+			cmdData.unionid = userInfo.userId
+			if this.isScoreRace() then
+				if this.coinType == 1 then
+					if v.totalScore > 0 then
+						cmdData.addCoin = math.ceil(v.totalScore*2/3)
+					else
+						cmdData.addCoin = v.totalScore
+					end
+				else
+					--postData.userData.score2 = userInfo.score2
+				end
 			end
 		end
-		table.insert(postData.roomResult.history, {n=v.nickname, s=v.totalScore})
+		table.insert(cmdData.roomResult.history, {n=v.nickname, s=v.totalScore})
 	end
 
 	if isAllZero == false then
@@ -108,17 +108,15 @@ function this.saveGameResult(userInfo, playerId, roomNo, roomType, roomResultLis
 			--postData.roomResult.history = {}
 		end
 		--print(cjson.encode(postData))
-		local status, body = netutil.http_post("service_updateUser.php", postData)
+		local status, body = netutil.http_do_cmd("cmd_submitGameResult", cmdData)
 	end
 end
 function this.costRoomCard(userInfo, msg)
-	local costRoomCardNum = msg.costRoomCardNum
-	local postData = {}
-	local userData = {}
-	userData.unionid = userInfo.userId
-	userData.roomCardNum = userInfo.roomCardNum - costRoomCardNum
-	postData.userData = userData
-	local status, body = netutil.http_post("service_updateUser.php", postData)
+	local costRoomCard = msg.costRoomCardNum
+	local cmdData = {}
+	cmdData.unionid = userInfo.userId
+	cmdData.costRoomCard = costRoomCard
+	local status, body = netutil.http_do_cmd("cmd_costRoomCard", cmdData)
 end
 function this.sendAllAgent(cmd, msg)
 	for k, v in pairs(this.playerInfoList) do

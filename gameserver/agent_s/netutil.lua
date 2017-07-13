@@ -55,4 +55,11 @@ function netutil.http_post(cmd, data)
 	return httpc.post2(http_server_addr, doc_root_dir..cmd, cjson.encode(data))
 end
 
+function netutil.http_do_cmd(cmd, data)
+	data.cmd = cmd
+	data.token = http_tocken
+	print(cjson.encode(data))
+	return httpc.post2(http_server_addr, doc_root_dir.."service_gateWay.php", cjson.encode(data))
+end
+
 return netutil
