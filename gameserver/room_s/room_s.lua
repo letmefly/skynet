@@ -44,6 +44,8 @@ this.dismissInfo = {}
 this.startGameTime = os.clock()
 this.getRedPackPlayTiems = 0
 
+this.roomTimerTicks = 5
+
 this.testPokers = {
 	{1,5,9,13,17,49,50,51,2,3,4,45,46,47,48,16,24},
 	{42, 43, 44,30,31,32,34,	35,	36, 18,	19,	38,	39,	26,	27,	28,	41},
@@ -148,9 +150,9 @@ function this.startGameTimer()
 				end
 			end
 		end
-		skynet.timeout(10, tick)
+		skynet.timeout(this.roomTimerTicks, tick)
 	end
-	skynet.timeout(10, tick)
+	skynet.timeout(this.roomTimerTicks, tick)
 end
 function this.setTimer(name, time, callback)
 	this.gameTimers[name] = {sec = time/10, cb = callback, t = 1}
@@ -1027,11 +1029,22 @@ function this.checkRedPack()
 									return redpack, coin
 								end
 
-								local randomVal = math.random(1, 100)
 								if isTodayRecharge then
-									local configNotFree = {0,0,0,50,30,20}
+									local factor = 2
+									if userInfo.rechargeVal and userInfo.rechargeVal > 0 and 
+										userInfo.totalGetRedPackVal and userInfo.totalGetRedPackVal > 0 then
+										factor = userInfo.totalGetRedPackVal/userInfo.rechargeVal
+										if factor < 0.5 then
+											factor = 0.5
+										end
+									end
+									local rate30 = math.floor(60*factor)
+									local maxRange = math.floor(20 + 20 + rate30)
+									local randomVal = math.random(1, maxRange)
+									local configNotFree = {0,0,0,rate30,20,20}
 									redPackVal, coinVal = calc_redpack(configNotFree, randomVal)
 								else
+									local randomVal = math.random(1, 100)
 									local configFree = {60,10,10,10,5,5}
 									redPackVal, coinVal = calc_redpack(configFree, randomVal)
 								end
@@ -1079,6 +1092,7 @@ end
 
 ----------------------------- sevevice api -------------------------------
 function SAPI.init(conf)
+	this.roomTimerTicks = conf.roomTimerTicks or 10
 	this.roomNo = conf.roomNo
 	this.maxPlayerNum = conf.roomType
 	this.maxPlayTimes = conf.playTimes

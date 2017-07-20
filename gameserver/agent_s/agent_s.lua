@@ -109,6 +109,8 @@ function CLIENT_REQ.gameLogin(msg)
 	user_info.lastLoginTime = userData['lastLoginTime']
 	user_info.todayRedPackCount = userData['todayRedPackCount']
 	user_info.lastRechargeDate = userData['lastRechargeDate']
+	user_info.rechargeVal = userData['rechargeVal']
+	user_info.totalGetRedPackVal = userData['totalGetRedPackVal']
 
 	-- verify user auth
 	send_client_msg("gameLogin_ack", {errno = 1000, userInfo = user_info})
@@ -299,6 +301,8 @@ function CLIENT_REQ.changeRoom(msg)
 	user_info.lastLoginTime = userData['lastLoginTime']
 	user_info.todayRedPackCount = userData['todayRedPackCount']
 	user_info.lastRechargeDate = userData['lastRechargeDate']
+	user_info.rechargeVal = userData['rechargeVal']
+	user_info.totalGetRedPackVal = userData['totalGetRedPackVal']
 
 	if coinType == 1 and user_info.score < 24 then
 		send_client_msg("changeRoom_ack", {errno = 1001, roomNo = -1})

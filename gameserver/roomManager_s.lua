@@ -1,5 +1,8 @@
 local skynet = require "skynet"
 require "skynet.manager"	-- import skynet.register
+local netutil = require "agent_s.netutil"
+local httpc = require "http.httpc"
+local cjson = require "cjson"
 
 local this = {}
 local SERVICE_API = {}
@@ -38,12 +41,23 @@ function this.scoreRace_findRoom(maxPlayerNum, excludeRoomNo, coinType)
 	return -1,-1
 end
 
+function this.getRoomConfig()
+	local postData = {}
+	local status, body = netutil.http_post("service_getRoomConfig.php", postData)
+	local config = cjson.decode(body)
+	local roomConfig = {}
+	roomConfig.roomTimerTicks = config.roomTimerTicks
+	return roomConfig
+end
+
 function this.scoreRace_createRoom(roomType, coinType)
 	print("---------------------total_room "..total_room.."----------------------")
 	local roomType = roomType
 	local playTimes = 9999
 	local grabMode = 1
 	local maxBoom = 2
+
+	local roomConfig = this.getRoomConfig()
 
 	this.scoreRace_roomseq = this.scoreRace_roomseq + 1
 	if (this.scoreRace_roomseq > 799998) then
@@ -57,7 +71,8 @@ function this.scoreRace_createRoom(roomType, coinType)
 		playTimes = playTimes,
 		grabMode = grabMode,
 		maxBoom = maxBoom,
-		coinType = coinType
+		coinType = coinType,
+		roomTimerTicks = roomConfig.roomTimerTicks
 	})
 	this.scoreRace_rooms[roomNo] = {sid = sid, coinType = coinType}
 	total_room = total_room + 1
