@@ -67,6 +67,18 @@ local function on_client_disconnect()
 	skynet.exit()
 end
 
+local function calcUserFactor(userInfo)
+	local factor = 2
+	if userInfo.rechargeVal and userInfo.rechargeVal > 0 and 
+		userInfo.totalGetRedPackVal and userInfo.totalGetRedPackVal > 0 then
+		factor = userInfo.totalGetRedPackVal/userInfo.rechargeVal
+		if factor < 0.5 then
+			factor = 0.5
+		end
+	end
+	return factor
+end	
+
 ------------------------ client request -------------------------
 function CLIENT_REQ.handshake(msg)
 	--skynet.error("handshake-"..msg.sn)
@@ -111,6 +123,7 @@ function CLIENT_REQ.gameLogin(msg)
 	user_info.lastRechargeDate = userData['lastRechargeDate']
 	user_info.rechargeVal = userData['rechargeVal']
 	user_info.totalGetRedPackVal = userData['totalGetRedPackVal']
+	user_info.todayRechargeVal = userData['todayRechargeVal']
 
 	-- verify user auth
 	send_client_msg("gameLogin_ack", {errno = 1000, userInfo = user_info})
@@ -263,7 +276,8 @@ function CLIENT_REQ.scoreRaceGetRoomNo(msg)
 		send_client_msg("scoreRaceGetRoomNo_ack", {errno = 1002, roomNo = -1})
 		return
 	end	
-	local ret = skynet.call("roomManager_s", "lua", "scoreRaceGetRoomNo", {userId = user_info.userId, maxPlayerNum=maxPlayerNum, excludeRoomNo=my_room_no, coinType=coinType})
+	local factor = calcUserFactor(user_info)
+	local ret = skynet.call("roomManager_s", "lua", "scoreRaceGetRoomNo", {userId = user_info.userId, maxPlayerNum=maxPlayerNum, excludeRoomNo=my_room_no, coinType=coinType, factor=factor})
 	local roomNo = ret.roomNo
 	send_client_msg("scoreRaceGetRoomNo_ack", {errno = errno, roomNo = roomNo})
 end
@@ -303,6 +317,7 @@ function CLIENT_REQ.changeRoom(msg)
 	user_info.lastRechargeDate = userData['lastRechargeDate']
 	user_info.rechargeVal = userData['rechargeVal']
 	user_info.totalGetRedPackVal = userData['totalGetRedPackVal']
+	user_info.todayRechargeVal = userData['todayRechargeVal']
 
 	if coinType == 1 and user_info.score < 24 then
 		send_client_msg("changeRoom_ack", {errno = 1001, roomNo = -1})
@@ -312,7 +327,9 @@ function CLIENT_REQ.changeRoom(msg)
 		send_client_msg("changeRoom_ack", {errno = 1001, roomNo = -1})
 		return
 	end	
-	local ret = skynet.call("roomManager_s", "lua", "scoreRaceGetRoomNo", {maxPlayerNum=maxPlayerNum, excludeRoomNo=my_room_no, coinType=coinType})
+
+	local factor = calcUserFactor(user_info)
+	local ret = skynet.call("roomManager_s", "lua", "scoreRaceGetRoomNo", {maxPlayerNum=maxPlayerNum, excludeRoomNo=my_room_no, coinType=coinType, factor=factor})
 	local roomNo = ret.roomNo
 	send_client_msg("changeRoom_ack", {errno = 1000, roomNo = roomNo})	
 

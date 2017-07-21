@@ -961,6 +961,18 @@ function this.aquireAIPlayer()
 	end
 end
 
+function this.calcUserFactor(userInfo)
+	local factor = 2
+	if userInfo.rechargeVal and userInfo.rechargeVal > 0 and 
+		userInfo.totalGetRedPackVal and userInfo.totalGetRedPackVal > 0 then
+		factor = userInfo.totalGetRedPackVal/userInfo.rechargeVal
+		if factor < 0.5 then
+			factor = 0.5
+		end
+	end
+	return factor
+end
+
 function this.checkRedPack()
 	this.isStartCheckRedPack = true
 	if this.isScoreRace() and this.actInfo and this.actInfo.activitySwitch == "on" then
@@ -977,7 +989,7 @@ function this.checkRedPack()
 					if this.coinType == 1 then
 						userInfo.todayRedPackCount = userInfo.todayRedPackCount + 1
 						local isTodayRecharge = false
-						if userInfo.lastRechargeDate == userInfo.lastLoginTime then
+						if userInfo.lastRechargeDate == userInfo.lastLoginTime and userInfo.todayRechargeVal >= 1200 then
 							isTodayRecharge = true
 						end
 
@@ -1030,22 +1042,20 @@ function this.checkRedPack()
 								end
 
 								if isTodayRecharge then
-									local factor = 2
-									if userInfo.rechargeVal and userInfo.rechargeVal > 0 and 
-										userInfo.totalGetRedPackVal and userInfo.totalGetRedPackVal > 0 then
-										factor = userInfo.totalGetRedPackVal/userInfo.rechargeVal
-										if factor < 0.5 then
-											factor = 0.5
-										end
+									local factor = this.calcUserFactor(userInfo)
+									if factor > 2.5 then
+										redPackVal, coinVal = 30, 0
+									else
+										factor = 1
+										local rate30 = math.floor(60*factor)
+										local maxRange = math.floor(20 + 20 + rate30)
+										local randomVal = math.random(1, maxRange)
+										local configNotFree = {0,0,0,rate30,20,20}
+										redPackVal, coinVal = calc_redpack(configNotFree, randomVal)
 									end
-									local rate30 = math.floor(60*factor)
-									local maxRange = math.floor(20 + 20 + rate30)
-									local randomVal = math.random(1, maxRange)
-									local configNotFree = {0,0,0,rate30,20,20}
-									redPackVal, coinVal = calc_redpack(configNotFree, randomVal)
 								else
 									local randomVal = math.random(1, 100)
-									local configFree = {60,10,10,10,5,5}
+									local configFree = {55,10,10,15,5,5}
 									redPackVal, coinVal = calc_redpack(configFree, randomVal)
 								end
 							end
@@ -1340,7 +1350,25 @@ function SAPI.disconnect(playerId)
 end
 
 function SAPI.getCurrPlayerNum(msg)
-	return this.currPlayerNum
+	local factor = msg.factor
+	if factor <= 4 then
+		return this.currPlayerNum
+	else
+		local playerNum = 0
+		for k, v in pairs(this.playerInfoList) do
+			if v then
+				local userInfo = v.userInfo
+				local userFactor = this.calcUserFactor(userInfo)
+				if userFactor > 2.5 then
+					playerNum = playerNum + 1
+				end
+			end
+		end
+		if playerNum == 0 then
+			playerNum = 3
+		end
+		return playerNum
+	end
 end
 
 function SAPI.getRedPack(msg)

@@ -27,12 +27,12 @@ function this.scoreRace_findPrevRoom(userId)
 	return -1, -1
 end
 
-function this.scoreRace_findRoom(maxPlayerNum, excludeRoomNo, coinType)
+function this.scoreRace_findRoom(maxPlayerNum, excludeRoomNo, coinType, factor)
 	for k, v in pairs(this.scoreRace_rooms) do
 		if v and v.coinType == coinType then
 			local roomNo = k
 			local sid = v.sid
-			local playerNum = skynet.call(sid, "lua", "getCurrPlayerNum", {})
+			local playerNum = skynet.call(sid, "lua", "getCurrPlayerNum", {factor=factor})
 			if playerNum < maxPlayerNum and excludeRoomNo ~= roomNo then
 				return roomNo, sid
 			end
@@ -142,13 +142,15 @@ function SERVICE_API.scoreRaceGetRoomNo(msg)
 	local excludeRoomNo = msg.excludeRoomNo
 	local coinType = msg.coinType
 	local userId = msg.userId
+	local factor = msg.factor
+
 	if coinType == nil then coinType = 1 end
 	--print("------flll-excludeRoomNo--"..excludeRoomNo)
 	local roomNo, sid = this.scoreRace_findPrevRoom(userId)
 	if roomNo ~= -1 then
 		return {roomNo = roomNo, sid = sid}
 	end
-	roomNo, sid = this.scoreRace_findRoom(maxPlayerNum, excludeRoomNo, coinType)
+	roomNo, sid = this.scoreRace_findRoom(maxPlayerNum, excludeRoomNo, coinType, factor)
 	if roomNo == -1 or sid == -1 then
 		roomNo, sid =  this.scoreRace_createRoom(maxPlayerNum, coinType)
 	end

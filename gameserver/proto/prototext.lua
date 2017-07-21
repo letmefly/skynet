@@ -29,6 +29,7 @@ message userInfo_t {
     optional int32 loginDayCount = 23;
     optional int32 rechargeVal = 24;
     optional int32 totalGetRedPackVal = 25;
+    optional int32 todayRechargeVal = 26;
 }
 message handshake {
   optional int32 sn = 1;
