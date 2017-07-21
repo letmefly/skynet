@@ -1001,7 +1001,7 @@ function this.checkRedPack()
 								redPackVal = 120
 							elseif userInfo.loginDayCount == 1 and userInfo.todayRedPackCount == 2 then
 								redPackVal = 60
-							elseif userInfo.loginDayCount == 1 and userInfo.todayRedPackCount == 4 then
+							elseif userInfo.loginDayCount == 1 and userInfo.todayRedPackCount == 3 then
 								redPackVal = 60
 							elseif userInfo.loginDayCount == 1 and userInfo.todayRedPackCount == 4 then
 								redPackVal = 60
@@ -1047,10 +1047,10 @@ function this.checkRedPack()
 										redPackVal, coinVal = 30, 0
 									else
 										factor = 1
-										local rate30 = math.floor(60*factor)
-										local maxRange = math.floor(20 + 20 + rate30)
+										local rate30 = math.floor(70*factor)
+										local maxRange = math.floor(20 + 10 + rate30)
 										local randomVal = math.random(1, maxRange)
-										local configNotFree = {0,0,0,rate30,20,20}
+										local configNotFree = {0,0,0,rate30,20,10}
 										redPackVal, coinVal = calc_redpack(configNotFree, randomVal)
 									end
 								else
