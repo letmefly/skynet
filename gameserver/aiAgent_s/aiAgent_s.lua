@@ -260,7 +260,7 @@ function AI.gameLogin_ack(msg)
 		AI.isLogin = true
 		AI.userInfo = msg.userInfo
 		-- 2. get room number
-		AI.scoreRaceGetRoomNo({maxPlayerNum=AI.maxPlayerNum, coinType = AI.coinType})
+		AI.scoreRaceGetRoomNo({maxPlayerNum=AI.maxPlayerNum, coinType = AI.coinType, factor=1})
 	else
 		AI.killMyself()
 	end
@@ -447,7 +447,6 @@ function CLIENT_REQ.gameLogin(msg)
 	local authCode = msg.authCode
 	local version = msg.version
 	local status, body = netutil.http_post("service_getUser.php", {unionid=userId})
-	print(body)
 	--local status, body = httpc.post2(http_server_addr, doc_root_dir.."service_getUser.php", cjson.encode({unionid=userId}))
 	local userData = cjson.decode(body)
 	user_info.userId = userData['unionid']
@@ -601,12 +600,13 @@ end
 function CLIENT_REQ.scoreRaceGetRoomNo(msg)
 	local maxPlayerNum = msg.maxPlayerNum
 	local coinType = msg.coinType
+	local factor = msg.factor
 	local errno = 1000
 	if user_info.score < 24 then
 		send_client_msg("scoreRaceGetRoomNo_ack", {errno = 1001, roomNo = -1})
 		return
 	end
-	local ret = skynet.call("roomManager_s", "lua", "scoreRaceGetRoomNo", {maxPlayerNum=maxPlayerNum, excludeRoomNo=my_room_no, coinType = coinType})
+	local ret = skynet.call("roomManager_s", "lua", "scoreRaceGetRoomNo", {maxPlayerNum=maxPlayerNum, excludeRoomNo=my_room_no, coinType = coinType, factor=factor})
 	local roomNo = ret.roomNo
 	send_client_msg("scoreRaceGetRoomNo_ack", {errno = errno, roomNo = roomNo})
 end
