@@ -931,6 +931,20 @@ end
 
 -- Get AI player number
 function this.setGetAITimer()
+	local playerNum = 0
+	for k, v in pairs(this.playerInfoList) do
+		if v then
+			local userInfo = v.userInfo
+			local userFactor = this.calcUserFactor(userInfo)
+			if userFactor > 4 then
+				playerNum = playerNum + 1
+			end
+		end
+	end
+	if playerNum > 0 then
+		return
+	end
+
 	--print("setGetAITimer..\n")
 	this.unsetTimer("get_ai_timer")
 	local randomVal = math.random(7, 10)
