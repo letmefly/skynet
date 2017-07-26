@@ -1055,9 +1055,9 @@ function this.checkRedPack()
 									return redpack, coin
 								end
 
+								local factor = this.calcUserFactor(userInfo)
 								if isTodayRecharge then
-									local factor = this.calcUserFactor(userInfo)
-									if factor > 2.5 then
+									if factor > 2 then
 										redPackVal, coinVal = 30, 0
 									else
 										factor = 1
@@ -1071,6 +1071,9 @@ function this.checkRedPack()
 									local randomVal = math.random(1, 100)
 									local configFree = {55,10,10,15,5,5}
 									redPackVal, coinVal = calc_redpack(configFree, randomVal)
+									if factor > 2 and redPackVal > 30 then
+										redPackVal = 30
+									end
 								end
 							end
 						end
